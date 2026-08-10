@@ -384,10 +384,18 @@ function toggleWatch(){
 }
 
 function gpsLocate(){
+  const t = T[state.lang];
   const btn = $('gps-btn');
-  if(!navigator.geolocation){ toast(T[state.lang].gpsFail); return; }
+  const span = btn.querySelector('span');
+  if(!navigator.geolocation){
+    toast(t.gpsFail);
+    return;
+  }
+  // in-app browsers (LINE/Facebook/Instagram) block geolocation — tell the user
+  const inApp = /Line|FBAN|FBAV|Instagram|MicroMessenger/i.test(navigator.userAgent);
   btn.disabled = true;
-  btn.querySelector('span').textContent = T[state.lang].gpsBusy;
+  span.textContent = t.gpsBusy;
+  const done = function(){ btn.disabled = false; span.textContent = t.gpsBtn; };
   navigator.geolocation.getCurrentPosition(function(pos){
     const la = pos.coords.latitude, lo = pos.coords.longitude;
     let best = null, bd = 1e9;
@@ -395,8 +403,7 @@ function gpsLocate(){
       const d = Math.sqrt(Math.pow(p.lat - la, 2) + Math.pow(p.lng - lo, 2));
       if(d < bd){ bd = d; best = p; }
     });
-    btn.disabled = false;
-    btn.querySelector('span').textContent = T[state.lang].gpsBtn;
+    done();
     if(best){
       state.prov = best.id;
       persistCfg({ prov: state.prov });
@@ -404,11 +411,12 @@ function gpsLocate(){
       renderHome();
       toast(best[state.lang] + ' · ' + REGIONS[best.rg][state.lang]);
     }
-  }, function(){
-    btn.disabled = false;
-    btn.querySelector('span').textContent = T[state.lang].gpsBtn;
-    toast(T[state.lang].gpsFail);
-  }, { timeout: 8000 });
+  }, function(err){
+    done();
+    if(err && err.code === 1) toast(inApp ? t.gpsDeniedInApp : t.gpsDenied);
+    else if(err && (err.code === 2 || err.code === 3)) toast(t.gpsNoFix);
+    else toast(t.gpsFail);
+  }, { enableHighAccuracy: false, timeout: 30000, maximumAge: 0 });
 }
 
 function renderHome(){
