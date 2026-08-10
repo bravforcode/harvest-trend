@@ -759,9 +759,13 @@ const LiveData = {
       this.map = {};
       d.prices.forEach(p => { if(p.crop && p.prov && p.price > 0) this.map[p.crop + '|' + p.prov] = p; });
       this.updated = d.updated || new Date().toISOString();
+      this._fails = 0;
       this.ok = true;
     }catch(e){
-      this.ok = false; // keep last snapshot; badge shows offline state
+      /* stay "live" through transient failures (page changes, slow cold
+         starts): only drop to the estimate state after 2 consecutive fails */
+      this._fails = (this._fails || 0) + 1;
+      if(this._fails >= 2 || !this.ok) this.ok = false;
     }
     /* re-render the page first (pages rebuild their own texts), then the badge */
     this._fns.forEach(f => { try{ f(); }catch(e){} });

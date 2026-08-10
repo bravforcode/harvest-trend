@@ -1,5 +1,5 @@
 /* Harvest Trend (รู้ทันราคา) — offline cache. Bump CACHE version on release. */
-const CACHE = 'rtp-v7';
+const CACHE = 'rtp-v8';
 const CORE = [
   './',
   'rutun-price.html',
@@ -26,32 +26,19 @@ self.addEventListener('activate', function(e){
 });
 self.addEventListener('fetch', function(e){
   if(e.request.method !== 'GET') return;
-  // live prices must never be served from cache — always hit the network
-  if(e.request.url.indexOf('/api/') !== -1){
-    e.respondWith(fetch(e.request));
-    return;
-  }
-  // pages (navigations): network-first so every deploy reaches users on the
-  // next page load; the cached copy is only an offline fallback
-  if(e.request.mode === 'navigate'){
-    e.respondWith(
-      fetch(e.request).then(function(res){
-        const copy = res.clone();
-        caches.open(CACHE).then(function(c){ c.put(e.request, copy); }).catch(function(){});
-        return res;
-      }).catch(function(){
-        return caches.match(e.request);
-      })
-    );
-    return;
-  }
+  /* network-first for EVERYTHING: every page load fetches fresh HTML, JS and
+     CSS, so a deploy is visible on the next navigation no matter what. The
+     cache is only an offline fallback and is never used while online.
+     /api responses are never cached at all (live prices must stay fresh). */
   e.respondWith(
-    caches.match(e.request).then(function(hit){
-      return hit || fetch(e.request).then(function(res){
+    fetch(e.request).then(function(res){
+      if(res.ok && e.request.url.indexOf('/api/') === -1){
         const copy = res.clone();
         caches.open(CACHE).then(function(c){ c.put(e.request, copy); }).catch(function(){});
-        return res;
-      });
+      }
+      return res;
+    }).catch(function(){
+      return caches.match(e.request);
     })
   );
 });
