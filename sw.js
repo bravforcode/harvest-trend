@@ -1,5 +1,5 @@
 /* Harvest Trend (รู้ทันราคา) — offline cache. Bump CACHE version on release. */
-const CACHE = 'rtp-v6';
+const CACHE = 'rtp-v7';
 const CORE = [
   './',
   'rutun-price.html',
@@ -29,6 +29,20 @@ self.addEventListener('fetch', function(e){
   // live prices must never be served from cache — always hit the network
   if(e.request.url.indexOf('/api/') !== -1){
     e.respondWith(fetch(e.request));
+    return;
+  }
+  // pages (navigations): network-first so every deploy reaches users on the
+  // next page load; the cached copy is only an offline fallback
+  if(e.request.mode === 'navigate'){
+    e.respondWith(
+      fetch(e.request).then(function(res){
+        const copy = res.clone();
+        caches.open(CACHE).then(function(c){ c.put(e.request, copy); }).catch(function(){});
+        return res;
+      }).catch(function(){
+        return caches.match(e.request);
+      })
+    );
     return;
   }
   e.respondWith(

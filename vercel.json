@@ -1,6 +1,10 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/rutun-price.html" },
-    { "source": "/index.html", "destination": "/rutun-price.html" }
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
   ]
 }
