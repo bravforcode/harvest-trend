@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--
+  Harvest Trend · รู้ทันราคา — LINE OA bot page
+  Shows live bot status (GET /api/line-webhook), how to add the OA,
+  command examples, and setup steps for the admin.
+-->
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>บอท LINE | Harvest Trend</title>
+<meta name="description" content="เพิ่มเพื่อน LINE OA ของ Harvest Trend แล้วส่งข้อความ "ราคา ระยอง ทุเรียน" เพื่อรับคำแนะนำจังหวะขายทันที">
+<meta name="keywords" content="line bot, line oa, ราคาพืชผล, ราคาทุเรียน, Harvest Trend, รู้ทันราคา, 77 จังหวัด, ราคาหน้าสวน">
+<meta name="author" content="Harvest Trend">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#2C4A24">
+<link rel="canonical" href="line.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="th_TH">
+<meta property="og:title" content="Harvest Trend · บอท LINE ตรวจราคาพืชผล">
+<meta property="og:description" content="ส่ง "ราคา ระยอง ทุเรียน" ใน LINE รับคำแนะนำจังหวะขายทันที ฟรี">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Harvest Trend · บอท LINE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Thai:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body data-i18n-title="docTitleLine">
+<a class="skip-link" href="#main" data-i18n="skip">ข้ามไปยังเนื้อหาหลัก</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="rutun-price.html" aria-label="Harvest Trend">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13.5" r="7.2" fill="#2C4A24"/>
+          <path d="M12 6.3V3.8"/>
+          <path d="M12 3.8c1.6-.2 3.1.4 4.2 1.6"/>
+          <path d="M7.1 9.2L5 7.1M9.5 7.5L8 5.2M14.5 7.5L16 5.2M16.9 9.2l2.1-2.1M18.5 12.2h2.6M18.5 15.5l2.4 1.6M16.4 18.6l1.3 2.3M13 20v2.5M9.7 19.9l-1 2.4M6.9 17.9l-2.2 1.8M5.2 14.6H2.7M4.9 11.3L2.7 9.8"/>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">Harvest Trend</span>
+        <span class="brand-sub">รู้ทันราคา</span>
+      </span>
+    </a>
+    <div class="spacer"></div>
+    <div class="controls">
+      <div class="fontctl" role="group" aria-label="ขนาดตัวอักษร" data-i18n-aria="aFontSize">
+        <button class="fontbtn" id="font-down" aria-label="ลดขนาดตัวอักษร" data-i18n-aria="aFontDown">A−</button>
+        <button class="fontbtn" id="font-up" aria-label="เพิ่มขนาดตัวอักษร" data-i18n-aria="aFontUp">A+</button>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="ภาษา / Language">
+        <button class="lang-btn active" data-lang="th" aria-pressed="true">ไทย</button>
+        <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <nav class="nav" aria-label="เมนูหลัก" data-i18n-aria="aNav">
+      <a href="rutun-price.html" data-i18n="nav1">ตรวจราคา</a>
+      <a href="price-chart.html" data-i18n="navPrice">ราคา &amp; แนวโน้ม</a>
+      <a href="report.html" data-i18n="nav2">รายงานราคา</a>
+      <a href="watch.html" data-i18n="nav3">ติดตาม</a>
+      <a href="about.html" data-i18n="nav4">เกี่ยวกับ</a>
+      <a href="line.html" data-i18n="lineNav">บอท LINE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="panel" aria-labelledby="line-h">
+    <div class="line-head">
+      <span class="lb-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.6-.7L3 20l1-4.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+      </span>
+      <div>
+        <h2 id="line-h" data-i18n="lineTitle">บอท LINE · gracia</h2>
+        <p class="sub" data-i18n="lineSub">ตรวจราคาพืชผลและรับคำแนะนำจังหวะขายใน LINE — ไม่ต้องเปิดเว็บ ไม่ต้องติดตั้งแอป</p>
+      </div>
+      <span class="st-badge wait" id="line-status" data-i18n="lineStatusCheck">กำลังตรวจสอบสถานะ…</span>
+    </div>
+    <div class="mock-banner" role="note">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+      <span data-i18n="mockNote">ข้อมูลราคาในเว็บนี้เป็นข้อมูลจำลอง (mock data) เพื่อการใช้งานจริงของต้นแบบ · ราคาจากแบบจำลอง ไม่ใช่ราคาตลาดจริง ก่อนตัดสินใจขายควรเช็กข้อมูลหน่วยงานราชการหรือตลาดกลางในพื้นที่ด้วย</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="demo-h">
+    <h2 id="demo-h" data-i18n="demoTitle">ทดลองคุยกับบอท (จำลอง) — ไม่ต้องมี LINE</h2>
+    <p class="sub" data-i18n="demoSub">พิมพ์คำสั่งด้านล่าง ระบบจะตอบเหมือนบอท LINE จริงทุกอย่าง (Flex Message + ปุ่มลัด) · ข้อมูลเป็น mock เช่นเดียวกับเว็บ</p>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="chat-input-row">
+      <input id="chat-input" type="text" placeholder="เช่น ราคา ระยอง ทุเรียน" data-i18n-ph="chatPh" autocomplete="off" aria-label="พิมพ์ข้อความถึงบอท" data-i18n-aria="chatAria">
+      <button class="btn btn-forest" id="chat-send" data-i18n="chatSend">ส่ง</button>
+    </div>
+    <div class="chat-chips" id="chat-chips" role="group" aria-label="ปุ่มลัด" data-i18n-aria="chipsAria"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="add-h">
+    <h2 id="add-h" data-i18n="addTitle">วิธีเพิ่มเพื่อน</h2>
+    <div class="line-add-grid">
+      <div class="qr-box" id="qr-box">
+        <div class="qr-placeholder" id="qr-placeholder" hidden>
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1M14 20h1M18 18h3v3h-3z"/></svg>
+          <span data-i18n="qrGen">กำลังสร้าง QR…</span>
+        </div>
+      </div>
+      <ol class="steps">
+        <li data-i18n-html="step1"><b>เปิด LINE</b> แล้วกดแท็บ "เพิ่มเพื่อน" (Add friends)</li>
+        <li data-i18n-html="step2">สแกน QR ด้านซ้าย หรือค้นหา ID <b>@441sptre</b> (ชื่อบอท gracia)</li>
+        <li data-i18n-html="step3">กดเพิ่มเพื่อน แล้วส่งข้อความ <code>"ราคา ระยอง ทุเรียน"</code> เพื่อเริ่มใช้งาน</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="cmd-h">
+    <h2 id="cmd-h" data-i18n="cmdTitle">ตัวอย่างคำสั่ง</h2>
+    <div class="tbl-wrap">
+      <table class="cmd-table">
+        <thead>
+          <tr><th data-i18n="cmdHead1">พิมพ์</th><th data-i18n="cmdHead2">ได้อะไร</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>ราคา ระยอง ทุเรียน</code></td><td data-i18n="cmd1a">ราคาปัจจุบัน + คำแนะนำจังหวะขาย + เหตุผล 4 ปัจจัย</td></tr>
+          <tr><td><code>ราคา จันทบุรี มังคุด เกรด B</code></td><td data-i18n="cmd2a">ระบุเกรดได้ (เฉพาะพืชที่มีเกรด)</td></tr>
+          <tr><td><code>price chanthaburi mangosteen</code></td><td data-i18n="cmd3a">ภาษาอังกฤษก็ได้</td></tr>
+          <tr><td><code>รายงาน 150 ระยอง ทุเรียน</code></td><td data-i18n="cmd4a">ส่งรายงานราคาที่ขายได้จริง (ช่วยสร้างข้อมูลราคาสด)</td></tr>
+          <tr><td><code>ช่วย</code> หรือ <code>help</code></td><td data-i18n="cmd5a">ดูคำสั่งทั้งหมด</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="chart-note" data-i18n="cmdNote">ครอบคลุม 77 จังหวัด 10 พืชหลัก (ทุเรียน ยางพารา มันสำปะหลัง ข้าว ข้าวโพด อ้อย ปาล์ม เงาะ มังคุด ลำไย)</p>
+  </section>
+
+  <section class="panel" aria-labelledby="feat-h">
+    <h2 id="feat-h" data-i18n="featTitle">บอททำอะไรได้</h2>
+    <ul class="feat-list">
+      <li data-i18n-html="feat1"><b>ตรวจราคาหน้าสวน</b> — 77 จังหวัด 10 พืชหลัก ราคาจำลองตามฤดูกาล</li>
+      <li data-i18n-html="feat2"><b>คำแนะนำจังหวะขาย</b> — 3 ระดับ (ขายตอนนี้ / รอ 3–5 วัน / รอผลแก่) พร้อมความเชื่อมั่น</li>
+      <li data-i18n-html="feat3"><b>เหตุผล 4 ปัจจัย</b> — โมเมนตัมราคา (40%) · ปริมาณผลผลิต (25%) · ช่วงเก็บเกี่ยว (20%) · สภาพอากาศ (15%)</li>
+      <li data-i18n-html="feat4"><b>ช่วงราคา 26 สัปดาห์</b> — ต่ำสุด/สูงสุด/เฉลี่ย พร้อมราคาพยากรณ์</li>
+      <li data-i18n-html="feat5"><b>รายงานราคาจริง</b> — ส่งราคาที่ขายได้ ช่วยสะสมข้อมูลราคาสด (ต้นแบบ)</li>
+      <li data-i18n-html="feat6"><b>ไทย/อังกฤษ</b> — พิมพ์ภาษาไหนตอบภาษานั้น</li>
+    </ul>
+  </section>
+
+  <section class="panel" aria-labelledby="faq-h">
+    <h2 id="faq-h" data-i18n="faqTitle">คำถามที่พบบ่อย</h2>
+    <div class="prose">
+      <p data-i18n-html="faq1"><b>ใช้ฟรีไหม?</b> ฟรี ไม่ต้องสมัครสมาชิก แค่เพิ่มเพื่อนบอทใน LINE แล้วส่งข้อความได้เลย</p>
+      <p data-i18n-html="faq2"><b>ราคาที่บอทตอบเป็นราคาจริงไหม?</b> ไม่ใช่ — เป็นข้อมูลจำลอง (mock) จากแบบจำลองฤดูกาล เช่นเดียวกับเว็บไซต์ เพื่อทดลองใช้ก่อนเชื่อมข้อมูลจริง</p>
+      <p data-i18n-html="faq3"><b>รายงานราคาที่ส่งไปเก็บที่ไหน?</b> ต้นแบบเก็บชั่วคราวในหน่วยความจำเซิร์ฟเวอร์ (หายเมื่อรีสตาร์ท) เวอร์ชันจริงจะบันทึกลงฐานข้อมูลถาวร</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="sdg-row">
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#E5243B"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">1</text></svg> SDG 1 · <span data-i18n="sdg1">ขจัดความยากจน</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#DDA63A"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">2</text></svg> SDG 2 · <span data-i18n="sdg2">ขจัดความหิวโหย</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#A21942"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">8</text></svg> SDG 8 · <span data-i18n="sdg8">งานที่มีคุณค่าและเศรษฐกิจที่เติบโต</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#BF8B2E"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">12</text></svg> SDG 12 · <span data-i18n="sdg12">การผลิตและบริโภคที่ยั่งยืน</span></span>
+  </div>
+  <p class="foot-disc" data-i18n="footDisc">ต้นแบบ (prototype) · ราคาทั้งหมดเป็นข้อมูลจำลองเพื่อการทดลองใช้ ข้อมูลที่คุณรายงานถูกเก็บในเครื่องของคุณเท่านั้น คำแนะนำเป็นข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการเงิน และไม่ใช่หลักฐานผลกำไรจริง</p>
+  <p class="foot-credit" data-i18n="footCredit">Harvest Trend (รู้ทันราคา) · EEC-SDG Hackathon &amp; Pitching 2026 · Track 5 Smart Agriculture &amp; Food Security</p>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<script src="assets/app.js"></script>
+<script>
+/* ===== LINE OA ID (ใช้สร้าง QR + ลิงก์เพิ่มเพื่อน) ===== */
+var LINE_OA_ID = '@441sptre';
+
+var lineStatusKey = 'lineStatusCheck';
+function applyLineStatus(){
+  var b = $('line-status');
+  if(b) b.textContent = T[state.lang][lineStatusKey];
+}
+function renderLineStatus(){
+  var badge = $('line-status');
+  fetch('api/line-webhook', { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(d){
+    lineStatusKey = d.status === 'ok' ? 'lineStatusOk' : 'lineStatusPrep';
+    badge.className = 'st-badge ' + (d.status === 'ok' ? 'ok' : 'wait');
+    applyLineStatus();
+  }).catch(function(){
+    lineStatusKey = 'lineStatusFail';
+    badge.className = 'st-badge wait';
+    applyLineStatus();
+  });
+}
+function renderQr(){
+  var box = $('qr-box');
+  if(!box) return;
+  var ph = $('qr-placeholder');
+  if(!LINE_OA_ID){
+    if(ph) ph.hidden = false;
+    return;
+  }
+  var clean = LINE_OA_ID.replace(/^@/, '');
+  var link = 'https://line.me/R/ti/p/@' + encodeURIComponent(clean);
+  var t = T[state.lang];
+  box.innerHTML =
+    '<img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=' + encodeURIComponent(link) + '" alt="' + t.qrAlt.replace('{id}', LINE_OA_ID) + '" width="220" height="220">' +
+    '<a class="btn btn-forest lb-btn" href="' + link + '" target="_blank" rel="noopener">' + t.addBtn + '</a>' +
+    '<span class="qr-id">LINE ID: ' + LINE_OA_ID + '</span>';
+}
+
+/* ===== demo chat (mockup LINE conversation) ===== */
+var chatDemo = {
+  api: 'api/line-webhook',
+  send: function(text){
+    return fetch(this.api, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ demo: true, text: text })
+    }).then(function(r){ return r.json(); });
+  }
+};
+
+function addUserMsg(text){
+  var d = document.createElement('div');
+  d.className = 'msg msg-user';
+  d.textContent = text;
+  $('chat').appendChild(d);
+  chatScroll();
+}
+function addBotMsg(msg){
+  var d = document.createElement('div');
+  d.className = 'msg msg-bot';
+  if(msg.type === 'flex') d.appendChild(flexCard(msg.contents));
+  else d.appendChild(textBlock(msg.text));
+  $('chat').appendChild(d);
+  chatScroll();
+}
+function textBlock(text){
+  var p = document.createElement('p');
+  p.className = 'msg-text';
+  p.textContent = text;
+  return p;
+}
+function flexCard(contents){
+  var card = document.createElement('div');
+  card.className = 'flex-card';
+  var head = document.createElement('div');
+  head.className = 'fc-head';
+  if(contents.header && contents.header.contents){
+    contents.header.contents.forEach(function(t){
+      var s = document.createElement('div');
+      s.className = 'fc-head-line' + (t.size === 'sm' ? ' title' : '');
+      s.textContent = t.text;
+      head.appendChild(s);
+    });
+  }
+  card.appendChild(head);
+  var body = document.createElement('div');
+  body.className = 'fc-body';
+  (contents.body && contents.body.contents || []).forEach(function(c){
+    if(c.type === 'separator'){ body.appendChild(document.createElement('hr')); return; }
+    if(c.type === 'box' && c.layout === 'horizontal'){
+      var row = document.createElement('div');
+      row.className = 'fc-row';
+      (c.contents || []).forEach(function(t){
+        var s = document.createElement('span');
+        s.textContent = t.text;
+        if(t.weight === 'bold') s.className = 'bold';
+        if(t.color === '#C9922E') s.className = 'w';
+        row.appendChild(s);
+      });
+      body.appendChild(row);
+      return;
+    }
+    if(c.type === 'text'){
+      var p = document.createElement('p');
+      p.className = 'fc-text' + (c.size === '2xl' ? ' big' : '') + (c.size === 'md' ? ' verdict' : '') + (c.size === 'xxs' ? ' note' : '') + (c.weight === 'bold' && c.size === 'md' ? ' verdict' : '');
+      p.textContent = c.text;
+      body.appendChild(p);
+    }
+  });
+  card.appendChild(body);
+  return card;
+}
+function chatScroll(){
+  var c = $('chat');
+  c.scrollTop = c.scrollHeight;
+}
+function renderChips(quickReply){
+  var row = $('chat-chips');
+  row.innerHTML = '';
+  if(!quickReply || !quickReply.items) return;
+  quickReply.items.forEach(function(it){
+    var b = document.createElement('button');
+    b.className = 'reg-chip';
+    b.textContent = it.action.label;
+    b.addEventListener('click', function(){ sendChat(it.action.text); });
+    row.appendChild(b);
+  });
+}
+function sendChat(text){
+  if(!text || !text.trim()) return;
+  $('chat-input').value = '';
+  renderChips(null);
+  addUserMsg(text.trim());
+  var busy = document.createElement('div');
+  busy.className = 'msg msg-bot busy';
+  busy.textContent = T[state.lang].typing;
+  $('chat').appendChild(busy);
+  chatScroll();
+  chatDemo.send(text.trim()).then(function(d){
+    busy.remove();
+    if(d && d.messages){
+      d.messages.forEach(addBotMsg);
+      var last = d.messages[d.messages.length - 1];
+      if(last && last.quickReply) renderChips(last.quickReply);
+    }else{
+      addBotMsg({ type:'text', text:T[state.lang].demoNoBackend });
+    }
+  }).catch(function(){
+    busy.remove();
+    addBotMsg({ type:'text', text:T[state.lang].demoFail });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  hydrateState();
+  initHeaderControls(function(){ applyLineStatus(); renderQr(); });
+  applyI18nDom();
+  renderLineStatus();
+  renderQr();
+
+  // demo chat: welcome + input wiring
+  addBotMsg({ type:'text', text:T[state.lang].welcome });
+  $('chat-send').addEventListener('click', function(){ sendChat($('chat-input').value); });
+  $('chat-input').addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter'){ ev.preventDefault(); sendChat(this.value); }
+  });
+});
+</script>
+</body>
+</html>

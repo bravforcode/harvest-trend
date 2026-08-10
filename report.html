@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<!--
+  DIRECTION CONTRACT v2 · รู้ทันราคา (AgriTrend EEC) · NATIONAL MVP
+  THESIS: A real-use tool, not a pitch: pick your province and crop, get today's
+  verdict with reasons, in 2 taps. Refuses the demo dashboard by making the
+  picker + verdict the whole first screen.
+  OWN-WORLD: Warm orchard ledger (unchanged world): cream ground, forest ink,
+  harvest gold for what is yet to come, clay for decide-now; Kanit over Plex
+  Sans Thai; leaf-line SVG grammar; paper panels on hairline seams.
+  STORY: A farmer in any of 77 provinces picks their place (search/region/GPS),
+  picks their crop (10 crops), reads the verdict, checks the price chart, saves
+  it to follow, and reports the price they actually got · all locally, offline.
+  FIRST VIEWPORT: Sticky header (brand, province, language, font size) then a
+  clear 3-step path: province picker → crop chips → verdict card.
+  FORM: Operate, single column, mobile-first, deterministic mock engine (labeled
+  as simulated), localStorage for watchlist + price reports, Thai+EN.
+-->
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>รายงานราคาที่ขายได้ | Harvest Trend</title>
+<meta name="description" content="ช่วยรายงานราคาพืชผลที่คุณขายได้จริง ข้อมูลบันทึกในเครื่องของคุณเท่านั้น">
+<meta name="keywords" content="ราคาพืชผล, ราคาทุเรียน, ราคายางพารา, ราคาข้าว, Harvest Trend, รู้ทันราคา, 77 จังหวัด, ราคาหน้าสวน, เกษตรกร, จังหวะขายผลผลิต">
+<meta name="author" content="Harvest Trend">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#2C4A24">
+<link rel="canonical" href="report.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="Harvest Trend · ตรวจราคาพืชผล 77 จังหวัด">
+<meta property="og:description" content="ตรวจราคาพืชผล 77 จังหวัด 10 พืชหลัก พร้อมคำแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ใช้งานง่าย">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Harvest Trend">
+<meta name="twitter:description" content="ตรวจราคาพืชผล 77 จังหวัด พร้อมคำแนะนำจังหวะขาย · ใช้ฟรี">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Thai:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body data-i18n-title="docTitleReport">
+<a class="skip-link" href="#main" data-i18n="skip">ข้ามไปยังเนื้อหาหลัก</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="rutun-price.html" aria-label="Harvest Trend">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#E8B54A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="14.3" r="8.3" stroke-width="1.8"/>
+          <circle cx="12" cy="14.3" r="5.9" stroke-width="0.7" opacity="0.55"/>
+          <path d="M12 11.6V4.5" stroke="#FFFDF6" stroke-width="1.7"/>
+          <path d="M12 8C10.2 7.7 8.8 6.4 8.6 3.6C10.5 3.9 11.9 5.6 12 8Z" fill="#FFFDF6" stroke="none"/>
+          <path d="M12 6.8C13.8 6.5 15.2 5.2 15.4 3.2C13.5 3.5 12.1 5.2 12 6.8Z" fill="#FFFDF6" stroke="none"/>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">Harvest Trend</span>
+        <span class="brand-sub">รู้ทันราคา</span>
+      </span>
+    </a>
+    <div class="spacer"></div>
+    <div class="controls">
+      <div class="fontctl" role="group" aria-label="ขนาดตัวอักษร" data-i18n-aria="aFontSize">
+        <button class="fontbtn" id="font-down" aria-label="ลดขนาดตัวอักษร" data-i18n-aria="aFontDown">A−</button>
+        <button class="fontbtn" id="font-up" aria-label="เพิ่มขนาดตัวอักษร" data-i18n-aria="aFontUp">A+</button>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="ภาษา / Language">
+        <button class="lang-btn active" data-lang="th" aria-pressed="true">ไทย</button>
+        <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <nav class="nav" aria-label="เมนูหลัก" data-i18n-aria="aNav">
+      <a href="rutun-price.html" data-i18n="nav1">ตรวจราคา</a>
+      <a href="price-chart.html" data-i18n="navPrice">ราคา &amp; แนวโน้ม</a>
+      <a href="report.html" data-i18n="nav2">รายงานราคา</a>
+      <a href="watch.html" data-i18n="nav3">ติดตาม</a>
+      <a href="about.html" data-i18n="nav4">เกี่ยวกับ</a>
+      <a href="line.html" data-i18n="lineNav">บอท LINE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section id="report" class="panel" aria-labelledby="report-title">
+    <h2 id="report-title" data-i18n="reportTitle">ช่วยรายงานราคาที่ขายได้จริง</h2>
+    <p class="sub" id="report-sub" data-i18n="reportSub"></p>
+    <div class="report-grid">
+      <form id="rep-form" novalidate>
+        <div class="field">
+          <label for="rep-prov" data-i18n="fProv">จังหวัด</label>
+          <input id="rep-prov" type="text" readonly>
+        </div>
+        <div class="field">
+          <label for="rep-crop" data-i18n="fCrop">พืช</label>
+          <input id="rep-crop" type="text" readonly>
+        </div>
+        <div class="field">
+          <label for="rep-price" data-i18n="fPrice">ราคาที่ขายได้ (บาท/หน่วย)</label>
+          <input id="rep-price" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="เช่น 150" data-i18n-ph="fPricePh">
+          <div class="hint" id="rep-price-hint"></div>
+        </div>
+        <div class="field">
+          <label for="rep-note" data-i18n="fNote">หมายเหตุ (ไม่บังคับ)</label>
+          <textarea id="rep-note" rows="2" data-i18n-ph="fNotePh"></textarea>
+        </div>
+        <button class="btn btn-forest" type="submit" id="rep-submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>
+          <span data-i18n="fSubmit">ส่งรายงานราคา</span>
+        </button>
+      </form>
+      <div>
+        <h3 class="sub" style="font-size:14px;font-weight:700;color:var(--ink);margin:0 0 8px" data-i18n="repListT">รายงานล่าสุดในเครื่องนี้</h3>
+        <div class="rep-list" id="rep-list"></div>
+        <p class="rep-empty" id="rep-empty" data-i18n="repEmpty">ยังไม่มีรายงาน · ข้อมูลจะถูกบันทึกในเครื่องของคุณเท่านั้น (ต้นแบบ)</p>
+        <p class="watch-tip" data-i18n="repTip">ข้อมูลนี้เก็บใน localStorage ของเบราว์เซอร์คุณเท่านั้น ไม่มีการส่งไปยังเซิร์ฟเวอร์ ในเวอร์ชันจริงจะถูกส่งเข้าระบบเพื่อช่วยให้ทุกคนเห็นราคาตลาดสด</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="sdg-row">
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#E5243B"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">1</text></svg> SDG 1 · <span data-i18n="sdg1">ขจัดความยากจน</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#DDA63A"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">2</text></svg> SDG 2 · <span data-i18n="sdg2">ขจัดความหิวโหย</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#A21942"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">8</text></svg> SDG 8 · <span data-i18n="sdg8">งานที่มีคุณค่าและเศรษฐกิจที่เติบโต</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#BF8B2E"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">12</text></svg> SDG 12 · <span data-i18n="sdg12">การผลิตและบริโภคที่ยั่งยืน</span></span>
+  </div>
+  <p class="foot-disc" data-i18n="footDisc">ต้นแบบ (prototype) · ราคาทั้งหมดเป็นข้อมูลจำลองเพื่อการทดลองใช้ ข้อมูลที่คุณรายงานถูกเก็บในเครื่องของคุณเท่านั้น คำแนะนำเป็นข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการเงิน และไม่ใช่หลักฐานผลกำไรจริง</p>
+  <p class="foot-credit" data-i18n="footCredit">Harvest Trend (รู้ทันราคา) · EEC-SDG Hackathon &amp; Pitching 2026 · Track 5 Smart Agriculture &amp; Food Security</p>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<script src="assets/app.js"></script>
+<script>
+function updateRepForm(){
+  const p = provById(state.prov), c = cropById(state.crop);
+  $('rep-prov').value = p[state.lang] + ' · ' + REGIONS[p.rg][state.lang];
+  $('rep-crop').value = c[state.lang] + ' (' + c.unit[state.lang] + ')';
+  $('rep-price-hint').textContent = T[state.lang].priceSubTpl.replace('{crop}', c[state.lang]);
+}
+
+function renderReports(){
+  const t = T[state.lang];
+  const reps = store.get(REP_KEY, []);
+  const list = $('rep-list');
+  list.innerHTML = '';
+  $('rep-empty').hidden = reps.length > 0;
+  reps.slice(0, 12).forEach((r, i) => {
+    const p = provById(r.p), c = cropById(r.c);
+    const div = document.createElement('div');
+    div.className = 'rep-item';
+    div.innerHTML =
+      '<div class="rp-main"><div class="rp-line1">' + (p ? p[state.lang] : r.p) + ' · ' + (c ? c[state.lang] : r.c) + '</div>' +
+      '<div class="rp-line2">' + r.date + (r.note ? ' · ' + r.note : '') + '</div></div>' +
+      '<div class="rp-price">' + r.price + '</div>' +
+      '<button class="rep-del" data-ri="' + i + '" aria-label="' + t.del + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+    list.appendChild(div);
+  });
+}
+
+function submitReport(ev){
+  ev.preventDefault();
+  const t = T[state.lang];
+  const price = parseFloat($('rep-price').value);
+  if(!(price > 0)){ toast(t.repBad); $('rep-price').focus(); return; }
+  const reps = store.get(REP_KEY, []);
+  reps.unshift({
+    p: state.prov, c: state.crop, price: fmtVal(price),
+    date: fmtDate(state.lang, new Date()), note: $('rep-note').value.trim()
+  });
+  store.set(REP_KEY, reps.slice(0, 60));
+  $('rep-price').value = ''; $('rep-note').value = '';
+  renderReports();
+  toast(t.repSaved);
+}
+
+function renderReportPage(){
+  updateRepForm();
+  renderReports();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  hydrateState();
+
+  $('rep-form').addEventListener('submit', submitReport);
+  $('rep-list').addEventListener('click', function(e){
+    const b = e.target.closest('[data-ri]'); if(!b) return;
+    const reps = store.get(REP_KEY, []);
+    reps.splice(+b.dataset.ri, 1);
+    store.set(REP_KEY, reps);
+    renderReports();
+  });
+
+  initHeaderControls(function(){ renderReportPage(); });
+  applyI18nDom();
+  renderReportPage();
+});
+
+</script>
+</body>
+</html>

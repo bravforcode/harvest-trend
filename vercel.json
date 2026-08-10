@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/rutun-price.html" },
+    { "source": "/index.html", "destination": "/rutun-price.html" }
+  ]
+}

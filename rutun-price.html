@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<!--
+  DIRECTION CONTRACT v2 · รู้ทันราคา (AgriTrend EEC) · NATIONAL MVP
+  THESIS: A real-use tool, not a pitch: pick your province and crop, get today's
+  verdict with reasons, in 2 taps. Refuses the demo dashboard by making the
+  picker + verdict the whole first screen.
+  OWN-WORLD: Warm orchard ledger (unchanged world): cream ground, forest ink,
+  harvest gold for what is yet to come, clay for decide-now; Kanit over Plex
+  Sans Thai; leaf-line SVG grammar; paper panels on hairline seams.
+  STORY: A farmer in any of 77 provinces picks their place (search/region/GPS),
+  picks their crop (10 crops), reads the verdict, checks the price chart, saves
+  it to follow, and reports the price they actually got · all locally, offline.
+  FIRST VIEWPORT: Sticky header (brand, province, language, font size) then a
+  clear 3-step path: province picker → crop chips → verdict card.
+  FORM: Operate, single column, mobile-first, deterministic mock engine (labeled
+  as simulated), localStorage for watchlist + price reports, Thai+EN.
+-->
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Harvest Trend · รู้ทันราคา | ตรวจราคาพืชผล 77 จังหวัด แนะนำจังหวะขาย</title>
+<meta name="description" content="Harvest Trend เครื่องมือตรวจราคาพืชผล 77 จังหวัด 10 พืชหลัก (ทุเรียน ยางพารา มันสำปะหลัง ข้าว ฯลฯ) คาดการณ์แนวโน้มราคาและแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ไม่ต้องติดตั้ง ใช้งานง่ายสำหรับเกษตรกร">
+<meta name="keywords" content="ราคาพืชผล, ราคาทุเรียน, ราคายางพารา, ราคาข้าว, Harvest Trend, รู้ทันราคา, 77 จังหวัด, ราคาหน้าสวน, เกษตรกร, จังหวะขายผลผลิต">
+<meta name="author" content="Harvest Trend">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#2C4A24">
+<link rel="canonical" href="rutun-price.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="Harvest Trend · ตรวจราคาพืชผล 77 จังหวัด">
+<meta property="og:description" content="ตรวจราคาพืชผล 77 จังหวัด 10 พืชหลัก พร้อมคำแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ใช้งานง่าย">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Harvest Trend">
+<meta name="twitter:description" content="ตรวจราคาพืชผล 77 จังหวัด พร้อมคำแนะนำจังหวะขาย · ใช้ฟรี">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Thai:wght@600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Harvest Trend",
+  "alternateName": "รู้ทันราคา / AgriTrend EEC",
+  "url": "rutun-price.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "browserRequirements": "RequiresJavaScript",
+  "inLanguage": ["th", "en"],
+  "description": "Free farm-gate price checker for 77 Thai provinces and 10 major crops. Blends price momentum, supply season, harvest timing and weather into a plain-language recommendation on when to harvest or sell.",
+  "featureList": [
+    "Province picker: search, 6 regions, GPS nearest province",
+    "10 crops: durian, rubber, cassava, rice, maize, sugarcane, oil palm, rambutan, mangosteen, longan",
+    "Daily verdict in 3 plain levels with reasons",
+    "26-week price chart with 4-week forecast",
+    "Watchlist and farmer price reporting (saved on device)",
+    "Thai + English, adjustable font size"
+  ]
+}
+</script>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body data-i18n-title="docTitleHome">
+<a class="skip-link" href="#main" data-i18n="skip">ข้ามไปยังเนื้อหาหลัก</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="rutun-price.html" aria-label="Harvest Trend">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#E8B54A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="14.3" r="8.3" stroke-width="1.8"/>
+          <circle cx="12" cy="14.3" r="5.9" stroke-width="0.7" opacity="0.55"/>
+          <path d="M12 11.6V4.5" stroke="#FFFDF6" stroke-width="1.7"/>
+          <path d="M12 8C10.2 7.7 8.8 6.4 8.6 3.6C10.5 3.9 11.9 5.6 12 8Z" fill="#FFFDF6" stroke="none"/>
+          <path d="M12 6.8C13.8 6.5 15.2 5.2 15.4 3.2C13.5 3.5 12.1 5.2 12 6.8Z" fill="#FFFDF6" stroke="none"/>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">Harvest Trend</span>
+        <span class="brand-sub">รู้ทันราคา</span>
+      </span>
+    </a>
+    <div class="spacer"></div>
+    <div class="controls">
+      <div class="fontctl" role="group" aria-label="ขนาดตัวอักษร" data-i18n-aria="aFontSize">
+        <button class="fontbtn" id="font-down" aria-label="ลดขนาดตัวอักษร" data-i18n-aria="aFontDown">A−</button>
+        <button class="fontbtn" id="font-up" aria-label="เพิ่มขนาดตัวอักษร" data-i18n-aria="aFontUp">A+</button>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="ภาษา / Language">
+        <button class="lang-btn active" data-lang="th" aria-pressed="true">ไทย</button>
+        <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <nav class="nav" aria-label="เมนูหลัก" data-i18n-aria="aNav">
+      <a href="rutun-price.html" data-i18n="nav1">ตรวจราคา</a>
+      <a href="price-chart.html" data-i18n="navPrice">ราคา &amp; แนวโน้ม</a>
+      <a href="report.html" data-i18n="nav2">รายงานราคา</a>
+      <a href="watch.html" data-i18n="nav3">ติดตาม</a>
+      <a href="about.html" data-i18n="nav4">เกี่ยวกับ</a>
+      <a href="line.html" data-i18n="lineNav">บอท LINE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <svg class="hero-leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/></svg>
+    <svg class="hero-leaf2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/></svg>
+    <p class="hero-eyebrow" data-i18n="heroEyebrow">เครื่องมือช่วยตัดสินใจราคาพืชผล · ครอบคลุมทั่วประเทศ</p>
+    <h1 class="hero-title" id="hero-title" data-i18n="heroTitle">รู้ก่อนขาย ได้จังหวะที่ดีกว่า</h1>
+    <p class="hero-sub" data-i18n="heroSub">เลือกจังหวัดและพืชของคุณ รับคำแนะนำจังหวะเก็บเกี่ยว/ขายพร้อมเหตุผลประกอบที่เข้าใจง่าย ภายใน 2 คลิก ไม่ต้องเป็นผู้เชี่ยวชาญ</p>
+    <div class="hero-stats" role="list">
+      <div class="hero-stat" role="listitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v15M15 6v15M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/></svg>
+        <div><b>77</b><span data-i18n="heroStat1">จังหวัดทั่วประเทศ</span></div>
+      </div>
+      <div class="hero-stat" role="listitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20C5 11 11 5 20 5c0 9-6 15-15 15z"/><path d="M5 20c3-4 6-7 10-11"/></svg>
+        <div><b>10</b><span data-i18n="heroStat2">พืชเศรษฐกิจหลัก</span></div>
+      </div>
+      <div class="hero-stat" role="listitem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+        <div><b>4</b><span data-i18n="heroStat3">สัญญาณวิเคราะห์ร่วม</span></div>
+      </div>
+    </div>
+    <a class="hero-cta" href="#picker">
+      <span data-i18n="heroCta">เริ่มตรวจราคาเลย</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </a>
+  </section>
+
+  <div class="howto" id="howto">
+    <span class="step"><b>1</b><span data-i18n="how1">เลือกจังหวัดของคุณ</span></span>
+    <span class="step"><b>2</b><span data-i18n="how2">เลือกพืชที่ปลูก</span></span>
+    <span class="step"><b>3</b><span data-i18n="how3">อ่านคำแนะนำ + เช็กกราฟราคา</span></span>
+  </div>
+
+  <div class="mock-banner" role="note">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+    <span data-i18n="mockNote">ข้อมูลราคาในเว็บนี้เป็นข้อมูลจำลอง (mock data) เพื่อการใช้งานจริงของต้นแบบ · ราคาจากแบบจำลอง ไม่ใช่ราคาตลาดจริง ก่อนตัดสินใจขายควรเช็กข้อมูลหน่วยงานราชการหรือตลาดกลางในพื้นที่ด้วย</span>
+  </div>
+
+  <div class="line-banner">
+    <span class="lb-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.6-.7L3 20l1-4.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+    </span>
+    <div class="lb-txt">
+      <b data-i18n="lineCtaTitle">รับคำแนะนำผ่าน LINE</b>
+      <span data-i18n="lineCtaBody">เพิ่ม LINE OA แล้วส่งข้อความ "ราคา ระยอง ทุเรียน" รับคำแนะนำจังหวะขายทันที</span>
+    </div>
+    <a class="btn btn-forest lb-btn" href="line.html" data-i18n="lineCtaBtn">ดูวิธีใช้งาน</a>
+  </div>
+
+  <section id="picker" class="panel" aria-labelledby="pick-title">
+    <h2 id="pick-title" data-i18n="pickTitle">เลือกจังหวัดของคุณ</h2>
+    <p class="sub" data-i18n="pickSub">พิมพ์ค้นหา กดแผนภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด</p>
+    <div class="picker-head">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="search" id="prov-search" placeholder="ค้นหาจังหวัด เช่น ระยอง / Rayong" data-i18n-ph="searchPh" autocomplete="off" aria-label="ค้นหาจังหวัด" data-i18n-aria="aProvSearch">
+      </div>
+      <button class="gps-btn" id="gps-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <span data-i18n="gpsBtn">ใช้ตำแหน่งของฉัน</span>
+      </button>
+    </div>
+    <div class="region-row" id="region-row" role="group" aria-label="ภูมิภาค" data-i18n-aria="aRegion"></div>
+    <div class="prov-grid" id="prov-grid" role="listbox" aria-label="รายชื่อจังหวัด" data-i18n-aria="aProvList"></div>
+    <div id="prov-empty" class="prov-empty" hidden data-i18n="provEmpty">ไม่พบจังหวัดที่ค้นหา ลองพิมพ์ชื่อใหม่</div>
+  </section>
+
+  <section id="crop" class="panel" aria-labelledby="crop-title">
+    <h2 id="crop-title" data-i18n="cropTitle">เลือกพืชที่ปลูก</h2>
+    <p class="sub" data-i18n="cropSub">เรียงพืชที่นิยมปลูกในพื้นที่ของคุณไว้ก่อน · ป้าย "พื้นที่หลัก" หมายถึงแหล่งผลิตสำคัญ</p>
+    <div class="crop-row" id="crop-row" role="group" aria-label="เลือกพืช" data-i18n-aria="aCrop"></div>
+  </section>
+
+  <section id="verdict-sec" aria-labelledby="rec-eyebrow" hidden>
+    <div class="rec-card">
+      <svg class="rec-leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="position:absolute;right:16px;bottom:-28px;width:150px;height:150px;opacity:.07;pointer-events:none;"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/><path d="M4 20C8 16 12 12 17 7" fill="none" stroke="#F6F1E2" stroke-width="1.1"/></svg>
+      <div aria-live="polite">
+        <p class="rec-eyebrow" id="rec-eyebrow">คำแนะนำวันนี้</p>
+        <div class="rec-place">
+          <span id="rec-place-name"></span>
+          <span class="chip" id="rec-crop-name"></span>
+          <span class="chip" id="rec-date"></span>
+        </div>
+        <div class="rec-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <h2 class="rec-verdict" id="rec-verdict"></h2>
+        </div>
+        <p class="rec-body" id="rec-body" aria-live="polite"></p>
+        <div class="conf-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+          <span data-i18n="confPrefix">ระดับความเชื่อมั่น:</span> <b id="rec-conf"></b> <span data-i18n="confSuffix">· จาก 4 สัญญาณ</span>
+        </div>
+        <div class="rec-actions">
+          <button class="btn btn-gold" id="watch-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+            <span data-i18n="watchAdd">ติดตามราคานี้</span>
+          </button>
+          <button class="btn btn-ghost-dark" id="scroll-report">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10"/><path d="M8 14l4-4 4 4"/><path d="M4 4h16"/></svg>
+            <span data-i18n="scrollReport">รายงานราคาที่ขายได้</span>
+          </button>
+          <button class="btn btn-ghost-dark" id="view-chart-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+            <span data-i18n="viewChart">ดูกราฟราคา + สัญญาณ</span>
+          </button>
+          <button class="btn btn-ghost-dark" id="share-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2"/></svg>
+            <span data-i18n="shareBtn">แชร์ผลลัพธ์</span>
+          </button>
+          <button class="btn btn-ghost-dark" id="line-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.6-.7L3 20l1-4.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+            <span data-i18n="shareLine">แชร์ผ่าน LINE</span>
+          </button>
+        </div>
+      </div>
+      <div class="rec-signals">
+        <div class="sig-mini">
+          <div class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5l6 6 4-4 6 6"/><path d="M20 9v4h-4"/></svg> <span data-i18n="sig1n">โมเมนตัมราคา</span></div>
+          <div class="val" id="mini-1"></div>
+        </div>
+        <div class="sig-mini">
+          <div class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/></svg> <span data-i18n="sig2n">ปริมาณผลผลิต</span></div>
+          <div class="val" id="mini-2"></div>
+        </div>
+        <div class="sig-mini">
+          <div class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16c2.5-6 5-6 7.5 0s5 6 7.5 0"/><circle cx="6.5" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="17.5" cy="16" r="1" fill="currentColor" stroke="none"/></svg> <span data-i18n="sig3n">ช่วงเก็บเกี่ยว</span></div>
+          <div class="val" id="mini-3"></div>
+        </div>
+        <div class="sig-mini">
+          <div class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="17" cy="8" r="3"/><path d="M7 18h9a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.1 8.4 3.5 3.5 0 0 0 7 18z"/></svg> <span data-i18n="sig4n">สภาพอากาศ</span></div>
+          <div class="val" id="mini-4"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="sdg-row">
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#E5243B"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">1</text></svg> SDG 1 · <span data-i18n="sdg1">ขจัดความยากจน</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#DDA63A"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">2</text></svg> SDG 2 · <span data-i18n="sdg2">ขจัดความหิวโหย</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#A21942"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">8</text></svg> SDG 8 · <span data-i18n="sdg8">งานที่มีคุณค่าและเศรษฐกิจที่เติบโต</span></span>
+    <span class="sdg"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#BF8B2E"/><text x="12" y="16.5" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" font-weight="700" fill="#fff">12</text></svg> SDG 12 · <span data-i18n="sdg12">การผลิตและบริโภคที่ยั่งยืน</span></span>
+  </div>
+  <p class="foot-disc" data-i18n="footDisc">ต้นแบบ (prototype) · ราคาทั้งหมดเป็นข้อมูลจำลองเพื่อการทดลองใช้ ข้อมูลที่คุณรายงานถูกเก็บในเครื่องของคุณเท่านั้น คำแนะนำเป็นข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการเงิน และไม่ใช่หลักฐานผลกำไรจริง</p>
+  <p class="foot-credit" data-i18n="footCredit">Harvest Trend (รู้ทันราคา) · EEC-SDG Hackathon &amp; Pitching 2026 · Track 5 Smart Agriculture &amp; Food Security</p>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<script src="assets/app.js"></script>
+<script>
+function buildRegionChips(){
+  const row = $('region-row');
+  row.innerHTML = '';
+  const mk = (id, lbl, on) => {
+    const b = document.createElement('button');
+    b.className = 'reg-chip' + (on ? ' active' : '');
+    b.dataset.rg = id;
+    b.innerHTML = '<span class="rd" style="background:' + REG_COLOR[id] + '"></span>' + lbl;
+    row.appendChild(b);
+  };
+  mk('all', T[state.lang].regionAll, state.region === 'all');
+  Object.keys(REGIONS).forEach(rg => mk(rg, REGIONS[rg][state.lang], state.region === rg));
+}
+
+function filterProvinces(){
+  const q = state.query.trim().toLowerCase();
+  return PROVINCES.filter(p =>
+    (state.region === 'all' || p.rg === state.region) &&
+    (!q || p.th.toLowerCase().includes(q) || p.en.toLowerCase().includes(q) || p.id.includes(q))
+  );
+}
+
+function buildProvGrid(){
+  const grid = $('prov-grid');
+  const list = filterProvinces();
+  grid.innerHTML = '';
+  $('prov-empty').hidden = list.length > 0;
+  list.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'prov-item' + (p.id === state.prov ? ' sel' : '');
+    b.dataset.prov = p.id;
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', p.id === state.prov ? 'true' : 'false');
+    b.innerHTML = '<span class="pd" style="background:' + REG_COLOR[p.rg] + '"></span><span>' +
+      p[state.lang] + '<small>' + REGIONS[p.rg][state.lang] + '</small></span>';
+    grid.appendChild(b);
+  });
+}
+
+function buildCropChips(){
+  const row = $('crop-row');
+  const p = provById(state.prov);
+  const sorted = CROPS.slice().sort((a, b) => {
+    const am = p.main.includes(a.id) || p.main.includes('*') ? 0 : 1;
+    const bm = p.main.includes(b.id) || p.main.includes('*') ? 0 : 1;
+    return am - bm || a.th.localeCompare(b.th);
+  });
+  row.innerHTML = '';
+  sorted.forEach(c => {
+    const isMain = p.main.includes(c.id) || p.main.includes('*');
+    const b = document.createElement('button');
+    b.className = 'crop-chip' + (c.id === state.crop ? ' active' : '');
+    b.dataset.crop = c.id;
+    b.innerHTML = c[state.lang] + (isMain ? ' <span class="main-tag">' + T[state.lang].mainTag + '</span>' : '');
+    row.appendChild(b);
+  });
+}
+
+function renderVerdict(){
+  const sec = $('verdict-sec'); sec.hidden = false;
+  const t = T[state.lang], c = cropById(state.crop), p = provById(state.prov);
+  const sg = signals(), r = recommend(sg);
+  const a = sg.series.a;
+  const last = a[a.length - 1], prev5 = a[a.length - 6];
+  const chg5 = (last - prev5) / prev5 * 100;
+  const mn26 = Math.min.apply(null, a), mx26 = Math.max.apply(null, a);
+  const av26 = a.reduce(function(x, y){ return x + y; }, 0) / a.length;
+  $('rec-eyebrow').textContent = t.recKicker;
+  $('rec-place-name').innerHTML =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9922E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> ' +
+    p[state.lang] + ' <span class="chip">' + REGIONS[p.rg][state.lang] + '</span>';
+  $('rec-crop-name').textContent = c[state.lang] + ' · ' + c.unit[state.lang];
+  $('rec-date').textContent = fmtDate(state.lang, todayInfo().date);
+  $('rec-verdict').textContent = t[REC_KEY[r.rec]];
+  $('rec-conf').textContent = t[r.confKey];
+  const supTxt = t['supply' + cap(sg.supSt)];
+  const cls = sg.momSt === 'up' ? 'up' : (sg.momSt === 'down' ? 'down' : 'flat');
+  const pctTxt = (chg5 > 0 ? '+' : '') + chg5.toFixed(1) + '%';
+  let harvTxt;
+  if(sg.harvSt === 'all') harvTxt = t.harvestAll;
+  else if(sg.harvSt === 'yes') harvTxt = t.harvestYes + (sg.peakDist === 0 ? ' · ' + t.peakNow : (sg.peakDist ? ' · ' + t.peakIn.replace('{m}', sg.peakDist) : ''));
+  else harvTxt = t.harvestNo + (sg.peakDist ? ' · ' + t.peakIn.replace('{m}', sg.peakDist) : '');
+  const peakTxt = sg.peakDist === null ? '' : (sg.peakDist === 0 ? ' · ' + t.peakNow : ' · ' + t.peakIn.replace('{m}', sg.peakDist));
+  $('rec-body').innerHTML =
+    '<p class="rb-price"><b>~' + fmtVal(last) + ' ' + c.unit[state.lang] + '</b> ' +
+    '<span class="trend ' + cls + '">' + t['nowTrend' + cap(sg.momSt)] + ' ' + pctTxt + ' ' + t.last5w + '</span></p>' +
+    '<p class="rb-range">' + t.range26Lbl + ': ' + t.minLbl + ' ~' + fmtVal(mn26) + ' · ' + t.maxLbl + ' ~' + fmtVal(mx26) + ' · ' + t.avgLbl + ' ~' + fmtVal(av26) + '</p>' +
+    '<p class="rb-title">' + t.recReasons + '</p>' +
+    '<ul class="rb-list">' +
+    '<li><b>' + t.sig1n + ' (40%):</b> ' + t['mom' + cap(sg.momSt)] + '</li>' +
+    '<li><b>' + t.sig2n + ' (25%):</b> ' + supTxt + peakTxt + '</li>' +
+    '<li><b>' + t.sig3n + ' (20%):</b> ' + harvTxt + '</li>' +
+    '<li><b>' + t.sig4n + ' (15%):</b> ' + t['weather' + cap(sg.wxSt)] + '</li>' +
+    '</ul>' +
+    '<p class="rb-close"><b>' + t[BODY_KEY[r.rec]] + '</b> · ' + t[CLOSE_KEY[r.rec]] + ' (' + t[REC_KEY[r.rec]] + ')</p>';
+  $('mini-1').textContent = t['nowTrend' + cap(sg.momSt)];
+  $('mini-2').textContent = supTxt;
+  $('mini-3').textContent = t['harvest' + cap(sg.harvSt)];
+  $('mini-4').textContent = t['weather' + cap(sg.wxSt)];
+  const wl = store.get(WATCH_KEY, []);
+  const inW = wl.some(x => x.p === state.prov && x.c === state.crop);
+  const wb = $('watch-btn');
+  wb.querySelector('span').textContent = t[inW ? 'watchExists' : 'watchAdd'];
+  wb.dataset.in = inW ? '1' : '0';
+}
+
+function syncPickUI(){
+  $('prov-search').value = '';
+  state.query = '';
+  state.region = 'all';
+  buildRegionChips();
+  buildProvGrid();
+  buildCropChips();
+}
+
+function toggleWatch(){
+  const t = T[state.lang];
+  let wl = store.get(WATCH_KEY, []);
+  const i = wl.findIndex(x => x.p === state.prov && x.c === state.crop);
+  if(i >= 0){ wl.splice(i, 1); toast(t.watchRemoved); }
+  else{ wl.push({ p: state.prov, c: state.crop }); toast(t.watchAdded); }
+  store.set(WATCH_KEY, wl);
+  renderVerdict();
+}
+
+function gpsLocate(){
+  const btn = $('gps-btn');
+  if(!navigator.geolocation){ toast(T[state.lang].gpsFail); return; }
+  btn.disabled = true;
+  btn.querySelector('span').textContent = T[state.lang].gpsBusy;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    const la = pos.coords.latitude, lo = pos.coords.longitude;
+    let best = null, bd = 1e9;
+    PROVINCES.forEach(p => {
+      const d = Math.sqrt(Math.pow(p.lat - la, 2) + Math.pow(p.lng - lo, 2));
+      if(d < bd){ bd = d; best = p; }
+    });
+    btn.disabled = false;
+    btn.querySelector('span').textContent = T[state.lang].gpsBtn;
+    if(best){
+      state.prov = best.id;
+      persistCfg({ prov: state.prov });
+      syncPickUI();
+      renderHome();
+      toast(best[state.lang] + ' · ' + REGIONS[best.rg][state.lang]);
+    }
+  }, function(){
+    btn.disabled = false;
+    btn.querySelector('span').textContent = T[state.lang].gpsBtn;
+    toast(T[state.lang].gpsFail);
+  }, { timeout: 8000 });
+}
+
+function renderHome(){
+  renderVerdict();
+  flashUpdate();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  hydrateState();
+
+  $('prov-search').addEventListener('input', function(e){
+    state.query = e.target.value;
+    buildProvGrid();
+  });
+  $('region-row').addEventListener('click', function(e){
+    const b = e.target.closest('.reg-chip'); if(!b) return;
+    state.region = b.dataset.rg;
+    buildRegionChips(); buildProvGrid();
+  });
+  $('prov-grid').addEventListener('click', function(e){
+    const b = e.target.closest('.prov-item'); if(!b) return;
+    state.prov = b.dataset.prov;
+    persistCfg({ prov: state.prov });
+    buildProvGrid(); buildCropChips(); renderHome();
+    $('verdict-sec').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  $('crop-row').addEventListener('click', function(e){
+    const b = e.target.closest('.crop-chip'); if(!b) return;
+    state.crop = b.dataset.crop;
+    persistCfg({ crop: state.crop });
+    buildCropChips(); renderHome();
+  });
+  $('gps-btn').addEventListener('click', gpsLocate);
+  $('watch-btn').addEventListener('click', toggleWatch);
+  $('share-btn').addEventListener('click', shareVerdict);
+  $('line-btn').addEventListener('click', shareLine);
+  $('scroll-report').addEventListener('click', function(){
+    persistCfg({ prov: state.prov, crop: state.crop });
+    location.href = 'report.html';
+  });
+  $('view-chart-btn').addEventListener('click', function(){
+    persistCfg({ prov: state.prov, crop: state.crop });
+    location.href = 'price-chart.html';
+  });
+
+  initHeaderControls(function(){
+    buildRegionChips(); buildProvGrid(); buildCropChips(); renderHome();
+  });
+  applyI18nDom();
+  buildRegionChips();
+  buildProvGrid();
+  buildCropChips();
+  renderHome();
+  if(location.hash === '#verdict-sec'){
+    $('verdict-sec').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+});
+
+</script>
+</body>
+</html>
