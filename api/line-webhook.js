@@ -313,7 +313,7 @@ function buildPriceReply(p, lang, liveMap){
         type:'box', layout:'vertical', spacing:'sm',
         contents:[
           { type:'box', layout:'baseline', contents:[
-            { type:'text', text:'~' + fmtValFor(last, p.crop), size:'2xl', weight:'bold', color:'#1C2E20' },
+            { type:'text', text:'~' + fmtValFor(last, p.crop), size:'xxl', weight:'bold', color:'#1C2E20' },
             { type:'text', text:c.unit[lang], size:'xs', color:'#6B6B5E', margin:'4px' }
           ]},
           { type:'text', text:t['nowTrend' + cap(sg.momSt)] + ' ' + pct + ' ' + t.last5w, size:'xs', color:flexColor(cls), weight:'bold', wrap:true },
@@ -400,11 +400,15 @@ function verifySignature(raw, sig, secret){
 async function sendReply(replyToken, messages){
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   if (!token) return;
-  await fetch('https://api.line.me/v2/bot/message/reply', {
+  const r = await fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ replyToken, messages })
   });
+  if (!r.ok){
+    const t = await r.text().catch(() => '');
+    console.error('[line] reply failed HTTP ' + r.status + ': ' + t.slice(0, 300));
+  }
 }
 
 /* in-memory farmer reports — ponytail: prototype only; wiped on cold start.
