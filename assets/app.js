@@ -344,7 +344,13 @@ th: {
   aQcProv:'เปลี่ยนจังหวัด', aQcCrop:'เปลี่ยนพืช', aGrade:'เลือกเกรด',
   docTitleHome:'Harvest Trend · รู้ทันราคา | ตรวจราคาพืชผล 77 จังหวัด แนะนำจังหวะขาย',
   docTitleChart:'ราคาและแนวโน้ม | Harvest Trend', docTitleReport:'รายงานราคาที่ขายได้ | Harvest Trend',
-  docTitleWatch:'รายการติดตาม | Harvest Trend', docTitleAbout:'เกี่ยวกับ | Harvest Trend', docTitleLine:'บอท LINE | Harvest Trend'
+  docTitleWatch:'รายการติดตาม | Harvest Trend', docTitleAbout:'เกี่ยวกับ | Harvest Trend', docTitleLine:'บอท LINE | Harvest Trend',
+  metaDescHome:'Harvest Trend เครื่องมือตรวจราคาพืชผล 77 จังหวัด 10 พืชหลัก (ทุเรียน ยางพารา มันสำปะหลัง ข้าว ฯลฯ) คาดการณ์แนวโน้มราคาและแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ไม่ต้องติดตั้ง ใช้งานง่ายสำหรับเกษตรกร',
+  metaDescChart:'กราฟราคาย้อนหลัง 26 สัปดาห์ พยากรณ์ 4 สัปดาห์ สถิติราคา ตารางตัวเลข สัญญาณ 4 ปัจจัย และปฏิทินฤดูกาล สำหรับพืชและจังหวัดที่คุณเลือก',
+  metaDescReport:'ช่วยรายงานราคาพืชผลที่คุณขายได้จริง ข้อมูลบันทึกในเครื่องของคุณเท่านั้น',
+  metaDescWatch:'รายการจังหวัด/พืชที่คุณติดตามราคาไว้ เข้าถึงได้เร็วจากทุกอุปกรณ์ในเครื่องนี้',
+  metaDescAbout:'Harvest Trend (รู้ทันราคา) ต้นแบบเครื่องมือคาดการณ์แนวโน้มราคาพืชผลหน้าสวน 77 จังหวัด 10 พืชหลัก',
+  metaDescLine:'เพิ่มเพื่อน LINE OA ของ Harvest Trend แล้วส่งข้อความ "ราคา ระยอง ทุเรียน" เพื่อรับคำแนะนำจังหวะขายทันที'
 },
 
 en: {
@@ -469,7 +475,13 @@ en: {
   aQcProv:'Change province', aQcCrop:'Change crop', aGrade:'Pick a grade',
   docTitleHome:'Harvest Trend | Check crop prices across 77 provinces',
   docTitleChart:'Price & trend | Harvest Trend', docTitleReport:'Report your price | Harvest Trend',
-  docTitleWatch:'Watchlist | Harvest Trend', docTitleAbout:'About | Harvest Trend', docTitleLine:'LINE Bot | Harvest Trend'
+  docTitleWatch:'Watchlist | Harvest Trend', docTitleAbout:'About | Harvest Trend', docTitleLine:'LINE Bot | Harvest Trend',
+  metaDescHome:'Harvest Trend — check crop prices across 77 provinces and 10 major crops (durian, rubber, cassava, rice, etc.), see price trends and harvest/sell timing advice. Free, no install, easy for farmers.',
+  metaDescChart:'26-week price history chart, 4-week forecast, price stats, data table, 4-factor signals, and a season calendar for the crop and province you pick.',
+  metaDescReport:'Report the crop price you actually got — saved on this device only.',
+  metaDescWatch:'Your saved province/crop price watchlist — quick access on this device.',
+  metaDescAbout:'Harvest Trend (รู้ทันราคา) — a prototype forecasting farm-gate crop prices across 77 provinces and 10 major crops.',
+  metaDescLine:'Add the Harvest Trend LINE OA and send "price rayong durian" to get an instant sell-timing verdict.'
 }
 };
 /* ---------- ENGINE: series, signals, verdict ---------- */
@@ -632,6 +644,10 @@ function applyI18nDom(){
   });
   const ti = document.querySelector('[data-i18n-title]');
   if(ti && t[ti.dataset.i18nTitle]) document.title = t[ti.dataset.i18nTitle];
+  document.querySelectorAll('[data-i18n-meta]').forEach(el => {
+    const k = el.dataset.i18nMeta;
+    if(t[k] !== undefined && t[k] !== null) el.setAttribute('content', t[k]);
+  });
   document.querySelectorAll('.lang-btn').forEach(b => {
     const on = b.dataset.lang === state.lang;
     b.classList.toggle('active', on);
