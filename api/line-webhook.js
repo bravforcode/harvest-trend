@@ -9,6 +9,8 @@
   so LINE's webhook validation passes; the site's line.html shows "รอการตั้งค่า".
 */
 const crypto = require('crypto');
+/* real price aggregator (data.go.th + BOT) — see api/prices.js */
+const { fetchPrices } = require('./prices.js');
 
 /* ================= DATA (mirror of assets/app.js) ================= */
 const REGION_FACTOR = { north: 0.97, ne: 0.95, central: 1.0, east: 1.08, west: 1.0, south: 1.02 };
@@ -76,7 +78,8 @@ const REGIONS = { north:{th:'ภาคเหนือ',en:'North'}, ne:{th:'ภ�
 /* Strings needed for bot messages (subset of app.js T). */
 const T = {
   th: {
-    title:'gracia · รู้ทันราคา', note:'ข้อมูลจำลอง (mock) ไม่ใช่ราคาตลาดจริง · ตรวจสอบกับตลาดกลาง/หน่วยงานรัฐก่อนตัดสินใจ',
+    title:'gracia · รู้ทันราคา', note:'ราคาจริงจากหน่วยงานราชการ (data.go.th / ธปท.) อัปเดตอัตโนมัติ',
+    noteMock:'ค่าประมาณจากแบบจำลองฤดูกาล · ยังไม่มีข้อมูลราคาราชการสำหรับจังหวัด/พืชนี้ ตรวจสอบตลาดกลางในพื้นที่ก่อนตัดสินใจ',
     todayLbl:'วันนี้', baht:'บาท/หน่วย', gradeLbl:'เกรด', last5w:'เทียบ 5 สัปดาห์ก่อน',
     nowTrendUp:'ขยับขึ้น', nowTrendDown:'ขยับลง', nowTrendFlat:'ทรงตัว',
     supplyRising:'ผลผลิตกำลังเพิ่ม', supplyPeak:'ผลผลิตพีค', supplyEasing:'ผลผลิตเริ่มลด', supplyNormal:'ผลผลิตคงที่ตามฤดูกาล',
@@ -98,10 +101,11 @@ const T = {
     reportNote:'รายงาน',
     notFound:'ไม่พบจังหวัด/พืชที่พิมพ์ ลองใหม่ เช่น "ราคา ระยอง ทุเรียน"',
     quickPrice:'ราคาอีกครั้ง', quickHelp:'ช่วยเหลือ', quickReport:'รายงานราคา',
-    joinBody:'สวัสดีครับ บอท gracia 🌾 เข้าร่วมกลุ่มแล้ว\nส่ง "ราคา <จังหวัด> <พืช>" เช่น "ราคา ระยอง ทุเรียน" เพื่อดูราคาและคำแนะนำ หรือพิมพ์ "ช่วย" เพื่อดูคำสั่งทั้งหมด'
+    joinBody:'สวัสดีครับ บอท gracia 🌾 เข้าร่วมกลุ่มแล้ว\nในกลุ่มนี้ต้อง @ บอทก่อนส่งคำสั่ง — กด @ แล้วเลือก gracia แล้วพิมพ์ เช่น "@gracia ราคา ระยอง ทุเรียน" เพื่อดูราคาและคำแนะนำ หรือ "@gracia ช่วย" เพื่อดูคำสั่งทั้งหมด'
   },
   en: {
-    title:'gracia', note:'Simulated (mock) data, not real market prices · verify with local markets before selling',
+    title:'gracia', note:'Real prices from government agencies (data.go.th / BOT), auto-refreshed',
+    noteMock:'Seasonal estimate · no official price data for this province/crop yet. Check local markets before selling',
     todayLbl:'Today', baht:'per unit', gradeLbl:'Grade', last5w:'vs 5 weeks ago',
     nowTrendUp:'Rising', nowTrendDown:'Falling', nowTrendFlat:'Flat',
     supplyRising:'Supply rising', supplyPeak:'Supply at peak', supplyEasing:'Supply easing', supplyNormal:'Supply steady by season',
@@ -123,7 +127,7 @@ const T = {
     reportNote:'Report',
     notFound:'Province/crop not found. Try "price Rayong durian"',
     quickPrice:'Check again', quickHelp:'Help', quickReport:'Report price',
-    joinBody:'Hi! The gracia bot 🌾 has joined this group.\nSend "price <province> <crop>", e.g. "price Rayong durian", for a price + sell-timing verdict, or "help" for all commands.'
+    joinBody:'Hi! The gracia bot 🌾 has joined this group.\nMention the bot (tap @ and pick gracia), e.g. "@gracia price Rayong durian", for a price + sell-timing verdict, or "@gracia help" for all commands.'
   }
 };
 
@@ -222,8 +226,12 @@ function findProv(msg, low){
 }
 /* Returns { type:'price'|'help'|'report'|'unknown', prov, crop, grade, price, lang } */
 function parseCommand(raw){
-  const msg = (raw || '').trim();
+  let msg = (raw || '').trim();
   if (!msg) return { type:'unknown', lang:'th' };
+  // strip leading @mention — in group chats LINE only delivers messages that
+  // mention the bot, and the mention text ("@gracia ราคา ...") precedes the
+  // actual command
+  msg = msg.replace(/^@\S+/, '').trim();
   const low = msg.toLowerCase();
   const lang = ['rayong','durian','price','help','report','mangosteen','rubber','chanthaburi','mangosteen'].some((k) => low.includes(k)) ? 'en' : 'th';
 
@@ -252,11 +260,22 @@ function parseCommand(raw){
 /* ================= REPLY BUILDERS ================= */
 function flexColor(status){ return status === 'up' ? '#1F7A3D' : (status === 'down' ? '#B6472E' : '#8A6415'); }
 
-function buildPriceReply(p, lang){
+function buildPriceReply(p, lang, liveMap){
   const t = T[lang], c = cropById(p.crop), prov = provById(p.prov);
   const sg = signals(p.crop, p.prov, p.grade), r = recommend(sg);
   const a = sg.series.a;
-  const last = a[a.length - 1], prev5 = a[a.length - 6];
+  const prev5 = a[a.length - 6];
+  /* real official price when available (exact province → region → national) */
+  let last = a[a.length - 1];
+  let liveNote = '';
+  if(liveMap){
+    const rg = provById(p.prov) ? provById(p.prov).rg : null;
+    const lr = liveMap[p.crop + '|' + p.prov] || (rg ? liveMap[p.crop + '|rg:' + rg] : null) || liveMap[p.crop + '|*'];
+    if(lr && lr.price > 0){
+      last = lr.price;
+      liveNote = ' · ' + lr.source;
+    }
+  }
   const chg5 = (last - prev5) / prev5 * 100;
   const mn = Math.min.apply(null, a), mx = Math.max.apply(null, a);
   const av = a.reduce((x, y) => x + y, 0) / a.length;
@@ -309,7 +328,7 @@ function buildPriceReply(p, lang){
           row(t.sig4n + ' 15%', t['weather' + cap(sg.wxSt)], '15%'),
           { type:'separator', margin:'sm' },
           { type:'text', text:t.range26 + ': ' + t.minLbl + ' ~' + fmtValFor(mn, p.crop) + ' · ' + t.maxLbl + ' ~' + fmtValFor(mx, p.crop) + ' · ' + t.avgLbl + ' ~' + fmtValFor(av, p.crop), size:'xs', color:'#1C2E20', wrap:true, margin:'sm' },
-          { type:'text', text:t.note, size:'xxs', color:'#9A9A8C', wrap:true, margin:'sm' }
+          { type:'text', text: liveNote ? (t.note + liveNote) : t.noteMock, size:'xxs', color:'#9A9A8C', wrap:true, margin:'sm' }
         ]
       }
     },
@@ -343,14 +362,24 @@ function buildReportReply(p, lang){
 /* Mockup/demo mode: run the exact same command→reply pipeline the LINE bot
    uses, and return the messages in the HTTP response (no LINE credentials).
    Powers the in-page chat simulator on line.html. */
-function processDemo(text){
+function processDemo(text, liveMap){
   const cmd = parseCommand(text);
   let messages;
-  if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang);
+  if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang, liveMap);
   else if (cmd.type === 'help') messages = [buildHelpReply(cmd.lang)];
   else if (cmd.type === 'report'){ storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
   else messages = [buildUnknownReply(cmd.lang)];
   return messages;
+}
+
+/* real prices from api/prices.js → lookup map (module cache makes this cheap) */
+async function buildLiveMap(){
+  try{
+    const live = await fetchPrices();
+    const map = {};
+    live.forEach(x => { map[x.crop + '|' + x.prov] = x; });
+    return map;
+  }catch(e){ return null; }
 }
 
 /* ================= LINE API ================= */
@@ -410,7 +439,8 @@ module.exports = async function handler(req, res){
      credentials; real LINE events always pass through signature verification. */
   if (body.demo){
     const text = (body.text != null ? String(body.text) : (body.message && body.message.text) || '');
-    return res.status(200).json({ ok: true, demo: true, messages: processDemo(text) });
+    const liveMap = await buildLiveMap();
+    return res.status(200).json({ ok: true, demo: true, messages: processDemo(text, liveMap) });
   }
 
   if (secret && !verifySignature(raw, sig, secret)){
@@ -418,12 +448,14 @@ module.exports = async function handler(req, res){
   }
   if (!configured) return res.status(200).json({ status: 'not-configured' });
 
+  const liveMap = await buildLiveMap();
+
   for (const ev of (body.events || [])){
     try {
       if (ev.type === 'message' && ev.message.type === 'text'){
         const cmd = parseCommand(ev.message.text);
         let messages;
-        if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang);
+        if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang, liveMap);
         else if (cmd.type === 'help') messages = [buildHelpReply(cmd.lang)];
         else if (cmd.type === 'report'){ storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
         else messages = [buildUnknownReply(cmd.lang)];

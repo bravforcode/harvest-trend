@@ -16,6 +16,12 @@ let p = parseCommand('ราคา ระยอง ทุเรียน');
 ok('th price rayong/durian', p.type === 'price' && p.prov === 'rayong' && p.crop === 'durian' && p.grade === 'A' && p.lang === 'th');
 p = parseCommand('ราคา จันทบุรี มังคุด เกรด B');
 ok('th grade B', p.prov === 'chanthaburi' && p.crop === 'mangosteen' && p.grade === 'B');
+p = parseCommand('@gracia ราคา ระยอง ทุเรียน');
+ok('th price with @mention prefix', p.type === 'price' && p.prov === 'rayong' && p.crop === 'durian' && p.lang === 'th');
+p = parseCommand('@gracia ช่วย');
+ok('help with @mention prefix', p.type === 'help');
+p = parseCommand('@gracia price chanthaburi mangosteen');
+ok('en price with @mention prefix', p.type === 'price' && p.crop === 'mangosteen' && p.lang === 'en');
 p = parseCommand('price chanthaburi mangosteen');
 ok('en price', p.type === 'price' && p.crop === 'mangosteen' && p.lang === 'en');
 p = parseCommand('ช่วย');
@@ -85,13 +91,20 @@ const sig = crypto.createHmac('sha256', 'SECRET').update(origRaw).digest('base64
   };
   const realFetch = global.fetch;
   let sent = [];
-  global.fetch = async (url, opts) => { sent.push({ url, opts }); return { ok: true, status: 200 }; };
+  // track only LINE API calls — api/prices.js also uses fetch (real prices),
+  // so filter and give the mock response json/text for those calls
+  global.fetch = async (url, opts) => {
+    if (String(url).includes('api.line.me')) sent.push({ url, opts });
+    return { ok: true, status: 200, json: async () => ({}), text: async () => '' };
+  };
   try {
     process.env.LINE_CHANNEL_SECRET = 'SECRET';
     process.env.LINE_CHANNEL_ACCESS_TOKEN = 'TOKEN';
     await handler(req, res);
     ok('vercel-style event → 200 (not 401)', status === 200);
-    const msg = sent.length && JSON.parse(sent[0].opts.body).messages[0];
+    /* the webhook now fetches real prices (data.go.th/BOT) before replying,
+       so the LINE API call is the LAST fetch captured */
+    const msg = sent.length && JSON.parse(sent[sent.length - 1].opts.body).messages[0];
     ok('vercel-style event → flex reply sent via LINE API', !!msg && msg.type === 'flex' && JSON.stringify(msg).includes('ทุเรียน'));
 
     // join event (bot invited to group) → must greet the group, not stay silent
@@ -108,7 +121,7 @@ const sig = crypto.createHmac('sha256', 'SECRET').update(origRaw).digest('base64
       [Symbol.asyncIterator]: drained[Symbol.asyncIterator].bind(drained)
     };
     await handler(req2, res);
-    const joinMsg = sent.length && JSON.parse(sent[0].opts.body).messages[0];
+    const joinMsg = sent.length && JSON.parse(sent[sent.length - 1].opts.body).messages[0];
     ok('join event → 200 + group greeting sent', status === 200 && !!joinMsg && joinMsg.type === 'text' && joinMsg.text.includes('เข้าร่วมกลุ่ม'));
   } finally {
     global.fetch = realFetch;

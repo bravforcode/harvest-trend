@@ -237,6 +237,11 @@ th: {
   shareLine:'แชร์ผ่าน LINE',
   how1:'เลือกจังหวัดของคุณ', how2:'เลือกพืชที่ปลูก', how3:'อ่านคำแนะนำ + เช็กกราฟราคา',
   mockNote:'ข้อมูลราคาในเว็บนี้เป็นข้อมูลจำลอง (mock data) เพื่อการใช้งานจริงของต้นแบบ · ราคาจากแบบจำลอง ไม่ใช่ราคาตลาดจริง ก่อนตัดสินใจขายควรเช็กข้อมูลหน่วยงานราชการหรือตลาดกลางในพื้นที่ด้วย',
+  liveNote:'ราคาจริงจากหน่วยงานราชการ (data.go.th: สำนักงานจังหวัด / สำนักงานเศรษฐกิจการเกษตร + ธนาคารแห่งประเทศไทย) · อัปเดตอัตโนมัติทุก 10 วินาที · พื้นที่ที่ยังไม่มีข้อมูลราชการแสดงค่าประมาณจากแบบจำลองและมีป้ายกำกับ',
+  liveBadgeLive:'🟢 ราคาจริงจากหน่วยงาน · อัปเดตล่าสุด {t} · ดึงอัตโนมัติทุก 10 วิ',
+  liveBadgeOff:'🟡 ข้อมูลจำลอง (เชื่อมต่อราคาจริงไม่ได้) · จะกลับเป็นราคาจริงเมื่อระบบออนไลน์',
+  liveBadgeFile:'🟡 ข้อมูลจำลอง · เปิดบนเว็บที่ deploy แล้วเพื่อดูราคาจริง (https://harvest-ecc.vercel.app)',
+  liveRealLabel:'ราคาจริง · {src}',
   pickTitle:'เลือกจังหวัดของคุณ', pickSub:'พิมพ์ค้นหา กดภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด',
   searchPh:'ค้นหาจังหวัด เช่น ระยอง / Rayong', gpsBtn:'ใช้ตำแหน่งของฉัน',
   gpsBusy:'กำลังหาตำแหน่ง...', gpsFail:'ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาเลือกจังหวัดด้วยตนเอง',
@@ -252,6 +257,7 @@ th: {
   sig1n:'โมเมนตัมราคา', sig2n:'ปริมาณผลผลิต', sig3n:'ช่วงเก็บเกี่ยว', sig4n:'สภาพอากาศ',
   priceTitleTpl:'แนวโน้มราคา {crop} · {prov}',
   priceSubTpl:'ราคาจำลองย้อนหลัง 26 สัปดาห์ + พยากรณ์ 4 สัปดาห์ (บาท/หน่วย) · สร้างจากแบบจำลองฤดูกาลของ {crop}',
+  livePriceSubTpl:'ราคาย้อนหลัง 26 สัปดาห์ + พยากรณ์ 4 สัปดาห์ (บาท/หน่วย) · ยึดราคาจริงล่าสุดจากหน่วยงานราชการ · จุดย้อนหลังเป็นค่าประมาณตามฤดูกาลของ {crop}',
   legAct:'ราคาจำลองย้อนหลัง', legFore:'พยากรณ์ล่วงหน้า', legBand:'ช่วงคาดการณ์',
   todayLbl:'วันนี้', wk:'สัปดาห์ที่', baht:'บาท/หน่วย',
   chartAriaTpl:'กราฟราคา {crop} 26 สัปดาห์ พร้อมพยากรณ์ 4 สัปดาห์',
@@ -301,10 +307,10 @@ th: {
   aboutTitle:'เกี่ยวกับ Harvest Trend',
   p1:'Harvest Trend (รู้ทันราคา) เป็นต้นแบบเครื่องมือคาดการณ์แนวโน้มราคาพืชผลหน้าสวน ครอบคลุม <b>77 จังหวัด 10 พืชหลัก</b> ผสานสัญญาณ 4 ปัจจัย (โมเมนตัมราคา · ปริมาณผลผลิตตามฤดูกาล · ช่วงเก็บเกี่ยว · สภาพอากาศ) แปลผลเป็นคำแนะนำ 3 ระดับที่เข้าใจง่าย สำหรับเกษตรกรที่ไม่ถนัดเทคโนโลยี',
   p2:'แรงบันดาลใจมาจากวิกฤตทุเรียนล้นตลาดภาคตะวันออกปี 2569: ผลผลิตพุ่ง 1,066,980 ตัน (+22.4%) ราคาเกรด C ร่วงจาก ~170 เหลือ ~95 บาท/กก. เกษตรกรจำนวนมากต้องตัดสินใจโดยไม่มีข้อมูลล่วงหน้า ระบบนี้ช่วยให้เห็นแนวโน้มและจังหวะก่อนตัดสินใจ ไม่ใช่ให้ "เชื่อ AI" แบบไม่มีที่มา',
-  p3:'<b>สถานะปัจจุบัน: ข้อมูลจำลอง (mock data) ทั้งหมด</b> · ราคาที่แสดงสร้างจากแบบจำลองฤดูกาลเพื่อให้ทดลองใช้ได้จริงทั้ง 77 จังหวัด ขั้นตอนถัดไปคือเชื่อมข้อมูลราคาจริงจากตลาดกลาง/หน่วยงานรัฐ และเปิดรับรายงานราคาจากเกษตรกรผ่าน LINE OA (ทดลองใช้บอทได้ในหน้า "บอท LINE")',
+  p3:'<b>สถานะปัจจุบัน: เชื่อมต่อราคาจริงจากหน่วยงานแล้ว</b> · ราคาแสดงจากข้อมูลราชการ (data.go.th: สำนักงานจังหวัดตราด/อำนาจเจริญ/แม่ฮ่องสอน/สุราษฎร์ธานี + สำนักงานเศรษฐกิจการเกษตร + ธนาคารแห่งประเทศไทย) ดึงอัตโนมัติทุก 10 วินาที · จังหวัด/พืชนอกเหนือที่ยังไม่มีข้อมูลราชการ ระบบใช้แบบจำลองฤดูกาลและมีป้ายกำกับชัดเจน พร้อมเปิดรับรายงานราคาจากเกษตรกรผ่าน LINE OA (ทดลองใช้บอทได้ในหน้า "บอท LINE")',
   srcTitle:'แหล่งอ้างอิงแนวคิด',
   sdg1:'ขจัดความยากจน', sdg2:'ขจัดความหิวโหย', sdg8:'งานที่มีคุณค่าและเศรษฐกิจที่เติบโต', sdg12:'การผลิตและบริโภคที่ยั่งยืน',
-  footDisc:'ต้นแบบ (prototype) · ราคาทั้งหมดเป็นข้อมูลจำลองเพื่อการทดลองใช้ ข้อมูลที่คุณรายงานถูกเก็บในเครื่องของคุณเท่านั้น คำแนะนำเป็นข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการเงิน และไม่ใช่หลักฐานผลกำไรจริง',
+  footDisc:'ต้นแบบ (prototype) · ราคาหลักจากข้อมูลราชการจริง (data.go.th / ธปท.) อัปเดตอัตโนมัติ · พื้นที่ที่ยังไม่มีข้อมูลราชการใช้ค่าประมาณจากแบบจำลอง ข้อมูลที่คุณรายงานถูกเก็บในเครื่องของคุณเท่านั้น คำแนะนำเป็นข้อมูลประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการเงิน และไม่ใช่หลักฐานผลกำไรจริง',
   footCredit:'Harvest Trend (รู้ทันราคา) · EEC-SDG Hackathon & Pitching 2026 · Track 5 Smart Agriculture & Food Security',
   regionAll:'ทั้งหมด',
   lineTitle:'บอท LINE · gracia',
@@ -325,7 +331,7 @@ th: {
   cmd5a:'ดูคำสั่งทั้งหมด',
   cmdNote:'ครอบคลุม 77 จังหวัด 10 พืชหลัก (ทุเรียน ยางพารา มันสำปะหลัง ข้าว ข้าวโพด อ้อย ปาล์ม เงาะ มังคุด ลำไย)',
   featTitle:'บอททำอะไรได้',
-  feat1:'<b>ตรวจราคาหน้าสวน</b> — 77 จังหวัด 10 พืชหลัก ราคาจำลองตามฤดูกาล',
+  feat1:'<b>ตรวจราคาหน้าสวน</b> — 77 จังหวัด 10 พืชหลัก ราคาจริงจากหน่วยงานราชการ อัปเดตอัตโนมัติ (พื้นที่ที่ยังไม่มีข้อมูลใช้ค่าประมาณ)',
   feat2:'<b>คำแนะนำจังหวะขาย</b> — 3 ระดับ (ขายตอนนี้ / รอ 3–5 วัน / รอผลแก่) พร้อมความเชื่อมั่น',
   feat3:'<b>เหตุผล 4 ปัจจัย</b> — โมเมนตัมราคา (40%) · ปริมาณผลผลิต (25%) · ช่วงเก็บเกี่ยว (20%) · สภาพอากาศ (15%)',
   feat4:'<b>ช่วงราคา 26 สัปดาห์</b> — ต่ำสุด/สูงสุด/เฉลี่ย พร้อมราคาพยากรณ์',
@@ -333,7 +339,7 @@ th: {
   feat6:'<b>ไทย/อังกฤษ</b> — พิมพ์ภาษาไหนตอบภาษานั้น',
   faqTitle:'คำถามที่พบบ่อย',
   faq1:'<b>ใช้ฟรีไหม?</b> ฟรี ไม่ต้องสมัครสมาชิก แค่เพิ่มเพื่อนบอทใน LINE แล้วส่งข้อความได้เลย',
-  faq2:'<b>ราคาที่บอทตอบเป็นราคาจริงไหม?</b> ไม่ใช่ — เป็นข้อมูลจำลอง (mock) จากแบบจำลองฤดูกาล เช่นเดียวกับเว็บไซต์ เพื่อทดลองใช้ก่อนเชื่อมข้อมูลจริง',
+  faq2:'<b>ราคาที่บอทตอบเป็นราคาจริงไหม?</b> ส่วนใหญ่ใช่ — บอทใช้ราคาจริงจากข้อมูลราชการ (data.go.th: สำนักงานจังหวัด/สศก. + ธนาคารแห่งประเทศไทย) อัปเดตอัตโนมัติทุก 10 วินาที · พื้นที่/พืชที่ยังไม่มีข้อมูลราชการ ระบบใช้แบบจำลองฤดูกาลและแจ้งไว้ในคำตอบ',
   faq3:'<b>รายงานราคาที่ส่งไปเก็บที่ไหน?</b> ต้นแบบเก็บชั่วคราวในหน่วยความจำเซิร์ฟเวอร์ (หายเมื่อรีสตาร์ท) เวอร์ชันจริงจะบันทึกลงฐานข้อมูลถาวร',
   typing:'พิมพ์…',
   demoNoBackend:'เดโมนี้ใช้ได้บนเว็บที่ deploy แล้ว (https://harvest-ecc.vercel.app/line.html) — localhost ไม่มี backend',
@@ -368,6 +374,11 @@ en: {
   shareLine:'Share on LINE',
   how1:'Pick your province', how2:'Pick your crop', how3:'Read the verdict + check the chart',
   mockNote:'All prices on this page are mock/simulated data for a working prototype · from a seasonal model, not real market prices. Before selling, always check official or local market prices.',
+  liveNote:'Real prices from government agencies (data.go.th: Provincial Offices / OAE + Bank of Thailand) · auto-refreshed every 10 seconds · areas without official data show a clearly-labelled seasonal estimate.',
+  liveBadgeLive:'🟢 Live government prices · updated {t} · auto-refresh every 10s',
+  liveBadgeOff:'🟡 Simulated data (cannot reach the price service) · will return to live data when online',
+  liveBadgeFile:'🟡 Simulated data · open the deployed site to see live prices (https://harvest-ecc.vercel.app)',
+  liveRealLabel:'Real price · {src}',
   pickTitle:'Pick your province', pickSub:'Search, filter by region, or use GPS · all 77 provinces',
   searchPh:'Search province, e.g. Rayong / ระยอง', gpsBtn:'Use my location',
   gpsBusy:'Locating...', gpsFail:'Location unavailable · please pick your province manually',
@@ -383,6 +394,7 @@ en: {
   sig1n:'Price momentum', sig2n:'Seasonal supply', sig3n:'Harvest window', sig4n:'Weather',
   priceTitleTpl:'{crop} price trend · {prov}',
   priceSubTpl:'26-week simulated history + 4-week forecast (per unit) · generated from the {crop} seasonal model',
+  livePriceSubTpl:'26-week history + 4-week forecast (per unit) · anchored to the latest official price · older points are seasonal estimates for {crop}',
   legAct:'Simulated history', legFore:'Forecast', legBand:'Forecast range',
   todayLbl:'Today', wk:'Week', baht:'per unit',
   chartAriaTpl:'{crop} price chart, 26 weeks with 4-week forecast',
@@ -432,10 +444,10 @@ en: {
   aboutTitle:'About Roo Tun Raka',
   p1:'Harvest Trend (รู้ทันราคา) is a working prototype that forecasts farm-gate crop prices across <b>77 provinces and 10 major crops</b>, blending 4 signals (price momentum · seasonal supply · harvest window · weather) into one plain-language verdict · built for farmers who are not tech-savvy.',
   p2:'Inspired by the 2026 Eastern durian oversupply crisis: output hit 1,066,980 tonnes (+22.4%) and grade-C prices fell from ~170 to ~95 THB/kg. Farmers had to decide with no foresight. This tool shows the trend and timing before the decision · never a blind "trust the AI".',
-  p3:'<b>Current status: all data is simulated (mock)</b> · prices come from a seasonal model so all 77 provinces work today. Next step: connect real prices from markets/government agencies and accept farmer reports via LINE OA (try the bot on the "LINE Bot" page).',
+  p3:'<b>Status: connected to real government price data</b> · prices come from official sources (data.go.th: Trat/Amnat Charoen/Mae Hong Son/Surat Thani provincial offices + OAE + Bank of Thailand), auto-refreshed every 10 seconds · provinces/crops without official data use the seasonal model with a clear label. Farmer price reports via LINE OA are welcome too (try the bot on the "LINE Bot" page).',
   srcTitle:'Concept references',
   sdg1:'No poverty', sdg2:'Zero hunger', sdg8:'Decent work & economic growth', sdg12:'Responsible consumption',
-  footDisc:'Prototype · all prices are simulated for testing. Your reports stay on this device. Recommendations support decisions; they are not financial advice and not proof of live profit.',
+  footDisc:'Prototype · prices are real government data (data.go.th / BOT) with auto-refresh · areas without official data show seasonal estimates. Your reports stay on this device. Recommendations support decisions; they are not financial advice and not proof of live profit.',
   footCredit:'Harvest Trend (รู้ทันราคา) · EEC-SDG Hackathon & Pitching 2026 · Track 5 Smart Agriculture & Food Security',
   regionAll:'All',
   lineTitle:'LINE Bot · gracia',
@@ -456,7 +468,7 @@ en: {
   cmd5a:'See all commands',
   cmdNote:'Covers 77 provinces, 10 major crops (durian, rubber, cassava, rice, maize, sugarcane, oil palm, rambutan, mangosteen, longan)',
   featTitle:'What the bot can do',
-  feat1:'<b>Farm-gate price checks</b> — 77 provinces, 10 crops, seasonal simulated prices',
+  feat1:'<b>Farm-gate price checks</b> — 77 provinces, 10 crops, real government prices with auto-refresh (estimates where official data is missing)',
   feat2:'<b>Sell-timing verdicts</b> — 3 levels (sell now / wait 3–5 days / wait to ripen) with confidence',
   feat3:'<b>4-factor reasoning</b> — price momentum (40%) · seasonal supply (25%) · harvest window (20%) · weather (15%)',
   feat4:'<b>26-week price range</b> — low/high/average plus forecast price',
@@ -464,7 +476,7 @@ en: {
   feat6:'<b>Thai/English</b> — the bot answers in the language you type',
   faqTitle:'Frequently asked questions',
   faq1:'<b>Is it free?</b> Yes — free, no sign-up. Just add the bot on LINE and start messaging.',
-  faq2:'<b>Are the bot\u2019s prices real?</b> No — simulated (mock) from the seasonal model, like the website. For testing before real data is connected.',
+  faq2:'<b>Are the bot\u2019s prices real?</b> Mostly yes — the bot uses real government prices (data.go.th: Provincial Offices/OAE + Bank of Thailand), auto-refreshed every 10 seconds · areas without official data use the seasonal model and the reply says so.',
   faq3:'<b>Where do submitted price reports go?</b> The prototype stores them temporarily in server memory (lost on restart). The real version will store them in a permanent database.',
   typing:'Typing…',
   demoNoBackend:'This demo works on the deployed site (https://harvest-ecc.vercel.app/line.html) — localhost has no backend',
@@ -496,9 +508,26 @@ function priceAt(cropId, provId, weekOfYear){
   const m = Math.min(12, Math.max(1, Math.floor((w - 1) / 4.33) + 1));
   const c = cropById(cropId), p = provById(provId);
   const gm = c.grades ? (GRADES[state.grade] || 1) : 1; // grade applies to the series' own crop
-  const r = rng01(cropId + ':' + provId + ':' + state.grade);
+  // grade-independent noise seed → grade multiplier stays a clean scalar on top of the real price
+  const r = rng01(cropId + ':' + provId);
   const n = 0.05 * Math.sin(w * 0.9 + r() * 6.28) + 0.035 * Math.sin(w * 2.3 + r() * 6.28);
-  return c.base * gm * c.season[m - 1] * (REGION_FACTOR[p.rg] || 1) * (1 + n);
+  const raw = c.base * gm * c.season[m - 1] * (REGION_FACTOR[p.rg] || 1) * (1 + n);
+  // real-data anchor: scale the seasonal curve so today's point equals the
+  // official price from /api/prices (data.go.th / BOT). k = 1 when offline.
+  return raw * liveAnchorK(cropId, provId);
+}
+/* ratio that makes week CUR_WEEK equal the real official price (if any).
+   Computed on the UNGRADED curve so grades stay relative to the real price. */
+function liveAnchorK(cropId, provId){
+  const real = LiveData.get(cropId, provId);
+  if(!real || !(real.price > 0)) return 1;
+  const c = cropById(cropId), p = provById(provId);
+  const w = ((CUR_WEEK - 1) % 52) + 1;
+  const m = Math.min(12, Math.max(1, Math.floor((w - 1) / 4.33) + 1));
+  const r = rng01(cropId + ':' + provId);
+  const n = 0.05 * Math.sin(w * 0.9 + r() * 6.28) + 0.035 * Math.sin(w * 2.3 + r() * 6.28);
+  const mockNow = c.base * c.season[m - 1] * (REGION_FACTOR[p.rg] || 1) * (1 + n);
+  return mockNow > 0 ? real.price / mockNow : 1;
 }
 function priceSeriesFor(cropId, provId){
   const a = [], f = [];
@@ -694,3 +723,117 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     navigator.serviceWorker.register('sw.js').catch(function(){});
   });
 }
+
+/* ================================================================
+   LIVE REAL PRICES — /api/prices (data.go.th + ธนาคารแห่งประเทศไทย)
+   Polls every 10s (server caches upstream 60s). Updates the chart and
+   verdict IN PLACE — no page reload. Falls back to the seasonal model
+   (clearly labelled) when offline or when a crop×province has no
+   official data yet.
+   ================================================================ */
+const LiveData = {
+  map: {},        // 'crop|prov' | 'crop|rg:region' | 'crop|*' -> {price,unit,date,source}
+  updated: null,  // ISO timestamp of last successful fetch
+  ok: false,      // last fetch succeeded
+  _fns: [],       // re-render callbacks (registered per page)
+  onUpdate(fn){ this._fns.push(fn); },
+  get(cropId, provId){
+    const p = provById(provId);
+    if(this.map[cropId + '|' + provId]) return this.map[cropId + '|' + provId];
+    if(p && this.map[cropId + '|rg:' + p.rg]) return this.map[cropId + '|rg:' + p.rg];
+    if(this.map[cropId + '|*']) return this.map[cropId + '|*'];
+    return null;
+  },
+  label(cropId, provId){
+    const r = this.get(cropId, provId);
+    if(!r) return null;
+    const t = T[state.lang];
+    return (t.liveRealLabel || 'ราคาจริง · {src}').replace('{src}', r.source) + (r.date ? ' (' + r.date + ')' : '');
+  },
+  async refresh(){
+    try{
+      const res = await fetch('api/prices', { cache: 'no-store' });
+      if(!res.ok) throw new Error('http ' + res.status);
+      const d = await res.json();
+      if(!d || !Array.isArray(d.prices)) throw new Error('bad payload');
+      this.map = {};
+      d.prices.forEach(p => { if(p.crop && p.prov && p.price > 0) this.map[p.crop + '|' + p.prov] = p; });
+      this.updated = d.updated || new Date().toISOString();
+      this.ok = true;
+    }catch(e){
+      this.ok = false; // keep last snapshot; badge shows offline state
+    }
+    /* re-render the page first (pages rebuild their own texts), then the badge */
+    this._fns.forEach(f => { try{ f(); }catch(e){} });
+    updateLiveBadge();
+  },
+  start(){
+    if(this._started) return;
+    this._started = true;
+    if(location.protocol !== 'http:' && location.protocol !== 'https:'){
+      updateLiveBadge();
+      return;
+    }
+    /* page re-render hooks — each page exposes its full render fn */
+    const rerender = window.renderHome || window.renderPriceChart || window.renderWatch || window.renderVerdict || null;
+    if(typeof rerender === 'function') this.onUpdate(rerender);
+    const tick = () => { if(!document.hidden) this.refresh(); };
+    tick();
+    setInterval(tick, 10000); // auto-refresh every 10s — no page reload
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) this.refresh(); });
+  }
+};
+
+function liveTimeStr(){
+  const d = new Date();
+  return d.toTimeString().slice(0, 8);
+}
+
+/* live badge + swap the "mock data" notes for the real-data note */
+function updateLiveBadge(){
+  const t = T[state.lang];
+  const live = LiveData.ok;
+  document.querySelectorAll('[data-i18n="mockNote"]').forEach(n => {
+    if(live) n.textContent = t.liveNote;
+    else n.textContent = t.mockNote;
+  });
+  let el = document.querySelector('[data-live-badge]');
+  if(!el){
+    const anchor = document.querySelector('header') || document.querySelector('main') || document.body.firstElementChild;
+    el = document.createElement('div');
+    el.dataset.liveBadge = '';
+    el.className = 'live-badge';
+    if(anchor && anchor.insertAdjacentElement) anchor.insertAdjacentElement('afterend', el);
+  }
+  el.className = 'live-badge ' + (live ? 'on' : 'off');
+  if(live){
+    el.textContent = t.liveBadgeLive.replace('{t}', liveTimeStr());
+  }else{
+    el.textContent = location.protocol === 'file:' ? t.liveBadgeFile : t.liveBadgeOff;
+  }
+  /* show which official source backs the current crop×province selection */
+  const src = LiveData.label(state.crop, state.prov);
+  const price = document.querySelector('.rb-price b, #now-price');
+  if(src && price && price.closest('.rec-card, .chart-box')){
+    let s = price.closest('.rec-card, .chart-box').querySelector('.live-src');
+    if(!s){
+      s = document.createElement('div');
+      s.className = 'live-src';
+      price.closest('.rec-card, .chart-box').appendChild(s);
+    }
+    s.textContent = src;
+    s.hidden = false;
+  }
+  /* chart subtitle: say it is anchored to the real price when live */
+  const ps = document.getElementById('price-sub');
+  if(ps){
+    const c = cropById(state.crop);
+    ps.textContent = live
+      ? t.livePriceSubTpl.replace('{crop}', c ? c[state.lang] : '')
+      : t.priceSubTpl.replace('{crop}', c ? c[state.lang] : '');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  LiveData.start();
+});
