@@ -238,9 +238,9 @@ th: {
   how1:'เลือกจังหวัดของคุณ', how2:'เลือกพืชที่ปลูก', how3:'อ่านคำแนะนำ + เช็กกราฟราคา',
   mockNote:'ข้อมูลราคาในเว็บนี้เป็นข้อมูลจำลอง (mock data) เพื่อการใช้งานจริงของต้นแบบ · ราคาจากแบบจำลอง ไม่ใช่ราคาตลาดจริง ก่อนตัดสินใจขายควรเช็กข้อมูลหน่วยงานราชการหรือตลาดกลางในพื้นที่ด้วย',
   liveNote:'ราคาจริงจากหน่วยงานราชการ (data.go.th: สำนักงานจังหวัด / สำนักงานเศรษฐกิจการเกษตร + ธนาคารแห่งประเทศไทย) · อัปเดตอัตโนมัติทุก 10 วินาที · พื้นที่ที่ยังไม่มีข้อมูลราชการแสดงค่าประมาณจากแบบจำลองและมีป้ายกำกับ',
-  liveBadgeLive:'🟢 ราคาจริงจากหน่วยงาน · อัปเดตล่าสุด {t} · ดึงอัตโนมัติทุก 10 วิ',
-  liveBadgeOff:'🟡 ข้อมูลจำลอง (เชื่อมต่อราคาจริงไม่ได้) · จะกลับเป็นราคาจริงเมื่อระบบออนไลน์',
-  liveBadgeFile:'🟡 ข้อมูลจำลอง · เปิดบนเว็บที่ deploy แล้วเพื่อดูราคาจริง (https://harvest-ecc.vercel.app)',
+  lbLiveTitle:'ราคาจริงจากหน่วยงาน', lbLiveMeta:'อัปเดต {t} · ดึงอัตโนมัติทุก 10 วิ',
+  lbOffTitle:'ข้อมูลจำลอง', lbOffMeta:'เชื่อมต่อราคาจริงไม่ได้ · กลับเป็นอัตโนมัติเมื่อออนไลน์',
+  lbFileTitle:'ข้อมูลจำลอง', lbFileMeta:'เปิดเว็บที่ deploy แล้วเพื่อดูราคาจริง (harvest-ecc.vercel.app)',
   liveRealLabel:'ราคาจริง · {src}',
   pickTitle:'เลือกจังหวัดของคุณ', pickSub:'พิมพ์ค้นหา กดภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด',
   searchPh:'ค้นหาจังหวัด เช่น ระยอง / Rayong', gpsBtn:'ใช้ตำแหน่งของฉัน',
@@ -375,9 +375,9 @@ en: {
   how1:'Pick your province', how2:'Pick your crop', how3:'Read the verdict + check the chart',
   mockNote:'All prices on this page are mock/simulated data for a working prototype · from a seasonal model, not real market prices. Before selling, always check official or local market prices.',
   liveNote:'Real prices from government agencies (data.go.th: Provincial Offices / OAE + Bank of Thailand) · auto-refreshed every 10 seconds · areas without official data show a clearly-labelled seasonal estimate.',
-  liveBadgeLive:'🟢 Live government prices · updated {t} · auto-refresh every 10s',
-  liveBadgeOff:'🟡 Simulated data (cannot reach the price service) · will return to live data when online',
-  liveBadgeFile:'🟡 Simulated data · open the deployed site to see live prices (https://harvest-ecc.vercel.app)',
+  lbLiveTitle:'Live government price', lbLiveMeta:'updated {t} · auto-refresh every 10s',
+  lbOffTitle:'Simulated data', lbOffMeta:'cannot reach the price service · auto-recovers when online',
+  lbFileTitle:'Simulated data', lbFileMeta:'open the deployed site for live prices (harvest-ecc.vercel.app)',
   liveRealLabel:'Real price · {src}',
   pickTitle:'Pick your province', pickSub:'Search, filter by region, or use GPS · all 77 provinces',
   searchPh:'Search province, e.g. Rayong / ระยอง', gpsBtn:'Use my location',
@@ -793,6 +793,7 @@ function liveTimeStr(){
 function updateLiveBadge(){
   const t = T[state.lang];
   const live = LiveData.ok;
+  const fileMode = location.protocol === 'file:';
   document.querySelectorAll('[data-i18n="mockNote"]').forEach(n => {
     if(live) n.textContent = t.liveNote;
     else n.textContent = t.mockNote;
@@ -803,14 +804,29 @@ function updateLiveBadge(){
     el = document.createElement('div');
     el.dataset.liveBadge = '';
     el.className = 'live-badge';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
     if(anchor && anchor.insertAdjacentElement) anchor.insertAdjacentElement('afterend', el);
+    el.classList.add('lb-in'); // one entrance moment on creation only
   }
-  el.className = 'live-badge ' + (live ? 'on' : 'off');
-  if(live){
-    el.textContent = t.liveBadgeLive.replace('{t}', liveTimeStr());
-  }else{
-    el.textContent = location.protocol === 'file:' ? t.liveBadgeFile : t.liveBadgeOff;
+  el.className = 'live-badge ' + (live ? 'on' : (fileMode ? 'file' : 'off'));
+  let title = '', meta = '';
+  if(live){ title = t.lbLiveTitle; meta = t.lbLiveMeta.replace('{t}', liveTimeStr()); }
+  else if(fileMode){ title = t.lbFileTitle; meta = t.lbFileMeta; }
+  else { title = t.lbOffTitle; meta = t.lbOffMeta; }
+  /* rebuild the skeleton only when the state/copy changes; otherwise just
+     refresh the timestamp so the 10s poll never re-triggers motion */
+  if(el._title !== title){
+    el._title = title;
+    el.innerHTML =
+      '<span class="lb-dot" aria-hidden="true"></span>' +
+      '<span class="lb-body">' +
+      '<span class="lb-title"></span>' +
+      '<span class="lb-meta"></span>' +
+      '</span>';
+    el.querySelector('.lb-title').textContent = title;
   }
+  el.querySelector('.lb-meta').textContent = meta;
   /* show which official source backs the current crop×province selection */
   const src = LiveData.label(state.crop, state.prov);
   const price = document.querySelector('.rb-price b, #now-price');
