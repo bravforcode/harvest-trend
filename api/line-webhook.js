@@ -97,7 +97,8 @@ const T = {
     reportSaved:'บันทึกรายงานแล้ว ขอบคุณครับ! ({prov} · {crop} ~{price} {unit})\nหมายเหตุ: ต้นแบบเก็บไว้ชั่วคราวในหน่วยความจำเซิร์ฟเวอร์',
     reportNote:'รายงาน',
     notFound:'ไม่พบจังหวัด/พืชที่พิมพ์ ลองใหม่ เช่น "ราคา ระยอง ทุเรียน"',
-    quickPrice:'ราคาอีกครั้ง', quickHelp:'ช่วยเหลือ', quickReport:'รายงานราคา'
+    quickPrice:'ราคาอีกครั้ง', quickHelp:'ช่วยเหลือ', quickReport:'รายงานราคา',
+    joinBody:'สวัสดีครับ บอท gracia 🌾 เข้าร่วมกลุ่มแล้ว\nส่ง "ราคา <จังหวัด> <พืช>" เช่น "ราคา ระยอง ทุเรียน" เพื่อดูราคาและคำแนะนำ หรือพิมพ์ "ช่วย" เพื่อดูคำสั่งทั้งหมด'
   },
   en: {
     title:'gracia', note:'Simulated (mock) data, not real market prices · verify with local markets before selling',
@@ -121,7 +122,8 @@ const T = {
     reportSaved:'Report saved · thank you! ({prov} · {crop} ~{price} {unit})\nNote: prototype stores temporarily on the server.',
     reportNote:'Report',
     notFound:'Province/crop not found. Try "price Rayong durian"',
-    quickPrice:'Check again', quickHelp:'Help', quickReport:'Report price'
+    quickPrice:'Check again', quickHelp:'Help', quickReport:'Report price',
+    joinBody:'Hi! The gracia bot 🌾 has joined this group.\nSend "price <province> <crop>", e.g. "price Rayong durian", for a price + sell-timing verdict, or "help" for all commands.'
   }
 };
 
@@ -325,6 +327,7 @@ function buildPriceReply(p, lang){
 
 function buildHelpReply(lang){ return { type:'text', text:T[lang].helpBody }; }
 function buildWelcomeReply(lang){ return { type:'text', text:T[lang].welcome }; }
+function buildJoinReply(lang){ return { type:'text', text:T[lang].joinBody }; }
 function buildUnknownReply(lang){ return { type:'text', text:T[lang].unknown }; }
 function buildReportReply(p, lang){
   const t = T[lang], c = cropById(p.crop), prov = provById(p.prov);
@@ -425,6 +428,10 @@ module.exports = async function handler(req, res){
         else if (cmd.type === 'report'){ storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
         else messages = [buildUnknownReply(cmd.lang)];
         if (ev.replyToken) await sendReply(ev.replyToken, messages);
+      } else if (ev.type === 'join' && ev.replyToken){
+        // bot invited into a group/room — greet members (console setting
+        // "Allow bot to join group chats" must be ON or LINE auto-removes it)
+        await sendReply(ev.replyToken, [buildJoinReply('th')]);
       } else if (ev.type === 'follow' && ev.replyToken){
         await sendReply(ev.replyToken, [buildWelcomeReply('th')]);
       }
@@ -435,7 +442,7 @@ module.exports = async function handler(req, res){
 
 /* internals exported for tests (tests/line-bot.test.js) */
 module.exports._internals = {
-  parseCommand, buildPriceReply, buildHelpReply, buildWelcomeReply, buildUnknownReply,
+  parseCommand, buildPriceReply, buildHelpReply, buildWelcomeReply, buildJoinReply, buildUnknownReply,
   buildReportReply, verifySignature, priceAt, signals, recommend, storeReport,
   processDemo,
   PROVINCES, CROPS, T, REC_KEY, fmtValFor, CUR_WEEK

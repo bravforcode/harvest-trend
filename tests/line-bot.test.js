@@ -2,7 +2,7 @@
 'use strict';
 const assert = require('assert');
 const { _internals } = require('../api/line-webhook.js');
-const { parseCommand, buildPriceReply, buildReportReply, verifySignature, priceAt, signals, recommend, storeReport, processDemo } = _internals;
+const { parseCommand, buildPriceReply, buildReportReply, verifySignature, priceAt, signals, recommend, storeReport, processDemo, buildJoinReply } = _internals;
 
 let n = 0;
 function ok(name, cond){
@@ -66,6 +66,7 @@ console.log('webhook handler (Vercel pre-parsed body):');
    Signature must be verified against JSON.stringify(req.body), and the bot
    must reply — not 401. */
 const handler = require('../api/line-webhook.js');
+ok('join reply built (th)', buildJoinReply('th').type === 'text' && buildJoinReply('th').text.includes('เข้าร่วมกลุ่ม'));
 const origRaw = JSON.stringify({
   destination: 'U123',
   events: [{ type: 'message', replyToken: 'R1', message: { type: 'text', text: 'ราคา ระยอง ทุเรียน' }, source: { type: 'user', userId: 'U1' } }]
@@ -83,15 +84,32 @@ const sig = crypto.createHmac('sha256', 'SECRET').update(origRaw).digest('base64
     [Symbol.asyncIterator]: drained[Symbol.asyncIterator].bind(drained)
   };
   const realFetch = global.fetch;
-  let sent = null;
-  global.fetch = async (url, opts) => { sent = { url, opts }; return { ok: true, status: 200 }; };
+  let sent = [];
+  global.fetch = async (url, opts) => { sent.push({ url, opts }); return { ok: true, status: 200 }; };
   try {
     process.env.LINE_CHANNEL_SECRET = 'SECRET';
     process.env.LINE_CHANNEL_ACCESS_TOKEN = 'TOKEN';
     await handler(req, res);
     ok('vercel-style event → 200 (not 401)', status === 200);
-    const msg = sent && JSON.parse(sent.opts.body).messages[0];
+    const msg = sent.length && JSON.parse(sent[0].opts.body).messages[0];
     ok('vercel-style event → flex reply sent via LINE API', !!msg && msg.type === 'flex' && JSON.stringify(msg).includes('ทุเรียน'));
+
+    // join event (bot invited to group) → must greet the group, not stay silent
+    status = null; sent = [];
+    const joinRaw = JSON.stringify({
+      destination: 'U123',
+      events: [{ type: 'join', replyToken: 'R2', timestamp: Date.now(), source: { type: 'group', groupId: 'G1', userId: 'U1' } }]
+    });
+    const joinSig = crypto.createHmac('sha256', 'SECRET').update(joinRaw).digest('base64');
+    const req2 = {
+      method: 'POST',
+      body: JSON.parse(joinRaw),
+      headers: { 'x-line-signature': joinSig },
+      [Symbol.asyncIterator]: drained[Symbol.asyncIterator].bind(drained)
+    };
+    await handler(req2, res);
+    const joinMsg = sent.length && JSON.parse(sent[0].opts.body).messages[0];
+    ok('join event → 200 + group greeting sent', status === 200 && !!joinMsg && joinMsg.type === 'text' && joinMsg.text.includes('เข้าร่วมกลุ่ม'));
   } finally {
     global.fetch = realFetch;
     delete process.env.LINE_CHANNEL_SECRET;
