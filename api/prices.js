@@ -19,18 +19,29 @@
 'use strict';
 
 const CACHE_TTL = 60 * 1000; // refresh upstream at most once a minute
-const FETCH_TIMEOUT = 10 * 1000;
+const FETCH_TIMEOUT = 15 * 1000;
 const DATA_GOV = 'https://data.go.th/api/3/action';
 const BOT_URL = 'https://app.bot.or.th/BTWS_STAT/statistics/BOTWEBSTAT.aspx?reportID=491&language=TH';
+const UA_CUSTOM = 'harvest-ecc/1.0 (+https://harvest-ecc.vercel.app)';
+const UA_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 /* ---------- helpers ---------- */
-async function getJson(url, opts){
+async function getJson(url){
   const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), opts && opts.timeout || FETCH_TIMEOUT);
+  const t = setTimeout(() => ctl.abort(), FETCH_TIMEOUT);
   try{
-    const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': 'harvest-ecc/1.0 (+https://harvest-ecc.vercel.app)' } });
-    if(!r.ok) throw new Error('HTTP ' + r.status + ' ' + url);
-    return await r.json();
+    /* some Thai gov WAFs reject datacenter IPs with non-browser UAs — try both */
+    for(const ua of [UA_CUSTOM, UA_BROWSER]){
+      try{
+        const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': ua, 'Accept': 'application/json' } });
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      }catch(e){
+        if(e.name === 'AbortError') throw e;
+        if(ua === UA_BROWSER) throw e; // both failed
+      }
+    }
+    throw new Error('unreachable');
   } finally { clearTimeout(t); }
 }
 
@@ -123,13 +134,34 @@ const SOURCES = [
     to: r => ({ price: num(r['value']), date: String(r['year']) + '/' + String(r['month']).padStart(2, '0'), unit: 'บาท/กก.' }) },
 ];
 
-/* ---------- BOT (ธปท.) report 491 — north region, monthly (last 6 months) ---------- */
-const BOT_PROV = 'rg:north';
-/* row priority for the same crop (ข้าวเปลือกเจ้า preferred over เหนียว) */
-const botPrio = name => /ข้าวเปลือกเหนียว/.test(name) ? 1 : (/ข้าวเปลือกเจ้า/.test(name) ? 3 : (/ข้าวเปลือก/.test(name) ? 2 : 0));
+/* ---------- BOT (ธปท.) reports — HTML tables, works from Vercel ---------- */
+/* pick: 'last' → values are months left→right (rightmost = latest, report 491)
+          'first' → values are [current, previous] (leftmost = latest, 997/89)  */
+const BOT_REPORTS = [
+  { id: 491, prov: 'rg:north', pick: 'last', label: 'ธนาคารแห่งประเทศไทย · ภาคเหนือ', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
+    rows: [
+      { re: /ข้าวเปลือก/,  crop: 'rice',      tag: 'ข้าวเปลือก',  prio: name => /ข้าวเปลือกเหนียว/.test(name) ? 1 : (/ข้าวเปลือกเจ้า/.test(name) ? 3 : 2) },
+      { re: /ข้าวโพด/,    crop: 'maize',     tag: 'ข้าวโพด' },
+      { re: /มันสำปะหลัง/, crop: 'cassava',  tag: 'มันสำปะหลัง' },
+      { re: /ลำไย/,       crop: 'longan',    tag: 'ลำไย' },
+      { re: /อ้อย/,       crop: 'sugarcane', tag: 'อ้อย' }
+    ] },
+  { id: 997, prov: 'rg:south', pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ภาคใต้', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
+    rows: [
+      { re: /ยาง/,       crop: 'rubber', tag: 'ยางพารา' },
+      { re: /ผลปาล์ม/,    crop: 'palm',   tag: 'ปาล์มน้ำมัน' },
+      { re: /ทุเรียน/,    crop: 'durian', tag: 'ทุเรียน' }
+    ] },
+  { id: 89,  prov: 'rg:*',   pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ราคาขายส่งตลาดสำคัญ (กรุงเทพฯ)', source: 'ธนาคารแห่งประเทศไทย (ขายส่ง)',
+    /* product group rows: "ยางแผ่นรมควัน 1/" followed by "ชั้น 1/2/3" sub-rows */
+    rows: [
+      { re: /ยางแผ่นรมควัน/, group: true, crop: 'rubber', div: 1000, unit: 'บาท/กก.', tag: 'ยางพารา' },
+      { re: /^ข้าวโพด$/,     crop: 'maize', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวโพด' }
+    ] }
+];
 
 function parseBotTable(html){
-  /* data rows: [rowno][name with unit][6 monthly values — rightmost = latest] */
+  /* data rows: [rowno][name][values...] (≥3 cells so header/foot rows are skipped) */
   const rows = [];
   const trRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
   let m;
@@ -141,48 +173,69 @@ function parseBotTable(html){
       const txt = t[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, '').trim();
       tds.push(txt);
     }
-    if(tds.length >= 8) rows.push(tds);
+    if(tds.length >= 3) rows.push(tds);
   }
   return rows;
 }
 
-function normalizeBot(rows){
+function pickValue(vals, pick){
+  const seq = pick === 'first' ? vals : vals.slice().reverse();
+  for(const v of seq){
+    if(v !== '-' && v !== '' && v !== 'n.a.'){
+      const n = num(v);
+      if(n !== null) return n;
+    }
+  }
+  return null;
+}
+
+function normalizeBot(rows, report){
   const seen = {}; // crop -> {prio, entry}
+  let group = null; // pending product group (report 89 sub-rows)
   for(const tds of rows){
-    const name = tds[1];
-    const vals = tds.slice(2);
-    let last = null;
-    for(let i = vals.length - 1; i >= 0; i--){ // rightmost = latest month
-      if(vals[i] !== '-' && vals[i] !== ''){
-        const n = num(vals[i]);
-        if(n !== null){ last = n; break; }
+    const name = tds[1] || '';
+    const val = pickValue(tds.slice(2), report.pick);
+    /* group sub-rows (ชั้น 1/2/3) inherit the parent product */
+    let spec = null;
+    for(const r of report.rows){
+      if(r.re.test(name)){
+        if(r.group){ group = r; spec = null; }
+        else spec = r;
+        break;
       }
     }
-    if(last === null) continue;
-    let crop = null, tag = null;
-    if(/ข้าวเปลือก/.test(name)){ crop = 'rice'; tag = 'ข้าวเปลือก'; }
-    else if(/ข้าวโพด/.test(name)){ crop = 'maize'; tag = 'ข้าวโพด'; }
-    else if(/มันสำปะหลัง/.test(name)){ crop = 'cassava'; tag = 'มันสำปะหลัง'; }
-    else if(/ลำไย/.test(name)){ crop = 'longan'; tag = 'ลำไย'; }
-    else if(/อ้อย/.test(name)){ crop = 'sugarcane'; tag = 'อ้อย'; }
-    else if(/ยาง/.test(name)){ crop = 'rubber'; tag = 'ยางพารา'; }
-    else if(/ผลปาล์มทะลาย/.test(name)){ crop = 'palm'; tag = 'ปาล์มน้ำมัน'; }
-    else continue;
-    const perTonne = /เมตริกตัน/.test(name); // unit printed inside the product name
-    const div = perTonne && crop === 'rice' ? 1000 : 1; // rice displayed in บาท/กก.; sugarcane in บาท/ตัน
-    const prio = botPrio(name);
-    const cur = seen[crop];
+    if(!spec && group && /ชั้น/.test(name)) spec = group;
+    if(!spec || val === null) continue;
+    const prio = (spec.prio && spec.prio(name)) || 0;
+    const cur = seen[spec.crop];
     if(!cur || prio > cur.prio){
-      seen[crop] = { prio, entry: {
-        crop, prov: BOT_PROV, price: last / div,
-        unit: perTonne ? (crop === 'rice' ? 'บาท/กก.' : 'บาท/ตัน') : 'บาท/กก.',
-        date: 'ธปท. ภาคเหนือ · เดือนล่าสุด',
-        source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
-        label: 'ธนาคารแห่งประเทศไทย · ' + tag
+      const perTonne = /เมตริกตัน/.test(name);
+      const div = spec.div || (perTonne && spec.crop === 'rice' ? 1000 : 1);
+      const unit = spec.unit || (perTonne ? (spec.crop === 'rice' ? 'บาท/กก.' : 'บาท/ตัน') : 'บาท/กก.');
+      seen[spec.crop] = { prio, entry: {
+        crop: spec.crop, prov: report.prov, price: val / div, unit,
+        date: report.id === 89 ? 'ล่าสุด' : 'เดือนล่าสุด',
+        source: report.source, label: report.label + ' · ' + spec.tag
       }};
     }
   }
   return Object.keys(seen).map(k => seen[k].entry);
+}
+
+async function loadBot(){
+  const out = [];
+  const errors = [];
+  for(const report of BOT_REPORTS){
+    try{
+      const html = await getText(BOT_URL.replace('491', String(report.id)));
+      const entries = normalizeBot(parseBotTable(html), report);
+      if(entries.length) out.push.apply(out, entries);
+      else errors.push('BOT ' + report.id + ' — no rows parsed');
+    }catch(e){
+      errors.push('BOT ' + report.id + ' — ' + (e && e.message || String(e)));
+    }
+  }
+  return { out, errors };
 }
 
 /* ---------- rambutan: special (monthly, average across varieties) ---------- */
@@ -200,37 +253,51 @@ async function loadRambutan(){
 }
 
 /* ---------- aggregation ---------- */
-let cache = null; // { at, prices }
+let cache = null; // { at, prices, errors }
 
 async function fetchPrices(){
   const now = Date.now();
   if(cache && now - cache.at < CACHE_TTL) return cache.prices;
   if(cache) return cache.prices; // stale-while-refreshing: serve last good snapshot immediately
 
-  const results = await Promise.allSettled(SOURCES.map(async s => {
-    const rec = await s.load();
-    if(!rec) return null;
-    const v = s.to(rec);
-    if(!v || !(v.price > 0)) return null;
-    return { crop: s.crop, prov: s.prov, price: v.price, unit: v.unit, date: v.date, source: s.label };
-  }));
-
+  const errors = [];
   const prices = [];
-  for(const s of results){
-    if(s.status === 'fulfilled' && s.value) prices.push(s.value);
-    else if(s.status === 'rejected') console.error('[prices] source failed:', s.reason && s.reason.message || s.reason);
+
+  /* data.go.th (CKAN) — sequential to keep the WAF calm; retry once UNLESS the
+     failure is a deterministic 403 (Cloudflare IP block — retrying is pointless) */
+  for(const s of SOURCES){
+    for(let attempt = 0; attempt < 2; attempt++){
+      try{
+        const rec = await s.load();
+        if(!rec) break;
+        const v = s.to(rec);
+        if(v && v.price > 0){
+          prices.push({ crop: s.crop, prov: s.prov, price: v.price, unit: v.unit, date: v.date, source: s.label });
+          break;
+        }
+      }catch(e){
+        const msg = e && e.message || String(e);
+        if(attempt === 0 && msg.indexOf('HTTP 403') === -1){
+          await new Promise(r => setTimeout(r, 400)); // transient? brief pause then retry
+        }else{
+          errors.push(s.crop + ':' + s.prov + ' — ' + msg);
+          break;
+        }
+      }
+    }
   }
 
-  const rambutan = await loadRambutan().catch(e => { console.error('[prices] rambutan failed:', e.message); return null; });
-  if(rambutan) prices.push({ crop: 'rambutan', prov: 'trat', price: rambutan.price, unit: rambutan.unit, date: rambutan.date, source: 'สำนักงานจังหวัดตราด (เฉลี่ยสายพันธุ์)' });
-
   try{
-    const html = await getText(BOT_URL);
-    const bot = normalizeBot(parseBotTable(html));
-    if(bot.length) prices.push.apply(prices, bot);
-  }catch(e){ console.error('[prices] BOT failed:', e.message); }
+    const rambutan = await loadRambutan();
+    if(rambutan) prices.push({ crop: 'rambutan', prov: 'trat', price: rambutan.price, unit: rambutan.unit, date: rambutan.date, source: 'สำนักงานจังหวัดตราด (เฉลี่ยสายพันธุ์)' });
+  }catch(e){ errors.push('rambutan — ' + (e && e.message || String(e))); }
 
-  cache = { at: Date.now(), prices };
+  /* BOT (ธปท.) — works from Vercel */
+  const bot = await loadBot();
+  if(bot.out.length) prices.push.apply(prices, bot.out);
+  errors.push.apply(errors, bot.errors);
+
+  cache = { at: Date.now(), prices, errors };
   return prices;
 }
 
@@ -238,6 +305,18 @@ async function fetchPrices(){
 module.exports = async function handler(req, res){
   if(req.method !== 'GET' && req.method !== 'HEAD'){
     return res.status(405).json({ error: 'method not allowed' });
+  }
+  if(req.url && req.url.indexOf('debug=1') !== -1){
+    /* diagnostics: raw upstream response for one data.go.th call */
+    try{
+      const u = new URL(req.url, 'http://x');
+      const rid = u.searchParams.get('rid') || 'a5b7fe59-1bdd-4e64-bda6-568f3a9866e3';
+      const r = await fetch(DATA_GOV + '/datastore_search?resource_id=' + rid + '&limit=2', { headers: { 'User-Agent': UA_BROWSER, 'Accept': 'application/json' } });
+      const body = await r.text();
+      return res.status(200).json({ status: r.status, statusText: r.statusText, headers: Object.fromEntries(r.headers.entries()), body: body.slice(0, 1000) });
+    }catch(e){
+      return res.status(200).json({ error: e && e.message || String(e), name: e && e.name });
+    }
   }
   try{
     const prices = await fetchPrices();
@@ -247,6 +326,7 @@ module.exports = async function handler(req, res){
       source: 'data.go.th (CKAN) + ธนาคารแห่งประเทศไทย',
       updated: new Date().toISOString(),
       count: prices.length,
+      errors: (cache && cache.errors) || [],
       prices
     });
   }catch(e){
@@ -258,5 +338,5 @@ module.exports = async function handler(req, res){
 module.exports.fetchPrices = fetchPrices;
 module.exports._internals = {
   parseBotTable, normalizeBot, datastoreAll, lastByYear, lastByMonth, thMonthIdx, num,
-  SOURCES, botPrio
+  SOURCES, BOT_REPORTS
 };

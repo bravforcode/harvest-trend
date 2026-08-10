@@ -375,14 +375,12 @@ function processDemo(text, liveMap){
 /* real prices from api/prices.js → lookup map (module cache makes this cheap) */
 async function buildLiveMap(){
   try{
-    /* NEVER block the LINE reply on multi-second upstream fetches (cold start:
-       data.go.th/BOT can take >10s and Vercel Hobby kills the function, or the
-       reply token expires before sendReply). Wait at most 800ms for the cache;
-       otherwise reply with the seasonal estimate and let the background fetch
-       finish warming the cache for the next call. */
+    /* Don't block the LINE reply forever on a cold start (upstream fetches can
+       take ~5s). Wait up to 5s for the cache/refresh — usually instant because
+       the website's /api/prices polling warms the shared module cache. */
     const live = await Promise.race([
       fetchPrices(),
-      new Promise((resolve) => setTimeout(() => resolve(null), 800))
+      new Promise((resolve) => setTimeout(() => resolve(null), 5000))
     ]);
     if(!live) return null;
     const map = {};

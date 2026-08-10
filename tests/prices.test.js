@@ -2,7 +2,10 @@
 'use strict';
 const assert = require('assert');
 const { _internals } = require('../api/prices.js');
-const { parseBotTable, normalizeBot, lastByYear, lastByMonth, thMonthIdx, num } = _internals;
+const { parseBotTable, normalizeBot, lastByYear, lastByMonth, thMonthIdx, num, BOT_REPORTS } = _internals;
+const R491 = BOT_REPORTS.find(r => r.id === 491);
+const R997 = BOT_REPORTS.find(r => r.id === 997);
+const R89 = BOT_REPORTS.find(r => r.id === 89);
 
 let n = 0;
 function ok(name, cond){
@@ -24,13 +27,37 @@ const botHtml = [
 ].join('');
 const rows = parseBotTable(botHtml);
 ok('parseBotTable finds 4 data rows (2-cell header skipped)', rows.length === 4);
-const bot = normalizeBot(rows);
+const bot = normalizeBot(rows, R491);
 ok('BOT rice uses rightmost value (7,061.1 → 7.0611 THB/kg)', bot.some(x => x.crop === 'rice' && Math.abs(x.price - 7.0611) < 0.001));
 ok('BOT rice unit converted to THB/kg', (bot.find(x => x.crop === 'rice') || {}).unit === 'บาท/กก.');
 ok('BOT maize uses rightmost value (7.9 THB/kg)', bot.some(x => x.crop === 'maize' && Math.abs(x.price - 7.9) < 0.001));
 ok('BOT sugarcane stays in THB/tonne (798.8)', bot.some(x => x.crop === 'sugarcane' && Math.abs(x.price - 798.8) < 0.001 && x.unit === 'บาท/ตัน'));
 ok('BOT longan skipped when all values empty', !bot.some(x => x.crop === 'longan'));
 ok('BOT entries all scoped to north region + source label', bot.every(x => x.prov === 'rg:north' && !!x.source));
+
+console.log('BOT 997 (south, first value = current):');
+const southHtml = '<table>' +
+  '<tr><td>6</td><td>ยางแผ่นดิบ ชั้น 3 (บาท/กิโลกรัม)</td><td>81.61</td><td>75.91</td></tr>' +
+  '<tr><td>7</td><td>ผลปาล์มน้ำมันทั้งทะลายคละ (บาท/กิโลกรัม)</td><td>7.54</td><td>7.07</td></tr>' +
+  '<tr><td>9</td><td>ทุเรียนหมอนทองภาคใต้ (บาท/กิโลกรัม)</td><td>103.23</td><td>85.00</td></tr>' +
+  '</table>';
+const sb = normalizeBot(parseBotTable(southHtml), R997);
+ok('south rubber 81.61 THB/kg', sb.some(x => x.crop === 'rubber' && Math.abs(x.price - 81.61) < 0.001));
+ok('south palm 7.54 THB/kg', sb.some(x => x.crop === 'palm' && Math.abs(x.price - 7.54) < 0.001));
+ok('south durian 103.23 THB/kg', sb.some(x => x.crop === 'durian' && Math.abs(x.price - 103.23) < 0.001));
+ok('south scope rg:south', sb.every(x => x.prov === 'rg:south'));
+
+console.log('BOT 89 (wholesale, group rows):');
+const wsHtml = '<table>' +
+  '<tr><td>8</td><td>ยางแผ่นรมควัน 1/</td><td></td><td></td></tr>' +
+  '<tr><td>9</td><td>ชั้น 1</td><td>83,370</td><td>80,970</td></tr>' +
+  '<tr><td>10</td><td>ชั้น 2</td><td>82,770</td><td>80,370</td></tr>' +
+  '<tr><td>12</td><td>ข้าวโพด</td><td>10,620</td><td>9,770</td></tr>' +
+  '</table>';
+const wb = normalizeBot(parseBotTable(wsHtml), R89);
+ok('wholesale rubber RSS1 = 83.37 THB/kg (per tonne ÷1000)', wb.some(x => x.crop === 'rubber' && Math.abs(x.price - 83.37) < 0.001));
+ok('wholesale maize = 10.62 THB/kg', wb.some(x => x.crop === 'maize' && Math.abs(x.price - 10.62) < 0.001));
+ok('wholesale scope rg:*', wb.every(x => x.prov === 'rg:*'));
 
 console.log('pickers:');
 const recs = [ {ปี:2565, ราคา:10}, {ปี:2567, ราคา:12}, {ปี:2566, ราคา:11} ];
