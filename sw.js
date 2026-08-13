@@ -1,5 +1,5 @@
 /* Harvest Trend (รู้ทันราคา) — offline cache. Bump CACHE version on release. */
-const CACHE = 'rtp-v8';
+const CACHE = 'rtp-v9';
 const CORE = [
   './',
   'rutun-price.html',
@@ -10,6 +10,9 @@ const CORE = [
   'assets/app.js',
   'assets/styles.css',
   'assets/icon.svg',
+  'assets/icon-192.png',
+  'assets/icon-512.png',
+  'assets/apple-touch-icon.png',
   'manifest.webmanifest'
 ];
 self.addEventListener('install', function(e){
