@@ -174,7 +174,7 @@
       </button>
     </div>
     <div class="region-row" id="region-row" role="group" aria-label="ภูมิภาค" data-i18n-aria="aRegion"></div>
-    <div class="prov-grid" id="prov-grid" role="listbox" aria-label="รายชื่อจังหวัด" data-i18n-aria="aProvList"></div>
+    <div class="prov-grid" id="prov-grid" role="group" aria-label="รายชื่อจังหวัด" data-i18n-aria="aProvList"></div>
     <div id="prov-empty" class="prov-empty" hidden data-i18n="provEmpty">ไม่พบจังหวัดที่ค้นหา ลองพิมพ์ชื่อใหม่</div>
   </section>
 
@@ -296,8 +296,7 @@ function buildProvGrid(){
     const b = document.createElement('button');
     b.className = 'prov-item' + (p.id === state.prov ? ' sel' : '');
     b.dataset.prov = p.id;
-    b.setAttribute('role', 'option');
-    b.setAttribute('aria-selected', p.id === state.prov ? 'true' : 'false');
+    b.setAttribute('aria-pressed', p.id === state.prov ? 'true' : 'false');
     b.innerHTML = '<span class="pd" style="background:' + REG_COLOR[p.rg] + '"></span><span>' +
       p[state.lang] + '<small>' + REGIONS[p.rg][state.lang] + '</small></span>';
     grid.appendChild(b);

@@ -129,6 +129,12 @@
 
 <script src="assets/app.js"></script>
 <script>
+function trendSvg(cls){
+  if(cls === 'up') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>';
+  if(cls === 'down') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10"/><path d="M17 9v8H9"/></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>';
+}
+
 function renderWatch(){
   const t = T[state.lang];
   const wl = store.get(WATCH_KEY, []);
@@ -147,7 +153,7 @@ function renderWatch(){
     chip.className = 'watch-chip';
     chip.innerHTML = p[state.lang] + ' · ' + c[state.lang] +
       ' <b class="wp">~' + fmtValFor(last, x.c) + ' ' + c.unit[state.lang] + '</b>' +
-      ' <span class="mini-trend ' + cls + '" aria-label="' + arrow + '">' + arrow + '</span>' +
+      ' <span class="mini-trend ' + cls + '">' + trendSvg(cls) + '<span class="visually-hidden">' + arrow + '</span></span>' +
       ' <button data-rm="' + x.p + '|' + x.c + '" aria-label="' + t.del + '">×</button>';
     chip.addEventListener('click', function(ev){
       if(ev.target.tagName === 'BUTTON') return;
