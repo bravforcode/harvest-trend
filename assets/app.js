@@ -29,12 +29,29 @@ const store = {
 const WATCH_KEY = 'rtp_watch_v2';
 const REP_KEY = 'rtp_reports_v2';
 const CFG_KEY = 'rtp_cfg_v2';
-function toast(msg){
+function toast(msg, type){
   const t = $('toast');
+  if(!t) return;
+  const cls = type === 'ok' ? 'ok' : (type === 'err' ? 'err' : '');
+  t.classList.remove('ok', 'err');
+  if(cls) t.classList.add(cls);
+  const hide = function(){
+    t.classList.remove('show');
+    t.classList.remove('toast-fresh');
+  };
+  if(t.textContent === msg && t.classList.contains('show')){
+    /* dedupe: same message already visible — refresh the timer + replay entrance */
+    clearTimeout(t._h);
+    t._h = setTimeout(hide, 2600);
+    t.classList.remove('toast-fresh');
+    void t.offsetWidth;
+    t.classList.add('toast-fresh');
+    return;
+  }
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._h);
-  t._h = setTimeout(()=>t.classList.remove('show'), 2600);
+  t._h = setTimeout(hide, 2600);
 }
 function todayInfo(){
   const d = new Date();
@@ -295,7 +312,9 @@ th: {
   repEmpty:'ยังไม่มีรายงาน · ข้อมูลจะถูกบันทึกในเครื่องของคุณเท่านั้น (ต้นแบบ)',
   repTip:'ข้อมูลนี้เก็บใน localStorage ของเบราว์เซอร์คุณเท่านั้น ไม่มีการส่งไปยังเซิร์ฟเวอร์ ในเวอร์ชันจริงจะถูกส่งเข้าระบบเพื่อช่วยให้ทุกคนเห็นราคาตลาดสด',
   repSaved:'บันทึกรายงานแล้ว ขอบคุณครับ!', repBad:'กรุณากรอกราคาที่ถูกต้อง',
+  repQuick:'ใช้ราคาประมาณ {p}', repShowAll:'ดูทั้งหมด {n} รายการ',
   qcProv:'จังหวัด', qcCrop:'พืช', chartShare:'แชร์ราคานี้',
+  chartFollowAdd:'ติดตาม', chartFollowRemove:'เลิกติดตาม',
   tblTitle:'ตารางตัวเลขราคา', tblWeek:'สัปดาห์ที่', tblMonth:'เดือน', tblPrice:'ราคา', tblType:'ประเภท',
   tblHist:'ย้อนหลัง', tblFore:'พยากรณ์', tblExport:'ดาวน์โหลด CSV', csvDone:'ดาวน์โหลดไฟล์แล้ว',
   range26Lbl:'ช่วงราคา 26 สัปดาห์', minLbl:'ต่ำสุด', maxLbl:'สูงสุด', avgLbl:'เฉลี่ย',
@@ -304,6 +323,8 @@ th: {
   chartMin:'ต่ำสุด', chartMax:'สูงสุด', tblChg:'Δ%',
   watchTitle:'รายการติดตาม', watchSub:'เข้าถึงราคาที่คุณติดตามได้เร็ว',
   watchEmpty:'ยังไม่มีรายการติดตาม · กดปุ่ม "ติดตามราคานี้" บนคำแนะนำเพื่อเพิ่ม', watchGoTo:'เปิด',
+  watchStripTitle:'ติดตามล่าสุด', watchEmptyGo:'ไปตรวจราคา',
+  tickerLbl:'ราคาโดยประมาณ', tickerAria:'แถบราคาโดยประมาณของพืชหลักในจังหวัดนี้',
   aboutTitle:'เกี่ยวกับ Harvest Trend',
   p1:'Harvest Trend (รู้ทันราคา) เป็นต้นแบบเครื่องมือคาดการณ์แนวโน้มราคาพืชผลหน้าสวน ครอบคลุม <b>77 จังหวัด 10 พืชหลัก</b> ผสานสัญญาณ 4 ปัจจัย (โมเมนตัมราคา · ปริมาณผลผลิตตามฤดูกาล · ช่วงเก็บเกี่ยว · สภาพอากาศ) แปลผลเป็นคำแนะนำ 3 ระดับที่เข้าใจง่าย สำหรับเกษตรกรที่ไม่ถนัดเทคโนโลยี',
   p2:'แรงบันดาลใจมาจากวิกฤตทุเรียนล้นตลาดภาคตะวันออกปี 2569: ผลผลิตพุ่ง 1,066,980 ตัน (+22.4%) ราคาเกรด C ร่วงจาก ~170 เหลือ ~95 บาท/กก. เกษตรกรจำนวนมากต้องตัดสินใจโดยไม่มีข้อมูลล่วงหน้า ระบบนี้ช่วยให้เห็นแนวโน้มและจังหวะก่อนตัดสินใจ ไม่ใช่ให้ "เชื่อ AI" แบบไม่มีที่มา',
@@ -431,7 +452,9 @@ en: {
   repEmpty:'No reports yet · reports are saved on this device only (prototype)',
   repTip:'Reports are stored in this browser\u2019s localStorage only; nothing is sent to a server. The real version will feed them into the system so everyone sees fresher prices.',
   repSaved:'Report saved · thank you!', repBad:'Please enter a valid price',
+  repQuick:'Use estimate ~{p}', repShowAll:'Show all {n}',
   qcProv:'Province', qcCrop:'Crop', chartShare:'Share price',
+  chartFollowAdd:'Follow', chartFollowRemove:'Unfollow',
   tblTitle:'Price table', tblWeek:'Week', tblMonth:'Month', tblPrice:'Price', tblType:'Type',
   tblHist:'History', tblFore:'Forecast', tblExport:'Download CSV', csvDone:'File downloaded',
   range26Lbl:'26-week range', minLbl:'Low', maxLbl:'High', avgLbl:'Avg',
@@ -441,6 +464,8 @@ en: {
   watchTitle:'Watchlist', watchSub:'Quick access to the prices you follow',
   watchEmpty:'Nothing here yet · tap "Follow this price" on a verdict to add it.',
   watchGoTo:'open',
+  watchStripTitle:'Following', watchEmptyGo:'Check prices',
+  tickerLbl:'Estimated prices', tickerAria:'Estimated prices for this province\u2019s main crops',
   aboutTitle:'About Roo Tun Raka',
   p1:'Harvest Trend (รู้ทันราคา) is a working prototype that forecasts farm-gate crop prices across <b>77 provinces and 10 major crops</b>, blending 4 signals (price momentum · seasonal supply · harvest window · weather) into one plain-language verdict · built for farmers who are not tech-savvy.',
   p2:'Inspired by the 2026 Eastern durian oversupply crisis: output hit 1,066,980 tonnes (+22.4%) and grade-C prices fell from ~170 to ~95 THB/kg. Farmers had to decide with no foresight. This tool shows the trend and timing before the decision · never a blind "trust the AI".',
@@ -716,6 +741,208 @@ function initHeaderControls(onLangChange){
   if(fd) fd.addEventListener('click', function(){ changeFont(-1); });
   markCurrentNav();
 }
+
+/* ---------- UI-HARDENING shared helpers (2026-08-15) ---------- */
+/* conceptual adaptations from ReactBits/MagicUI/Aceternity/COSS research:
+   IO reveal, count-up, segmented pill, stateful buttons, scroll-hide topbar,
+   marquee ticker, sparklines. All motion gated by prefers-reduced-motion. */
+function reducedMotion(){
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+/* one-shot reveal on scroll (CSS: .rv -> .rv.on); idempotent. Elements inside
+   hidden sections reveal automatically once the section becomes visible
+   (IntersectionObserver re-evaluates on layout changes). */
+function initReveals(){
+  if(initReveals._done) return;
+  initReveals._done = true;
+  const els = document.querySelectorAll('.rv');
+  if(!els.length) return;
+  if(reducedMotion() || !('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('on'); });
+    return;
+  }
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        en.target.classList.add('on');
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  els.forEach(function(el){ io.observe(el); });
+}
+/* animated count-up to target (th-TH formatting; tabular-nums via CSS) */
+function countUp(el, target, dec){
+  if(!el) return;
+  if(reducedMotion() || !('IntersectionObserver' in window)){
+    countUpNow(el, target, dec);
+    return;
+  }
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        io.disconnect();
+        countUpNow(el, target, dec);
+      }
+    });
+  }, { threshold: 0.3 });
+  io.observe(el);
+}
+function countUpNow(el, target, dec){
+  if(!el) return;
+  const fmt = function(v){
+    try{ return new Intl.NumberFormat('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v); }
+    catch(e){ return String(v); }
+  };
+  const start = parseFloat(el.dataset.v) || 0;
+  if(reducedMotion() || !('requestAnimationFrame' in window)){
+    el.textContent = fmt(target);
+    el.dataset.v = target;
+    return;
+  }
+  let t0 = null;
+  function frame(ts){
+    if(t0 === null) t0 = ts;
+    const p = Math.min(1, (ts - t0) / 700);
+    const e = 1 - Math.pow(1 - p, 3); // easeOutCubic
+    el.textContent = fmt(start + (target - start) * e);
+    if(p < 1) requestAnimationFrame(frame);
+    else el.dataset.v = target;
+  }
+  el.dataset.v = target;
+  requestAnimationFrame(frame);
+}
+/* segmented sliding pill (CSS: .seg / .seg-pill / .with-pill); idempotent.
+   The page keeps its own click handlers; this only manages the visual pill. */
+function repositionSeg(container){
+  const pill = container.querySelector('.seg-pill');
+  const active = container.querySelector('.seg-btn.active') || container.querySelector('.seg-btn');
+  if(!pill || !active) return;
+  pill.style.width = active.offsetWidth + 'px';
+  pill.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+}
+function initSeg(container){
+  if(!container || container.dataset.segReady) return;
+  container.dataset.segReady = '1';
+  container.classList.add('seg');
+  if(!container.querySelector('.seg-pill')){
+    const pill = document.createElement('span');
+    pill.className = 'seg-pill';
+    pill.setAttribute('aria-hidden', 'true');
+    container.appendChild(pill);
+  }
+  container.classList.add('with-pill');
+  container.addEventListener('click', function(e){
+    const b = e.target.closest('.seg-btn');
+    if(!b) return;
+    container.querySelectorAll('.seg-btn').forEach(function(x){
+      const on = x === b;
+      x.classList.toggle('active', on);
+      x.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    repositionSeg(container);
+  });
+  let rz = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(rz);
+    rz = setTimeout(function(){ repositionSeg(container); }, 100);
+  });
+  repositionSeg(container);
+}
+/* stateful button: idle -> loading (spinner) -> success (check) */
+function ensureBtnLbl(btn){
+  if(btn.querySelector('.btn-lbl')) return;
+  const lbl = document.createElement('span');
+  lbl.className = 'btn-lbl';
+  Array.prototype.slice.call(btn.childNodes).forEach(function(n){
+    if(n.nodeType === 3 && n.textContent.trim()){ btn.removeChild(n); lbl.appendChild(n); }
+  });
+  const spin = document.createElement('span');
+  spin.className = 'spin';
+  spin.setAttribute('aria-hidden', 'true');
+  btn.appendChild(spin);
+  btn.appendChild(lbl);
+}
+function statefulBtn(btn, fn){
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    if(btn.classList.contains('is-loading')) return;
+    ensureBtnLbl(btn);
+    btn.classList.add('is-loading');
+    if(btn.tagName !== 'A') btn.disabled = true;
+    Promise.resolve().then(fn).then(function(){
+      btn.classList.remove('is-loading');
+      btn.classList.add('is-success');
+      if(btn.tagName !== 'A') btn.disabled = false;
+      setTimeout(function(){ btn.classList.remove('is-success'); }, 1400);
+    }).catch(function(err){
+      btn.classList.remove('is-loading');
+      if(btn.tagName !== 'A') btn.disabled = false;
+      throw err;
+    });
+  });
+}
+/* scroll-hide topbar on mobile (reclaims viewport while reading prices) */
+function initTopbarHide(){
+  const bar = document.querySelector('.topbar');
+  if(!bar) return;
+  let lastY = window.scrollY;
+  window.addEventListener('scroll', function(){
+    if(window.innerWidth > 640){ bar.classList.remove('hide'); return; }
+    if(document.activeElement && bar.contains(document.activeElement)){ bar.classList.remove('hide'); return; }
+    const y = window.scrollY;
+    if(y < 120){ bar.classList.remove('hide'); }
+    else if(y > lastY + 8){ bar.classList.add('hide'); }
+    else if(y < lastY - 8){ bar.classList.remove('hide'); }
+    lastY = y;
+  }, { passive: true });
+}
+/* marquee ticker: duplicates the single .tk-set and drives the CSS animation.
+   Pauses offscreen via .paused (animation-play-state) so position is kept. */
+function initTicker(el){
+  if(!el || el._tkDone) return;
+  const set = el.querySelector('.tk-set');
+  if(!set){
+    let tries = 0;
+    const retry = setInterval(function(){
+      tries++;
+      if(el.querySelector('.tk-set')){ clearInterval(retry); initTicker(el); }
+      else if(tries >= 5) clearInterval(retry);
+    }, 100);
+    return;
+  }
+  el._tkDone = true;
+  el.appendChild(set.cloneNode(true));
+  if(reducedMotion()) return; // CSS hides the second set; static single row
+  el.classList.add('anim');
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        el.classList.toggle('paused', !en.isIntersecting);
+      });
+    }, { threshold: 0 });
+    io.observe(el);
+  }
+}
+/* tiny inline sparkline (used by watch chips); data comes from the engine */
+function sparkSvg(values, w, h){
+  w = w || 64; h = h || 24;
+  const v = values || [];
+  if(!v.length) return '';
+  let mn = Math.min.apply(null, v), mx = Math.max.apply(null, v);
+  if(mx === mn) mx = mn + 1;
+  const pts = v.map(function(val, i){
+    const x = (i / (v.length - 1)) * w;
+    const y = h - ((val - mn) / (mx - mn)) * (h - 2) - 1;
+    return x.toFixed(2) + ',' + y.toFixed(2);
+  }).join(' ');
+  return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/></svg>';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  initReveals();
+  initTopbarHide();
+  document.querySelectorAll('.ticker').forEach(function(el){ initTicker(el); });
+});
 
 /* ---------- PWA: offline cache + installable ---------- */
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
