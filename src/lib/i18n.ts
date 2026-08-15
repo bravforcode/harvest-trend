@@ -57,6 +57,32 @@ export interface Dict {
   cropTitle: string;
   cropSub: string;
   mainTag: string;
+  /* price map page */
+  mapTitle: string;
+  mapSub: string;
+  mapNote: string;
+  mapLive: string;
+  mapModel: string;
+  mapTap: string;
+  mapCropLabel: string;
+  viewMap: string;
+  /* cost calculator page */
+  costTitle: string;
+  costSub: string;
+  costCoverage: string;
+  costNoData: string;
+  costOfficial: string;
+  costYourCost: string;
+  costCost: string;
+  costYield: string;
+  costYieldPh: string;
+  costBreakEven: string;
+  costCurrent: string;
+  costProfit: string;
+  costLoss: string;
+  costEven: string;
+  costSource: string;
+  viewCost: string;
   recKicker: string;
   youAt: string;
   confPrefix: string;
@@ -323,6 +349,19 @@ export const T: Record<Lang, Dict> = {
     provEmpty: 'ไม่พบจังหวัดที่ค้นหา ลองพิมพ์ชื่อใหม่', provCount: '{n} จังหวัด',
     cropTitle: 'เลือกพืชที่ปลูก', cropSub: 'เรียงพืชที่นิยมปลูกในพื้นที่ของคุณไว้ก่อน · ป้าย "พื้นที่หลัก" หมายถึงแหล่งผลิตสำคัญ',
     mainTag: 'พื้นที่หลัก',
+    mapTitle: 'แผนที่ราคารายจังหวัด', mapSub: 'ดูราคาพืชที่เลือกในทุกจังหวัดพร้อมกัน — ยิ่งสีเข้ม ราคายิ่งสูง',
+    mapNote: 'แผนที่แบบออฟไลน์ (ไม่มีพื้นหลังแผนที่) โหลดเร็ว ใช้ได้แม้ไร้สัญญาณ · จังหวัดที่มีราคาจริงจากหน่วยงานราชการจะแสดงป้าย "ราคาจริง" นอกนั้นเป็นค่าประมาณจากแบบจำลอง',
+    mapLive: 'ราคาจริง', mapModel: 'แบบจำลอง', mapTap: 'แตะจังหวัดเพื่อดูราคาและเปิดคำแนะนำ',
+    mapCropLabel: 'เลือกพืช',
+    viewMap: 'ดูแผนที่ราคา',
+    costTitle: 'คำนวณต้นทุนและจุดคุ้มทุน', costSub: 'ใช้ต้นทุนการผลิตจากข้อมูลราชการ เปรียบเทียบกับราคาขายปัจจุบัน รู้ทันทีว่าขายแล้วกำไรหรือขาดทุน',
+    costCoverage: 'ครอบคลุม 10 จาก 25 พืชที่มีข้อมูลราชการเปิดเผย',
+    costNoData: 'ยังไม่มีข้อมูลต้นทุนราชการเปิดเผยสำหรับพืชนี้ · กรอกต้นทุนของคุณเองเพื่อคำนวณจุดคุ้มทุน',
+    costOfficial: 'ข้อมูลราชการ', costYourCost: 'ต้นทุนของคุณเอง (บาท/ไร่)',
+    costCost: 'ต้นทุน', costYield: 'ผลผลิตต่อไร่', costYieldPh: 'เช่น 1,200 (กก./ไร่)',
+    costBreakEven: 'จุดคุ้มทุน (บาท/กก.)', costCurrent: 'ราคาขายปัจจุบัน',
+    costProfit: 'กำไร', costLoss: 'ขาดทุน', costEven: 'คุ้มทุนพอดี',
+    costSource: 'ที่มา', viewCost: 'คำนวณต้นทุน',
     recKicker: 'คำแนะนำวันนี้', youAt: 'คุณอยู่ที่', confPrefix: 'ระดับความเชื่อมั่น:', confSuffix: '· จาก 4 สัญญาณ',
     watchAdd: 'ติดตามราคานี้', watchAdded: 'เพิ่มเข้ารายการติดตามแล้ว', watchExists: 'อยู่ในรายการติดตามแล้ว', watchRemoved: 'ลบออกจากรายการติดตามแล้ว',
     scrollReport: 'รายงานราคาที่ขายได้', viewChart: 'ดูกราฟราคา + สัญญาณ',
@@ -483,6 +522,19 @@ export const T: Record<Lang, Dict> = {
     provEmpty: 'No province found. Try another name.', provCount: '{n} provinces',
     cropTitle: 'Pick your crop', cropSub: 'Crops most grown in your area come first · the "Key area" tag marks major production zones',
     mainTag: 'Key area',
+    mapTitle: 'Price map by province', mapSub: 'See the selected crop price across every province — darker means higher',
+    mapNote: 'Offline map (no basemap tiles) — fast, works without signal · provinces with real official prices show a "Live" tag, the rest are seasonal model estimates',
+    mapLive: 'Live', mapModel: 'Estimate', mapTap: 'Tap a province to see its price and open the verdict',
+    mapCropLabel: 'Crop',
+    viewMap: 'View price map',
+    costTitle: 'Cost & break-even calculator', costSub: 'Uses official government production costs vs the current selling price — see instantly whether you profit',
+    costCoverage: 'Covers 10 of 25 crops with open official data',
+    costNoData: 'No official cost data for this crop yet · enter your own cost to compute the break-even',
+    costOfficial: 'Official data', costYourCost: 'Your own cost (THB/rai)',
+    costCost: 'Cost', costYield: 'Yield per rai', costYieldPh: 'e.g. 1200 (kg/rai)',
+    costBreakEven: 'Break-even (THB/kg)', costCurrent: 'Current price',
+    costProfit: 'Profit', costLoss: 'Loss', costEven: 'Break-even',
+    costSource: 'Source', viewCost: 'Cost calculator',
     recKicker: "Today's verdict", youAt: 'You are in', confPrefix: 'Confidence:', confSuffix: '· from 4 signals',
     watchAdd: 'Follow this price', watchAdded: 'Added to watchlist', watchExists: 'Already in watchlist', watchRemoved: 'Removed from watchlist',
     scrollReport: 'Report the price you got', viewChart: 'View chart + signals',

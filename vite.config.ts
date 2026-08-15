@@ -19,7 +19,7 @@ export default defineConfig({
       manifest: {
         name: 'Harvest Trend · รู้ทันราคา',
         short_name: 'Harvest Trend',
-        description: 'ตรวจราคาพืชผล 77 จังหวัด 10 พืชหลัก พร้อมคำแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ใช้งานง่ายสำหรับเกษตรกร',
+        description: 'ตรวจราคาพืชผล 77 จังหวัด 25 พืชหลัก พร้อมคำแนะนำจังหวะเก็บเกี่ยว/ขาย ใช้ฟรี ใช้งานง่ายสำหรับเกษตรกร',
         lang: 'th',
         theme_color: '#2C4A24',
         background_color: '#F6F1E2',

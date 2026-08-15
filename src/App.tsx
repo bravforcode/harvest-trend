@@ -8,6 +8,8 @@ import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { HomePage } from '@/pages/HomePage';
 import { PriceChartPage } from '@/pages/PriceChartPage';
+import { PriceMapPage } from '@/pages/PriceMapPage';
+import { CostCalcPage } from '@/pages/CostCalcPage';
 import { WatchPage } from '@/pages/WatchPage';
 import { ReportPage } from '@/pages/ReportPage';
 import { AboutPage } from '@/pages/AboutPage';
@@ -38,6 +40,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/chart" element={<PriceChartPage />} />
+          <Route path="/map" element={<PriceMapPage />} />
+          <Route path="/cost" element={<CostCalcPage />} />
           <Route path="/watch" element={<WatchPage />} />
           <Route path="/report" element={<ReportPage />} />
           <Route path="/about" element={<AboutPage />} />

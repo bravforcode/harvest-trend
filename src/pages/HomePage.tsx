@@ -138,6 +138,8 @@ export function HomePage() {
       {/* quick links */}
       <section className="flex flex-wrap gap-2">
         <Link to="/chart"><Button variant="outline">{t.viewChart}</Button></Link>
+        <Link to="/map"><Button variant="outline">{t.viewMap}</Button></Link>
+        <Link to="/cost"><Button variant="outline">{t.viewCost}</Button></Link>
         <Link to="/report"><Button variant="outline">{t.scrollReport}</Button></Link>
       </section>
     </div>
