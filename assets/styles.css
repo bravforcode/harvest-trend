@@ -706,30 +706,57 @@
   .btn-gold:active::before, .btn-forest:active::before, .btn-warn:active::before { background:rgba(28,46,32,.1); }
   .btn-gold>*,.btn-forest>*,.btn-warn>*{position:relative;z-index:1;}
 
-  /* 1.3 Shine sweep utility — gradient text (no per-character animation; Thai-safe).
-     Base colour stays visible (alpha .7); the clipped gradient band brightens it. */
+  /* 1.3 Shine sweep — vendored technique: magicui.design AnimatedShinyText (MIT).
+     REAL keyframes + technique, recolored to warm orchard tokens (base colour
+     stays visible at alpha .7; the clipped gradient band brightens it). */
   .shine-gold {
     color:rgba(243,227,188,.7);
-    background:linear-gradient(120deg, rgba(243,227,188,0) 40%, rgba(255,253,246,.9) 50%, rgba(243,227,188,0) 60%);
-    background-size:200% 100%;
+    background:linear-gradient(to right, transparent, rgba(255,253,246,.85) 50%, transparent);
+    background-size:var(--shiny-width, 100px) 100%;
+    background-repeat:no-repeat;
     -webkit-background-clip:text; background-clip:text;
-    animation:shineSweep 8s linear infinite;
+    animation:shiny-text 8s infinite;
   }
   .shine-static {
     background:linear-gradient(120deg, var(--gold-soft), var(--paper) 55%, var(--gold-soft));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  @keyframes shineSweep{0%,90%,100%{background-position:-200% 0;}30%,60%{background-position:200% 0;}}
-
-  /* 1.4 Rotating gold ring CTA (MovingBorder concept) */
-  .ring-cta{position:relative;}
-  .ring-cta::before{
-    content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
-    background:conic-gradient(from 0deg, var(--gold) 0deg, var(--gold-soft) 90deg, var(--clay) 180deg, var(--gold-soft) 270deg, var(--gold) 360deg);
-    animation:ringSpin 5s linear infinite;
+  @keyframes shiny-text {
+    0%, 90%, 100% { background-position: calc(-100% - var(--shiny-width, 100px)) 0; }
+    30%, 60%      { background-position: calc(100% + var(--shiny-width, 100px)) 0; }
   }
-  .ring-cta>*{position:relative;z-index:1;}
-  @keyframes ringSpin{to{transform:rotate(360deg);}}
+
+  /* 1.4 Primary CTA — vendored technique: magicui.design RainbowButton (MIT).
+     REAL 3-layer background-clip border ring (padding-box/border-box/border-box),
+     recolored to warm orchard tokens; the ::before is the blurred under-glow. */
+  .rainbow-cta{
+    border:2px solid transparent;
+    background:
+      linear-gradient(var(--gold), var(--gold)) padding-box,
+      linear-gradient(var(--gold) 50%, rgba(201,146,46,.6) 80%, rgba(201,146,46,0)) border-box,
+      linear-gradient(90deg, var(--gold), var(--gold-soft), var(--clay), var(--leaf), var(--gold)) border-box;
+    background-size:100% 100%, 100% 100%, 200% 100%;
+    background-origin:border-box;
+    -webkit-background-clip:padding-box, border-box, border-box;
+    background-clip:padding-box, border-box, border-box;
+    animation:rainbow 2s linear infinite;
+  }
+  .rainbow-cta::before{
+    content:''; position:absolute; bottom:-20%; left:50%; z-index:-1;
+    height:20%; width:60%; transform:translateX(-50%);
+    background:linear-gradient(90deg, var(--gold), var(--gold-soft), var(--clay), var(--leaf), var(--gold));
+    background-size:200% 100%;
+    filter:blur(.75rem); opacity:.5;
+    animation:rainbow 2s linear infinite;
+  }
+  .hero-cta.rainbow-cta:hover{
+    background:
+      linear-gradient(#D9A441, #D9A441) padding-box,
+      linear-gradient(#D9A441 50%, rgba(217,164,65,.6) 80%, rgba(217,164,65,0)) border-box,
+      linear-gradient(90deg, var(--gold), var(--gold-soft), var(--clay), var(--leaf), var(--gold)) border-box;
+    background-size:100% 100%, 100% 100%, 200% 100%;
+  }
+  @keyframes rainbow{ 0%{background-position:0%;} 100%{background-position:200%;} }
 
   /* 1.5 Static orchard dot texture (hero) — leaves keep their z-index:0; scoped child lift */
   .hero::after{
@@ -741,9 +768,10 @@
   }
   .hero > :not(.hero-leaf):not(.hero-leaf2){position:relative;z-index:1;}
 
-  /* 1.6 3-layer input shadow + autofill fix (focus rings untouched — higher specificity) */
+  /* 1.6 3-layer input shadow + autofill fix — vendored token: ui.aceternity.com
+     signup-form --shadow-input recipe, recolored to warm orchard rgba() */
   .field input, .field textarea, .search-box, .qc-row select, .chat-input-row input {
-    box-shadow:0 2px 3px -1px rgba(28,46,32,.08), 0 1px 0 0 rgba(255,253,246,.6), 0 0 0 1px rgba(28,46,32,.05);
+    box-shadow:0px 2px 3px -1px rgba(28,46,32,.1), 0px 1px 0px 0px rgba(255,253,246,.6), 0px 0px 0px 1px rgba(28,46,32,.08);
   }
   input, select, textarea { transition:background-color 5000000s ease-in-out 0s; }
   input:-webkit-autofill, input:-webkit-autofill:focus {
@@ -782,12 +810,17 @@
   .seg.with-pill .seg-btn.active{background:transparent;color:var(--paper);}
   .seg.with-pill .grade-btn{background:transparent;}
 
-  /* 1.11 Ticker marquee — JS duplicates .tk-set twice; width:max-content + shift of exactly one
-       set+gap (the content period) makes the wrap seamless for any clipping window */
-  .ticker{display:flex;gap:var(--ticker-gap,12px);overflow:hidden;width:max-content;}
-  .ticker .tk-set{display:flex;gap:var(--ticker-gap,12px);flex:none;padding-right:var(--ticker-gap,12px);}
-  .ticker.anim{animation:tickerMove var(--ticker-speed,36s) linear infinite;}
-  @keyframes tickerMove{to{transform:translateX(calc(-50% - var(--ticker-gap,12px)/2));}}
+  /* 1.11 Ticker marquee — vendored technique: magicui.design Marquee (MIT).
+       REAL keyframes: each .tk-set translates -(100% + gap); two identical sets
+       make the loop seamless. JS duplicates the set and pauses offscreen. */
+  .ticker{display:flex;gap:var(--ticker-gap,12px);overflow:hidden;}
+  .ticker .tk-set{display:flex;gap:var(--ticker-gap,12px);flex:none;min-width:max-content;padding-right:var(--ticker-gap,12px);}
+  .ticker.anim .tk-set{animation:marquee var(--ticker-speed,36s) linear infinite;}
+  .ticker.paused .tk-set{animation-play-state:paused;}
+  @keyframes marquee{
+    from{transform:translateX(0);}
+    to{transform:translateX(calc(-100% - var(--ticker-gap,12px)));}
+  }
   .ticker-fade{position:absolute;top:0;bottom:0;width:40px;pointer-events:none;background:linear-gradient(to right, var(--ground), transparent);}
   .ticker-fade.r{right:0;transform:scaleX(-1);}
 
@@ -826,21 +859,20 @@
   /* Reduced-motion: kill new animations; restore any content hidden via opacity */
   @media (prefers-reduced-motion: reduce){
     .shine-gold{animation:none;background:none;color:inherit;}
-    .ring-cta::before{animation:none;}
+    .rainbow-cta, .rainbow-cta::before{animation:none;}
     .hero::after{animation:none;}
     .skel{animation:none;}
     #toast.toast-fresh{animation:none;}
-    .ticker.anim{animation:none;}
+    .ticker.anim .tk-set{animation:none;}
     .ticker .tk-set + .tk-set{display:none;}
+    .rec-card::after{animation:none;}
+    .ripple{animation:none;}
     .rv{opacity:1;transform:none;transition:none;}
     .btn .spin{animation:none;}
     .topbar{transition:none;}
   }
 
   /* ---------- UI-HARDENING page wiring (T3: home) ---------- */
-  /* edge-only rotating ring: inside .hero's isolation:isolate stacking context,
-     z-index:-1 paints the ring behind the button's own gold face */
-  .hero-cta.ring-cta::before{ z-index:-1; }
   .ticker-wrap{ position:relative; overflow:hidden; margin:16px 0 2px; }
   .ticker.paused{ animation-play-state:paused; }
   .tk-chip{
@@ -862,3 +894,68 @@
   .field .err-msg{ display:none; font-size:11.5px; color:var(--clay); margin-top:4px; font-weight:600; }
   .field.invalid .err-msg{ display:block; }
   #rep-more{ margin-top:10px; }
+
+  /* ---------- ROUND 2 (2026-08-15): REAL VENDORED UI + province dropdown ---------- */
+  /* Province dropdown (F1): native select, optgroups by region, warm styling */
+  .prov-select{
+    flex:1; min-width:220px; max-width:420px;
+    border:1px solid var(--line); border-radius:999px; background:var(--paper);
+    padding:10px 42px 10px 16px; min-height:46px;
+    font:600 15px 'Sarabun'; color:var(--ink); outline:none;
+    box-shadow:0px 2px 3px -1px rgba(28,46,32,.1), 0px 1px 0px 0px rgba(255,253,246,.6), 0px 0px 0px 1px rgba(28,46,32,.08);
+    appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B4D10' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; background-size:14px;
+  }
+  .prov-select:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+  @media (max-width:640px){ .prov-select{ max-width:none; } }
+
+  /* Ripple — vendored technique: magicui.design RippleButton (MIT); the span is
+     created by initRipples() in app.js and self-removes on animationend. */
+  .ripple-btn{ overflow:hidden; }
+  .ripple-btn .ripple{
+    position:absolute; border-radius:50%; pointer-events:none;
+    background:rgba(255,253,246,.35);
+    transform:scale(0);
+    animation:rippling .6s ease-out;
+  }
+  .btn-gold .ripple, .btn-forest .ripple, .btn-warn .ripple{ z-index:0; }
+  @keyframes rippling{
+    0%{ opacity:1; }
+    100%{ transform:scale(2); opacity:0; }
+  }
+
+  /* ShineBorder on the verdict card — vendored technique: magicui.design
+     ShineBorder (MIT): 1px mask-excluded ring, radial light sweeps 14s. */
+  .rec-card::after{
+    content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+    --border-width:1px; --duration:14s;
+    background-image:radial-gradient(transparent, transparent, rgba(201,146,46,.85), rgba(182,71,46,.45), transparent, transparent);
+    background-size:300% 300%;
+    padding:var(--border-width);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite:exclude;
+    animation:shine var(--duration) linear infinite;
+  }
+  @keyframes shine{
+    0%{ background-position:0% 0%; }
+    50%{ background-position:100% 100%; }
+    to{ background-position:0% 0%; }
+  }
+
+  /* SpotlightCard — vendored technique: reactbits.dev SpotlightCard
+     (MIT + Commons Clause): radial gradient follows the pointer via CSS vars;
+     initSpotlights() in app.js feeds --mouse-x/--mouse-y on fine pointers. */
+  .card-spotlight{
+    position:relative; overflow:hidden;
+    --mouse-x:50%; --mouse-y:50%;
+    --spotlight-color:rgba(201,146,46,.09);
+  }
+  .card-spotlight::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
+    opacity:0; transition:opacity .5s ease; pointer-events:none;
+  }
+  .card-spotlight:hover::before, .card-spotlight:focus-within::before{ opacity:1; }

@@ -132,7 +132,7 @@
         <div><b>4</b><span data-i18n="heroStat3">สัญญาณวิเคราะห์ร่วม</span></div>
       </div>
     </div>
-    <a class="hero-cta ring-cta rv rv-d3" href="#picker">
+    <a class="hero-cta rainbow-cta rv rv-d3" href="#picker">
       <span data-i18n="heroCta">เริ่มตรวจราคาเลย</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
     </a>
@@ -174,20 +174,14 @@
 
   <section id="picker" class="panel rv" aria-labelledby="pick-title">
     <h2 id="pick-title" data-i18n="pickTitle">เลือกจังหวัดของคุณ</h2>
-    <p class="sub" data-i18n="pickSub">พิมพ์ค้นหา กดแผนภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด</p>
+    <p class="sub" data-i18n="pickSub">เลือกจังหวัดจากรายการ หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด</p>
     <div class="picker-head">
-      <div class="search-box">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <input type="search" id="prov-search" placeholder="ค้นหาจังหวัด เช่น ระยอง / Rayong" data-i18n-ph="searchPh" autocomplete="off" aria-label="ค้นหาจังหวัด" data-i18n-aria="aProvSearch">
-      </div>
+      <select id="prov-select" class="prov-select" aria-label="เลือกจังหวัด" data-i18n-aria="aProvSelect"></select>
       <button class="gps-btn" id="gps-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
         <span data-i18n="gpsBtn">ใช้ตำแหน่งของฉัน</span>
       </button>
     </div>
-    <div class="region-row" id="region-row" role="group" aria-label="ภูมิภาค" data-i18n-aria="aRegion"></div>
-    <div class="prov-grid" id="prov-grid" role="group" aria-label="รายชื่อจังหวัด" data-i18n-aria="aProvList"></div>
-    <div id="prov-empty" class="prov-empty" hidden data-i18n="provEmpty">ไม่พบจังหวัดที่ค้นหา ลองพิมพ์ชื่อใหม่</div>
   </section>
 
   <section id="crop" class="panel rv" aria-labelledby="crop-title">
@@ -277,41 +271,27 @@
 
 <script src="assets/app.js"></script>
 <script>
-function buildRegionChips(){
-  const row = $('region-row');
-  row.innerHTML = '';
-  const mk = (id, lbl, on) => {
-    const b = document.createElement('button');
-    b.className = 'reg-chip' + (on ? ' active' : '');
-    b.dataset.rg = id;
-    b.innerHTML = '<span class="rd" style="background:' + REG_COLOR[id] + '"></span>' + lbl;
-    row.appendChild(b);
-  };
-  mk('all', T[state.lang].regionAll, state.region === 'all');
-  Object.keys(REGIONS).forEach(rg => mk(rg, REGIONS[rg][state.lang], state.region === rg));
-}
-
-function filterProvinces(){
-  const q = state.query.trim().toLowerCase();
-  return PROVINCES.filter(p =>
-    (state.region === 'all' || p.rg === state.region) &&
-    (!q || p.th.toLowerCase().includes(q) || p.en.toLowerCase().includes(q) || p.id.includes(q))
-  );
-}
-
-function buildProvGrid(){
-  const grid = $('prov-grid');
-  const list = filterProvinces();
-  grid.innerHTML = '';
-  $('prov-empty').hidden = list.length > 0;
-  list.forEach(p => {
-    const b = document.createElement('button');
-    b.className = 'prov-item' + (p.id === state.prov ? ' sel' : '');
-    b.dataset.prov = p.id;
-    b.setAttribute('aria-pressed', p.id === state.prov ? 'true' : 'false');
-    b.innerHTML = '<span class="pd" style="background:' + REG_COLOR[p.rg] + '"></span><span>' +
-      p[state.lang] + '<small>' + REGIONS[p.rg][state.lang] + '</small></span>';
-    grid.appendChild(b);
+function buildProvSelect(){
+  const sel = $('prov-select');
+  if(!sel) return;
+  const t = T[state.lang];
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = '';
+  ph.textContent = t.pickPh;
+  ph.disabled = true;
+  sel.appendChild(ph);
+  Object.keys(REGIONS).forEach(function(rg){
+    const g = document.createElement('optgroup');
+    g.label = REGIONS[rg][state.lang];
+    PROVINCES.filter(function(p){ return p.rg === rg; }).forEach(function(p){
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p[state.lang];
+      if(p.id === state.prov) o.selected = true;
+      g.appendChild(o);
+    });
+    sel.appendChild(g);
   });
 }
 
@@ -395,11 +375,8 @@ function renderVerdict(){
 }
 
 function syncPickUI(){
-  $('prov-search').value = '';
-  state.query = '';
-  state.region = 'all';
-  buildRegionChips();
-  buildProvGrid();
+  const sel = $('prov-select');
+  if(sel) sel.value = state.prov;
   buildCropChips();
 }
 
@@ -515,29 +492,20 @@ function renderWatchStrip(){
 document.addEventListener('DOMContentLoaded', function(){
   hydrateState();
 
-  $('prov-search').addEventListener('input', function(e){
-    state.query = e.target.value;
-    buildProvGrid();
-  });
-  $('region-row').addEventListener('click', function(e){
-    const b = e.target.closest('.reg-chip'); if(!b) return;
-    state.region = b.dataset.rg;
-    buildRegionChips(); buildProvGrid();
-  });
-  $('prov-grid').addEventListener('click', function(e){
-    const b = e.target.closest('.prov-item'); if(!b) return;
-    state.prov = b.dataset.prov;
+  $('prov-select').addEventListener('change', function(){
+    if(!this.value) return;
+    state.prov = this.value;
     persistCfg({ prov: state.prov });
-    buildProvGrid(); buildCropChips(); renderHome(); renderTicker();
+    buildCropChips(); renderHome(); renderTicker();
     $('verdict-sec').scrollIntoView({ behavior:'smooth', block:'start' });
   });
+  $('gps-btn').addEventListener('click', gpsLocate);
   $('crop-row').addEventListener('click', function(e){
     const b = e.target.closest('.crop-chip'); if(!b) return;
     state.crop = b.dataset.crop;
     persistCfg({ crop: state.crop });
     buildCropChips(); renderHome();
   });
-  $('gps-btn').addEventListener('click', gpsLocate);
   $('watch-btn').addEventListener('click', toggleWatch);
   $('share-btn').addEventListener('click', shareVerdict);
   $('line-btn').addEventListener('click', shareLine);
@@ -551,11 +519,10 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   initHeaderControls(function(){
-    buildRegionChips(); buildProvGrid(); buildCropChips(); renderHome(); renderTicker();
+    buildProvSelect(); buildCropChips(); renderHome(); renderTicker();
   });
   applyI18nDom();
-  buildRegionChips();
-  buildProvGrid();
+  buildProvSelect();
   buildCropChips();
   renderHome();
   renderTicker();

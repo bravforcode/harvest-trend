@@ -259,7 +259,8 @@ th: {
   lbOffTitle:'ข้อมูลจำลอง', lbOffMeta:'เชื่อมต่อราคาจริงไม่ได้ · กลับเป็นอัตโนมัติเมื่อออนไลน์',
   lbFileTitle:'ข้อมูลจำลอง', lbFileMeta:'เปิดเว็บที่ deploy แล้วเพื่อดูราคาจริง (harvest-ecc.vercel.app)',
   liveRealLabel:'ราคาจริง · {src}',
-  pickTitle:'เลือกจังหวัดของคุณ', pickSub:'พิมพ์ค้นหา กดภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด',
+  pickTitle:'เลือกจังหวัดของคุณ', pickSub:'เลือกจังหวัดจากรายการ หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด',
+  pickPh:'— เลือกจังหวัด —',
   searchPh:'ค้นหาจังหวัด เช่น ระยอง / Rayong', gpsBtn:'ใช้ตำแหน่งของฉัน',
   gpsBusy:'กำลังหาตำแหน่ง...', gpsFail:'ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาเลือกจังหวัดด้วยตนเอง',
   gpsDenied:'ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง · เปิดการตั้งค่าเบราว์เซอร์ > อนุญาตตำแหน่ง แล้วลองใหม่',
@@ -367,7 +368,7 @@ th: {
   demoFail:'ไม่สามารถติดต่อระบบได้ (ลองเปิดบนเว็บที่ deploy แล้ว)',
   welcome:'สวัสดีครับ ยินดีต้อนรับสู่บอท gracia 🌾\nลองพิมพ์ "ราคา ระยอง ทุเรียน" เพื่อดูราคาและคำแนะนำจังหวะขาย หรือ "ช่วย" เพื่อดูคำสั่งทั้งหมด',
   aFontSize:'ขนาดตัวอักษร', aFontDown:'ลดขนาดตัวอักษร', aFontUp:'เพิ่มขนาดตัวอักษร', aNav:'เมนูหลัก',
-  aRegion:'ภูมิภาค', aProvList:'รายชื่อจังหวัด', aProvSearch:'ค้นหาจังหวัด', aCrop:'เลือกพืช',
+  aRegion:'ภูมิภาค', aProvList:'รายชื่อจังหวัด', aProvSearch:'ค้นหาจังหวัด', aProvSelect:'เลือกจังหวัด', aCrop:'เลือกพืช',
   aQcProv:'เปลี่ยนจังหวัด', aQcCrop:'เปลี่ยนพืช', aGrade:'เลือกเกรด',
   docTitleHome:'Harvest Trend · รู้ทันราคา | ตรวจราคาพืชผล 77 จังหวัด แนะนำจังหวะขาย',
   docTitleChart:'ราคาและแนวโน้ม | Harvest Trend', docTitleReport:'รายงานราคาที่ขายได้ | Harvest Trend',
@@ -400,7 +401,8 @@ en: {
   lbOffTitle:'Simulated data', lbOffMeta:'cannot reach the price service · auto-recovers when online',
   lbFileTitle:'Simulated data', lbFileMeta:'open the deployed site for live prices (harvest-ecc.vercel.app)',
   liveRealLabel:'Real price · {src}',
-  pickTitle:'Pick your province', pickSub:'Search, filter by region, or use GPS · all 77 provinces',
+  pickTitle:'Pick your province', pickSub:'Pick your province from the list, or use GPS · all 77 provinces',
+  pickPh:'— Select province —',
   searchPh:'Search province, e.g. Rayong / ระยอง', gpsBtn:'Use my location',
   gpsBusy:'Locating...', gpsFail:'Location unavailable · please pick your province manually',
   gpsDenied:'Location permission denied · allow location in browser settings, then try again',
@@ -508,7 +510,7 @@ en: {
   demoFail:'Cannot reach the system (try the deployed site)',
   welcome:'Hello, welcome to the gracia bot 🌾\nTry "price rayong durian" for a price and sell-timing verdict, or "help" for all commands',
   aFontSize:'Font size', aFontDown:'Decrease font size', aFontUp:'Increase font size', aNav:'Main menu',
-  aRegion:'Region', aProvList:'Province list', aProvSearch:'Search province', aCrop:'Pick a crop',
+  aRegion:'Region', aProvList:'Province list', aProvSearch:'Search province', aProvSelect:'Select province', aCrop:'Pick a crop',
   aQcProv:'Change province', aQcCrop:'Change crop', aGrade:'Pick a grade',
   docTitleHome:'Harvest Trend | Check crop prices across 77 provinces',
   docTitleChart:'Price & trend | Harvest Trend', docTitleReport:'Report your price | Harvest Trend',
@@ -942,9 +944,49 @@ function sparkSvg(values, w, h){
   }).join(' ');
   return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/></svg>';
 }
+/* Vendored algorithm: magicui.design RippleButton (MIT) — THIRD_PARTY_LICENSES.md.
+   Ported verbatim from the React source: size = max(w,h), circle centered on the
+   click point, scale(0)->scale(2) fade; spans self-remove on animationend
+   (upstream cleanup only tracks the last ripple — fixed here). */
+function initRipples(){
+  document.querySelectorAll('.btn-gold, .btn-forest, .btn-warn').forEach(function(btn){
+    if(btn._rip) return;
+    btn._rip = true;
+    btn.classList.add('ripple-btn');
+    btn.addEventListener('click', function(ev){
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = ev.clientX - rect.left - size / 2;
+      const y = ev.clientY - rect.top - size / 2;
+      const span = document.createElement('span');
+      span.className = 'ripple';
+      span.style.width = size + 'px';
+      span.style.height = size + 'px';
+      span.style.left = x + 'px';
+      span.style.top = y + 'px';
+      span.addEventListener('animationend', function(){ span.remove(); });
+      btn.appendChild(span);
+    });
+  });
+}
+/* Vendored technique: reactbits.dev SpotlightCard (MIT + Commons Clause).
+   Sets --mouse-x/--mouse-y CSS vars on pointermove; the CSS ::before renders
+   the radial spotlight. Hover-capable devices only (touch has no pointer). */
+function initSpotlights(){
+  if(!('matchMedia' in window) || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  document.querySelectorAll('.card-spotlight').forEach(function(card){
+    card.addEventListener('pointermove', function(e){
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+      card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+    });
+  });
+}
 document.addEventListener('DOMContentLoaded', function(){
   initReveals();
   initTopbarHide();
+  initRipples();
+  initSpotlights();
   document.querySelectorAll('.ticker').forEach(function(el){ initTicker(el); });
 });
 
