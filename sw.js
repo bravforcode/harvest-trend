@@ -1,11 +1,12 @@
 /* Harvest Trend (รู้ทันราคา) — offline cache. Bump CACHE version on release. */
-const CACHE = 'rtp-v9';
+const CACHE = 'rtp-v10';
 const CORE = [
   './',
   'rutun-price.html',
   'price-chart.html',
   'report.html',
   'watch.html',
+  'line.html',
   'about.html',
   'assets/app.js',
   'assets/styles.css',

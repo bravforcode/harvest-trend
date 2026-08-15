@@ -466,7 +466,7 @@ en: {
   watchGoTo:'open',
   watchStripTitle:'Following', watchEmptyGo:'Check prices',
   tickerLbl:'Estimated prices', tickerAria:'Estimated prices for this province\u2019s main crops',
-  aboutTitle:'About Roo Tun Raka',
+  aboutTitle:'About Harvest Trend',
   p1:'Harvest Trend (รู้ทันราคา) is a working prototype that forecasts farm-gate crop prices across <b>77 provinces and 10 major crops</b>, blending 4 signals (price momentum · seasonal supply · harvest window · weather) into one plain-language verdict · built for farmers who are not tech-savvy.',
   p2:'Inspired by the 2026 Eastern durian oversupply crisis: output hit 1,066,980 tonnes (+22.4%) and grade-C prices fell from ~170 to ~95 THB/kg. Farmers had to decide with no foresight. This tool shows the trend and timing before the decision · never a blind "trust the AI".',
   p3:'<b>Status: connected to real government price data</b> · prices come from official sources (data.go.th: Trat/Amnat Charoen/Mae Hong Son/Surat Thani provincial offices + OAE + Bank of Thailand), auto-refreshed every 10 seconds · provinces/crops without official data use the seasonal model with a clear label. Farmer price reports via LINE OA are welcome too (try the bot on the "LINE Bot" page).',
