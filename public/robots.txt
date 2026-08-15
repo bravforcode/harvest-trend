@@ -1,0 +1,6 @@
+# Harvest Trend (รู้ทันราคา) — robots
+# Static prototype site; everything is indexable.
+User-agent: *
+Allow: /
+
+Sitemap: https://harvest-ecc.vercel.app/sitemap.xml
