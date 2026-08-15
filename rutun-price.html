@@ -115,10 +115,10 @@
   <section class="hero" aria-labelledby="hero-title">
     <svg class="hero-leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/></svg>
     <svg class="hero-leaf2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/></svg>
-    <p class="hero-eyebrow" data-i18n="heroEyebrow">เครื่องมือช่วยตัดสินใจราคาพืชผล · ครอบคลุมทั่วประเทศ</p>
-    <h1 class="hero-title" id="hero-title" data-i18n="heroTitle">รู้ก่อนขาย ได้จังหวะที่ดีกว่า</h1>
-    <p class="hero-sub" data-i18n="heroSub">เลือกจังหวัดและพืชของคุณ รับคำแนะนำจังหวะเก็บเกี่ยว/ขายพร้อมเหตุผลประกอบที่เข้าใจง่าย ภายใน 2 คลิก ไม่ต้องเป็นผู้เชี่ยวชาญ</p>
-    <div class="hero-stats" role="list">
+    <p class="hero-eyebrow shine-gold rv" data-i18n="heroEyebrow">เครื่องมือช่วยตัดสินใจราคาพืชผล · ครอบคลุมทั่วประเทศ</p>
+    <h1 class="hero-title rv rv-d1" id="hero-title" data-i18n="heroTitle">รู้ก่อนขาย ได้จังหวะที่ดีกว่า</h1>
+    <p class="hero-sub rv rv-d1" data-i18n="heroSub">เลือกจังหวัดและพืชของคุณ รับคำแนะนำจังหวะเก็บเกี่ยว/ขายพร้อมเหตุผลประกอบที่เข้าใจง่าย ภายใน 2 คลิก ไม่ต้องเป็นผู้เชี่ยวชาญ</p>
+    <div class="hero-stats rv rv-d2" role="list">
       <div class="hero-stat" role="listitem">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v15M15 6v15M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/></svg>
         <div><b>77</b><span data-i18n="heroStat1">จังหวัดทั่วประเทศ</span></div>
@@ -132,10 +132,17 @@
         <div><b>4</b><span data-i18n="heroStat3">สัญญาณวิเคราะห์ร่วม</span></div>
       </div>
     </div>
-    <a class="hero-cta" href="#picker">
+    <a class="hero-cta ring-cta rv rv-d3" href="#picker">
       <span data-i18n="heroCta">เริ่มตรวจราคาเลย</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
     </a>
+  </section>
+
+  <section class="ticker-wrap rv" id="home-ticker-wrap" aria-label="แถบราคาโดยประมาณของพืชหลักในจังหวัดนี้" data-i18n-aria="tickerAria">
+    <div class="ticker" id="home-ticker" aria-hidden="true"><div class="tk-set"></div></div>
+    <div class="ticker-fade" aria-hidden="true"></div>
+    <div class="ticker-fade r" aria-hidden="true"></div>
+    <span class="visually-hidden" id="ticker-sr"></span>
   </section>
 
   <div class="howto" id="howto">
@@ -160,7 +167,12 @@
     <a class="btn btn-forest lb-btn" href="line.html" data-i18n="lineCtaBtn">ดูวิธีใช้งาน</a>
   </div>
 
-  <section id="picker" class="panel" aria-labelledby="pick-title">
+  <section id="watch-strip" class="panel strip-panel rv" aria-labelledby="watch-strip-title" hidden>
+    <h2 class="sub" id="watch-strip-title" data-i18n="watchStripTitle">ติดตามล่าสุด</h2>
+    <div class="watch-row" id="home-watch-row"></div>
+  </section>
+
+  <section id="picker" class="panel rv" aria-labelledby="pick-title">
     <h2 id="pick-title" data-i18n="pickTitle">เลือกจังหวัดของคุณ</h2>
     <p class="sub" data-i18n="pickSub">พิมพ์ค้นหา กดแผนภูมิภาค หรือใช้ตำแหน่ง GPS · ครอบคลุม 77 จังหวัด</p>
     <div class="picker-head">
@@ -178,13 +190,13 @@
     <div id="prov-empty" class="prov-empty" hidden data-i18n="provEmpty">ไม่พบจังหวัดที่ค้นหา ลองพิมพ์ชื่อใหม่</div>
   </section>
 
-  <section id="crop" class="panel" aria-labelledby="crop-title">
+  <section id="crop" class="panel rv" aria-labelledby="crop-title">
     <h2 id="crop-title" data-i18n="cropTitle">เลือกพืชที่ปลูก</h2>
     <p class="sub" data-i18n="cropSub">เรียงพืชที่นิยมปลูกในพื้นที่ของคุณไว้ก่อน · ป้าย "พื้นที่หลัก" หมายถึงแหล่งผลิตสำคัญ</p>
     <div class="crop-row" id="crop-row" role="group" aria-label="เลือกพืช" data-i18n-aria="aCrop"></div>
   </section>
 
-  <section id="verdict-sec" aria-labelledby="rec-eyebrow" hidden>
+  <section id="verdict-sec" class="rv" aria-labelledby="rec-eyebrow" hidden>
     <div class="rec-card">
       <svg class="rec-leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="position:absolute;right:16px;bottom:-28px;width:150px;height:150px;opacity:.07;pointer-events:none;"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z"/><path d="M4 20C8 16 12 12 17 7" fill="none" stroke="#F6F1E2" stroke-width="1.1"/></svg>
       <div aria-live="polite">
@@ -363,6 +375,13 @@ function renderVerdict(){
   $('mini-2').textContent = supTxt;
   $('mini-3').textContent = t['harvest' + cap(sg.harvSt)];
   $('mini-4').textContent = t['weather' + cap(sg.wxSt)];
+  /* price count-up: first render jumps straight to the value; changes animate */
+  const bEl = document.querySelector('.rb-price b');
+  if(bEl){
+    if(lastVerdictV !== null && lastVerdictV !== last) countUpNow(bEl, last, c.dec);
+    else bEl.dataset.v = last;
+    lastVerdictV = last;
+  }
   const wl = store.get(WATCH_KEY, []);
   const inW = wl.some(x => x.p === state.prov && x.c === state.crop);
   const wb = $('watch-btn');
@@ -427,7 +446,64 @@ function gpsLocate(){
 
 function renderHome(){
   renderVerdict();
+  renderWatchStrip();
   flashUpdate();
+}
+
+var lastVerdictV = null;
+
+/* price ticker: top-3 main crops of the selected province (engine data, ~) */
+function tickerCrops(){
+  const p = provById(state.prov);
+  return CROPS.filter(function(c){ return p.main.includes(c.id) || p.main.includes('*'); }).slice(0, 3);
+}
+function renderTicker(){
+  const tick = $('home-ticker');
+  if(!tick) return;
+  const t = T[state.lang];
+  const crops = tickerCrops();
+  const chip = function(c){
+    const ser = priceSeriesFor(c.id, state.prov);
+    const last = ser.a[ser.a.length - 1];
+    return '<span class="tk-chip">' + c[state.lang] + ' <b>~' + fmtValFor(last, c.id) + '</b> ' + c.unit[state.lang] + '</span>';
+  };
+  const html = '<span class="tk-chip tk-lbl">' + t.tickerLbl + '</span>' + crops.map(chip).join('');
+  /* update every set (the ticker duplicates the set once it initialises) */
+  tick.querySelectorAll('.tk-set').forEach(function(set){ set.innerHTML = html; });
+  const sr = $('ticker-sr');
+  if(sr) sr.textContent = crops.map(function(c){
+    const ser = priceSeriesFor(c.id, state.prov);
+    return c[state.lang] + ' ~' + fmtValFor(ser.a[ser.a.length - 1], c.id) + ' ' + c.unit[state.lang];
+  }).join(' · ');
+}
+/* home watchlist strip: one-tap chips that load the saved province/crop */
+function renderWatchStrip(){
+  const sec = $('watch-strip'), row = $('home-watch-row');
+  if(!sec || !row) return;
+  const wl = store.get(WATCH_KEY, []);
+  sec.hidden = wl.length === 0;
+  if(!wl.length) return;
+  row.innerHTML = '';
+  wl.forEach(function(x){
+    const p = provById(x.p), c = cropById(x.c);
+    if(!p || !c) return;
+    const ser = priceSeriesFor(x.c, x.p);
+    const last = ser.a[ser.a.length - 1];
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'watch-chip';
+    chip.innerHTML = p[state.lang] + ' · ' + c[state.lang] +
+      ' <b class="wp">~' + fmtValFor(last, x.c) + ' ' + c.unit[state.lang] + '</b>';
+    chip.addEventListener('click', function(){
+      state.prov = x.p; state.crop = x.c;
+      persistCfg({ prov: x.p, crop: x.c });
+      syncPickUI();
+      buildCropChips();
+      renderHome();
+      $('verdict-sec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    row.appendChild(chip);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -446,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const b = e.target.closest('.prov-item'); if(!b) return;
     state.prov = b.dataset.prov;
     persistCfg({ prov: state.prov });
-    buildProvGrid(); buildCropChips(); renderHome();
+    buildProvGrid(); buildCropChips(); renderHome(); renderTicker();
     $('verdict-sec').scrollIntoView({ behavior:'smooth', block:'start' });
   });
   $('crop-row').addEventListener('click', function(e){
@@ -469,13 +545,14 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   initHeaderControls(function(){
-    buildRegionChips(); buildProvGrid(); buildCropChips(); renderHome();
+    buildRegionChips(); buildProvGrid(); buildCropChips(); renderHome(); renderTicker();
   });
   applyI18nDom();
   buildRegionChips();
   buildProvGrid();
   buildCropChips();
   renderHome();
+  renderTicker();
   if(location.hash === '#verdict-sec'){
     $('verdict-sec').scrollIntoView({ behavior:'smooth', block:'start' });
   }

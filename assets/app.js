@@ -902,11 +902,13 @@ function initTopbarHide(){
 function initTicker(el){
   if(!el || el._tkDone) return;
   const set = el.querySelector('.tk-set');
-  if(!set){
+  if(!set || !set.children.length){
+    /* content may be built by the page after DOMContentLoaded — retry briefly */
     let tries = 0;
     const retry = setInterval(function(){
       tries++;
-      if(el.querySelector('.tk-set')){ clearInterval(retry); initTicker(el); }
+      const s2 = el.querySelector('.tk-set');
+      if(s2 && s2.children.length){ clearInterval(retry); initTicker(el); }
       else if(tries >= 5) clearInterval(retry);
     }, 100);
     return;
