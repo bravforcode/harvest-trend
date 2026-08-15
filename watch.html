@@ -108,7 +108,13 @@
     <h2 id="watch-title" data-i18n="watchTitle">รายการติดตาม</h2>
     <p class="sub" id="watch-sub" data-i18n="watchSub"></p>
     <div class="watch-row" id="watch-row"></div>
-    <p class="watch-empty" id="watch-empty" data-i18n="watchEmpty">ยังไม่มีรายการติดตาม · กดปุ่ม "ติดตามราคานี้" บนคำแนะนำเพื่อเพิ่ม</p>
+    <div class="empty-box" id="watch-empty" hidden>
+      <span class="empty-ic" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+      </span>
+      <p class="empty-ds" data-i18n="watchEmpty">ยังไม่มีรายการติดตาม · กดปุ่ม "ติดตามราคานี้" บนคำแนะนำเพื่อเพิ่ม</p>
+      <a class="btn btn-gold empty-act" href="rutun-price.html" data-i18n="watchEmptyGo">ไปตรวจราคา</a>
+    </div>
   </section>
 
 </main>
@@ -153,6 +159,7 @@ function renderWatch(){
     chip.className = 'watch-chip';
     chip.innerHTML = p[state.lang] + ' · ' + c[state.lang] +
       ' <b class="wp">~' + fmtValFor(last, x.c) + ' ' + c.unit[state.lang] + '</b>' +
+      sparkSvg(ser.a) +
       ' <span class="mini-trend ' + cls + '">' + trendSvg(cls) + '<span class="visually-hidden">' + arrow + '</span></span>' +
       ' <button data-rm="' + x.p + '|' + x.c + '" aria-label="' + t.del + '">×</button>';
     chip.addEventListener('click', function(ev){
