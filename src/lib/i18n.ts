@@ -66,6 +66,8 @@ export interface Dict {
   mapTap: string;
   mapCropLabel: string;
   viewMap: string;
+  navMap: string;
+  navCost: string;
   /* cost calculator page */
   costTitle: string;
   costSub: string;
@@ -354,6 +356,7 @@ export const T: Record<Lang, Dict> = {
     mapLive: 'ราคาจริง', mapModel: 'แบบจำลอง', mapTap: 'แตะจังหวัดเพื่อดูราคาและเปิดคำแนะนำ',
     mapCropLabel: 'เลือกพืช',
     viewMap: 'ดูแผนที่ราคา',
+    navMap: 'แผนที่ราคา', navCost: 'ต้นทุน',
     costTitle: 'คำนวณต้นทุนและจุดคุ้มทุน', costSub: 'ใช้ต้นทุนการผลิตจากข้อมูลราชการ เปรียบเทียบกับราคาขายปัจจุบัน รู้ทันทีว่าขายแล้วกำไรหรือขาดทุน',
     costCoverage: 'ครอบคลุม 10 จาก 25 พืชที่มีข้อมูลราชการเปิดเผย',
     costNoData: 'ยังไม่มีข้อมูลต้นทุนราชการเปิดเผยสำหรับพืชนี้ · กรอกต้นทุนของคุณเองเพื่อคำนวณจุดคุ้มทุน',
@@ -527,6 +530,7 @@ export const T: Record<Lang, Dict> = {
     mapLive: 'Live', mapModel: 'Estimate', mapTap: 'Tap a province to see its price and open the verdict',
     mapCropLabel: 'Crop',
     viewMap: 'View price map',
+    navMap: 'Price map', navCost: 'Cost',
     costTitle: 'Cost & break-even calculator', costSub: 'Uses official government production costs vs the current selling price — see instantly whether you profit',
     costCoverage: 'Covers 10 of 25 crops with open official data',
     costNoData: 'No official cost data for this crop yet · enter your own cost to compute the break-even',

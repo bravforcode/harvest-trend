@@ -3,7 +3,7 @@
    "unchanged world") after the static-HTML → React migration:
    1. Theme tokens in src/index.css @theme must never drift from the golden set
       (v2 user-approved: --gold #C9922E → #A87B1F, --gold-soft #F3E3BC → #F5E8C8).
-   2. Header nav must keep the canonical 6 links (order included); bottom nav 5 tabs.
+   2. Header nav must keep the canonical 8 links (order included); bottom nav 5 tabs.
    3. vite.config.ts PWA must precache the app shell and never cache /api.
    4. Every i18n key used by src code must exist in BOTH T.th and T.en.
    5. The brand-mark SVG grammar must stay intact (single source: BrandMark.tsx).
@@ -85,8 +85,8 @@ const navHrefs = [];
   let m;
   while ((m = re.exec(navBlock))) navHrefs.push(m[1]);
 }
-ok('Header NAV_LINKS has the canonical 6 routes (order)',
-  JSON.stringify(navHrefs) === JSON.stringify(['/', '/chart', '/report', '/watch', '/about', '/line']));
+ok('Header NAV_LINKS has the canonical 8 routes (order)',
+  JSON.stringify(navHrefs) === JSON.stringify(['/', '/chart', '/map', '/cost', '/report', '/watch', '/about', '/line']));
 const bottom = readSrc('components/layout/BottomNav.tsx');
 const tabBlock = bottom.slice(bottom.indexOf('const TABS'), bottom.indexOf('as const'));
 const tabHrefs = [];

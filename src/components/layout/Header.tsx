@@ -8,6 +8,8 @@ import { BrandMark } from './BrandMark';
 const NAV_LINKS = [
   { to: '/', key: 'nav1' },
   { to: '/chart', key: 'navPrice' },
+  { to: '/map', key: 'navMap' },
+  { to: '/cost', key: 'navCost' },
   { to: '/report', key: 'nav2' },
   { to: '/watch', key: 'nav3' },
   { to: '/about', key: 'nav4' },
