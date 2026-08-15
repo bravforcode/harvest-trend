@@ -2,6 +2,7 @@
    crop chips, verdict card, how-it-works */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useReducedMotion, type Transition, type Variants } from 'motion/react';
 import { ArrowRight, History, X } from 'lucide-react';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
@@ -14,11 +15,22 @@ import { VerdictCard } from '@/components/VerdictCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
+const heroVar: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } }
+};
+const heroItem: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0 }
+};
+
 export function HomePage() {
   const { lang, prov, crop, setProv, setCrop, select } = useApp();
   const t = T[lang];
   const recents = getRecents();
   const [, force] = useState(0);
+  const reduce = useReducedMotion();
+  const heroT: Transition = reduce ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' };
 
   const scrollToPicker = () => {
     document.getElementById('picker')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -27,22 +39,24 @@ export function HomePage() {
   return (
     <div className="space-y-6 py-6">
       {/* hero */}
-      <section className="pt-4 text-center">
-        <p className="text-[12.5px] font-bold uppercase tracking-[2px] text-gold">{t.heroEyebrow}</p>
-        <h1 className="mx-auto mt-2 max-w-2xl font-display text-3xl font-extrabold leading-tight sm:text-4xl">
+      <motion.section variants={heroVar} initial="hidden" animate="show" className="pt-4 text-center">
+        <motion.p variants={heroItem} transition={heroT} className="text-[12.5px] font-bold uppercase tracking-[2px] text-gold">{t.heroEyebrow}</motion.p>
+        <motion.h1 variants={heroItem} transition={heroT} className="mx-auto mt-2 max-w-2xl font-display text-3xl font-extrabold leading-tight sm:text-4xl">
           {t.heroTitle}
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-moss">{t.heroSub}</p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[13px] font-semibold text-moss">
+        </motion.h1>
+        <motion.p variants={heroItem} transition={heroT} className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-moss">{t.heroSub}</motion.p>
+        <motion.div variants={heroItem} transition={heroT} className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[13px] font-semibold text-moss">
           <span><strong className="text-forest">77</strong> {t.heroStat1}</span>
           <span><strong className="text-forest">25</strong> {t.heroStat2}</span>
           <span><strong className="text-forest">4</strong> {t.heroStat3}</span>
-        </div>
-        <Button variant="gold" size="lg" className="mt-5" onClick={scrollToPicker}>
-          {t.heroCta}
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Button>
-      </section>
+        </motion.div>
+        <motion.div variants={heroItem} transition={heroT} className="mt-5">
+          <Button variant="gold" size="lg" onClick={scrollToPicker}>
+            {t.heroCta}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Button>
+        </motion.div>
+      </motion.section>
 
       <LiveBadge />
 
@@ -100,7 +114,14 @@ export function HomePage() {
       </div>
 
       {/* verdict */}
-      <VerdictCard />
+      <motion.div
+        key={prov + ':' + crop}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={heroT}
+      >
+        <VerdictCard />
+      </motion.div>
 
       {/* how it works */}
       <section className="grid gap-3 sm:grid-cols-3">
