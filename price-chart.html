@@ -540,7 +540,8 @@ function renderStats(){
     '<div class="stat-card"><span>' + t.statAvg + '</span><b data-n="3">~' + fmtVal(av) + '</b></div>' +
     '<div class="stat-card"><span>' + t.statFore + '</span><b class="fore" data-n="4">~' + fmtVal(fAv) + '</b></div>';
   /* count-up the price stats only when the underlying values actually change
-     (live refresh every 10s keeps the same values most of the time) */
+     (live refresh every 10s keeps the same values most of the time); first
+     render jumps straight to the values — never animate from 0 */
   const sig = state.crop + '|' + state.prov + '|' + state.grade + '|' + [chg5, mn, mx, av, fAv].join(',');
   const strip = $('stat-strip');
   if(strip.dataset.sig !== sig){
@@ -548,10 +549,19 @@ function renderStats(){
     const vals = [null, mn, mx, av, fAv];
     const dec = cropById(state.crop).dec;
     strip.querySelectorAll('b[data-n]').forEach(function(b){
-      countUpNow(b, vals[+b.dataset.n], dec, '~');
+      const idx = +b.dataset.n;
+      if(lastStats && lastStats[idx] !== undefined){
+        b.dataset.v = lastStats[idx];
+        countUpNow(b, vals[idx], dec, '~');
+      }else{
+        b.dataset.v = vals[idx];
+      }
     });
+    lastStats = vals;
   }
 }
+
+var lastStats = null;
 
 /* chart toolbar watch toggle (syncs the shared localStorage watchlist) */
 function renderChartWatch(){

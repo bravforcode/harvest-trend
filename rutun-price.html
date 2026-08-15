@@ -375,11 +375,16 @@ function renderVerdict(){
   $('mini-2').textContent = supTxt;
   $('mini-3').textContent = t['harvest' + cap(sg.harvSt)];
   $('mini-4').textContent = t['weather' + cap(sg.wxSt)];
-  /* price count-up: first render jumps straight to the value; changes animate */
+  /* price count-up: first render jumps straight to the value; changes animate
+     from the previous value (never from 0 — the ~ price must stay honest) */
   const bEl = document.querySelector('.rb-price b');
   if(bEl){
-    if(lastVerdictV !== null && lastVerdictV !== last) countUpNow(bEl, last, c.dec);
-    else bEl.dataset.v = last;
+    if(lastVerdictV !== null && lastVerdictV !== last){
+      bEl.dataset.v = lastVerdictV;
+      countUpNow(bEl, last, c.dec, '~');
+    }else{
+      bEl.dataset.v = last;
+    }
     lastVerdictV = last;
   }
   const wl = store.get(WATCH_KEY, []);
