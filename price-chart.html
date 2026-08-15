@@ -109,7 +109,7 @@
     <span data-i18n="mockNote">ข้อมูลราคาในเว็บนี้เป็นข้อมูลจำลอง (mock data) เพื่อการใช้งานจริงของต้นแบบ · ราคาจากแบบจำลอง ไม่ใช่ราคาตลาดจริง ก่อนตัดสินใจขายควรเช็กข้อมูลหน่วยงานราชการหรือตลาดกลางในพื้นที่ด้วย</span>
   </div>
 
-  <section id="price" class="panel" aria-labelledby="price-title" hidden>
+  <section id="price" class="panel rv" aria-labelledby="price-title" hidden>
     <h2 id="price-title">แนวโน้มราคา 26 สัปดาห์ + พยากรณ์ 4 สัปดาห์</h2>
     <p class="sub" id="price-sub"></p>
     <div class="qc-row">
@@ -125,6 +125,10 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.6-.7L3 20l1-4.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
         <span data-i18n="shareLine">แชร์ผ่าน LINE</span>
       </button>
+      <button class="btn btn-ghost" id="chart-watch-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+        <span data-i18n="chartFollowAdd">ติดตาม</span>
+      </button>
     </div>
     <div class="now-price">
       <span class="big" id="now-price"></span>
@@ -133,11 +137,11 @@
     </div>
     <div class="stat-strip" id="stat-strip"></div>
     <div class="toolbar">
-      <div class="grade-row" id="grade-row" role="group" aria-label="เลือกเกรด" data-i18n-aria="aGrade" hidden>
-        <button class="grade-btn active" data-grade="A" aria-pressed="true">A</button>
-        <button class="grade-btn" data-grade="B" aria-pressed="false">B</button>
-        <button class="grade-btn" data-grade="C" aria-pressed="false">C</button>
-        <button class="grade-btn" data-grade="D" aria-pressed="false">D</button>
+      <div class="grade-row seg" id="grade-row" role="group" aria-label="เลือกเกรด" data-i18n-aria="aGrade" hidden>
+        <button class="grade-btn seg-btn active" data-grade="A" aria-pressed="true">A</button>
+        <button class="grade-btn seg-btn" data-grade="B" aria-pressed="false">B</button>
+        <button class="grade-btn seg-btn" data-grade="C" aria-pressed="false">C</button>
+        <button class="grade-btn seg-btn" data-grade="D" aria-pressed="false">D</button>
       </div>
     </div>
     <div class="legend">
@@ -170,7 +174,7 @@
     </details>
   </section>
 
-  <section id="signals" class="panel" aria-labelledby="sig-title" hidden>
+  <section id="signals" class="panel rv" aria-labelledby="sig-title" hidden>
     <h2 id="sig-title" data-i18n="sigTitle">สัญญาณ 4 ปัจจัย ที่ประมวลผลร่วมกัน</h2>
     <p class="sub" id="sig-sub" data-i18n="sigSub"></p>
     <div class="sig-grid">
@@ -244,7 +248,7 @@
     </div>
   </section>
 
-  <section id="season" class="panel" aria-labelledby="season-title" hidden>
+  <section id="season" class="panel rv" aria-labelledby="season-title" hidden>
     <h2 id="season-title" data-i18n="seasonTitle">ปฏิทินฤดูกาลของพืชชนิดนี้</h2>
     <p class="sub" id="season-sub" data-i18n="seasonSub"></p>
     <div class="season-grid" id="season-grid"></div>
@@ -280,6 +284,7 @@ function renderChart(){
   $('price-title').textContent = t.priceTitleTpl.replace('{crop}', c[state.lang]).replace('{prov}', p[state.lang]);
   $('price-sub').textContent = t.priceSubTpl.replace('{crop}', c[state.lang]);
   $('grade-row').hidden = !c.grades;
+  if(c.grades) repositionSeg($('grade-row'));
   const sg = signals(), s = sg.series;
   const last = s.a[s.a.length - 1], prev5 = s.a[s.a.length - 6];
   $('now-price').textContent = fmtVal(last);
@@ -474,6 +479,7 @@ function renderPriceChart(){
   renderSeason();
   renderStats();
   renderTable();
+  renderChartWatch();
   flashUpdate();
 }
 
@@ -529,10 +535,41 @@ function renderStats(){
   const fAv = f.reduce(function(x, y){ return x + y; }, 0) / f.length;
   $('stat-strip').innerHTML =
     '<div class="stat-card"><span>' + t.statChg5 + '</span><b class="' + (chg5 >= 0 ? 'up' : 'down') + '">' + (chg5 > 0 ? '+' : '') + chg5.toFixed(1) + '%</b></div>' +
-    '<div class="stat-card"><span>' + t.statMin + '</span><b>~' + fmtVal(mn) + '</b></div>' +
-    '<div class="stat-card"><span>' + t.statMax + '</span><b>~' + fmtVal(mx) + '</b></div>' +
-    '<div class="stat-card"><span>' + t.statAvg + '</span><b>~' + fmtVal(av) + '</b></div>' +
-    '<div class="stat-card"><span>' + t.statFore + '</span><b class="fore">~' + fmtVal(fAv) + '</b></div>';
+    '<div class="stat-card"><span>' + t.statMin + '</span><b data-n="1">~' + fmtVal(mn) + '</b></div>' +
+    '<div class="stat-card"><span>' + t.statMax + '</span><b data-n="2">~' + fmtVal(mx) + '</b></div>' +
+    '<div class="stat-card"><span>' + t.statAvg + '</span><b data-n="3">~' + fmtVal(av) + '</b></div>' +
+    '<div class="stat-card"><span>' + t.statFore + '</span><b class="fore" data-n="4">~' + fmtVal(fAv) + '</b></div>';
+  /* count-up the price stats only when the underlying values actually change
+     (live refresh every 10s keeps the same values most of the time) */
+  const sig = state.crop + '|' + state.prov + '|' + state.grade + '|' + [chg5, mn, mx, av, fAv].join(',');
+  const strip = $('stat-strip');
+  if(strip.dataset.sig !== sig){
+    strip.dataset.sig = sig;
+    const vals = [null, mn, mx, av, fAv];
+    const dec = cropById(state.crop).dec;
+    strip.querySelectorAll('b[data-n]').forEach(function(b){
+      countUpNow(b, vals[+b.dataset.n], dec, '~');
+    });
+  }
+}
+
+/* chart toolbar watch toggle (syncs the shared localStorage watchlist) */
+function renderChartWatch(){
+  const btn = $('chart-watch-btn');
+  if(!btn) return;
+  const wl = store.get(WATCH_KEY, []);
+  const inW = wl.some(function(x){ return x.p === state.prov && x.c === state.crop; });
+  btn.querySelector('span').textContent = T[state.lang][inW ? 'chartFollowRemove' : 'chartFollowAdd'];
+  btn.dataset.in = inW ? '1' : '0';
+}
+function toggleChartWatch(){
+  const t = T[state.lang];
+  let wl = store.get(WATCH_KEY, []);
+  const i = wl.findIndex(function(x){ return x.p === state.prov && x.c === state.crop; });
+  if(i >= 0){ wl.splice(i, 1); toast(t.watchRemoved, 'err'); }
+  else{ wl.push({ p: state.prov, c: state.crop }); toast(t.watchAdded, 'ok'); }
+  store.set(WATCH_KEY, wl);
+  renderChartWatch();
 }
 
 function exportCSV(){
@@ -579,6 +616,8 @@ document.addEventListener('DOMContentLoaded', function(){
   $('chart-share-btn').addEventListener('click', shareVerdict);
   $('line-share-btn').addEventListener('click', shareLine);
   $('csv-btn').addEventListener('click', exportCSV);
+  initSeg($('grade-row'));
+  statefulBtn($('chart-watch-btn'), toggleChartWatch);
 
   initHeaderControls(function(){ buildQc(); renderPriceChart(); });
   applyI18nDom();

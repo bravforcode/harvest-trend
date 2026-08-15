@@ -772,27 +772,29 @@ function initReveals(){
   els.forEach(function(el){ io.observe(el); });
 }
 /* animated count-up to target (th-TH formatting; tabular-nums via CSS) */
-function countUp(el, target, dec){
+function countUp(el, target, dec, prefix){
   if(!el) return;
   if(reducedMotion() || !('IntersectionObserver' in window)){
-    countUpNow(el, target, dec);
+    countUpNow(el, target, dec, prefix);
     return;
   }
   const io = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
       if(en.isIntersecting){
         io.disconnect();
-        countUpNow(el, target, dec);
+        countUpNow(el, target, dec, prefix);
       }
     });
   }, { threshold: 0.3 });
   io.observe(el);
 }
-function countUpNow(el, target, dec){
+function countUpNow(el, target, dec, prefix){
   if(!el) return;
   const fmt = function(v){
-    try{ return new Intl.NumberFormat('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v); }
-    catch(e){ return String(v); }
+    let s;
+    try{ s = new Intl.NumberFormat('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v); }
+    catch(e){ s = String(v); }
+    return (prefix || '') + s;
   };
   const start = parseFloat(el.dataset.v) || 0;
   if(reducedMotion() || !('requestAnimationFrame' in window)){
