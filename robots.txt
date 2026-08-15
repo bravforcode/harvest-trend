@@ -1,8 +1,6 @@
 # Harvest Trend (รู้ทันราคา) — robots
 # Static prototype site; everything is indexable.
-# NOTE: Sitemap URL is relative (matches this project's relative canonical
-# convention). Replace with the absolute production URL on deploy.
 User-agent: *
 Allow: /
 
-Sitemap: sitemap.xml
+Sitemap: https://harvest-ecc.vercel.app/sitemap.xml

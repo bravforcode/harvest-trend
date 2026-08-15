@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Harvest Trend (รู้ทันราคา) · static prototype sitemap.
-     Loc values are relative, matching the project's relative-canonical
-     convention. Replace with absolute production URLs on deploy. -->
+     Absolute production URLs (deployed at harvest-ecc.vercel.app). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>rutun-price.html</loc>
+    <loc>https://harvest-ecc.vercel.app/rutun-price.html</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>price-chart.html</loc>
+    <loc>https://harvest-ecc.vercel.app/price-chart.html</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>watch.html</loc>
+    <loc>https://harvest-ecc.vercel.app/watch.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>report.html</loc>
+    <loc>https://harvest-ecc.vercel.app/report.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>line.html</loc>
+    <loc>https://harvest-ecc.vercel.app/line.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>about.html</loc>
+    <loc>https://harvest-ecc.vercel.app/about.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>

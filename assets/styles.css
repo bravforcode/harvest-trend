@@ -717,10 +717,6 @@
     -webkit-background-clip:text; background-clip:text;
     animation:shiny-text 8s infinite;
   }
-  .shine-static {
-    background:linear-gradient(120deg, var(--gold-soft), var(--paper) 55%, var(--gold-soft));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
   @keyframes shiny-text {
     0%, 90%, 100% { background-position: calc(-100% - var(--shiny-width, 100px)) 0; }
     30%, 60%      { background-position: calc(100% + var(--shiny-width, 100px)) 0; }
@@ -783,14 +779,6 @@
   #toast.err{background:var(--clay);}
   #toast.toast-fresh{animation:toastIn .25s ease both;}
   @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-
-  /* 1.8 Skeleton shimmer */
-  .skel{
-    background:linear-gradient(120deg, transparent 40%, rgba(255,253,246,.9) 50%, transparent 60%) var(--leaf-tint);
-    background-size:200% 100%; border-radius:8px;
-    animation:skelSweep 2s -1s infinite linear;
-  }
-  @keyframes skelSweep{to{background-position:-200% 0;}}
 
   /* 1.9 Empty-state anatomy */
   .empty-box{text-align:center;padding:26px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;}
@@ -860,8 +848,6 @@
   @media (prefers-reduced-motion: reduce){
     .shine-gold{animation:none;background:none;color:inherit;}
     .rainbow-cta, .rainbow-cta::before{animation:none;}
-    .hero::after{animation:none;}
-    .skel{animation:none;}
     #toast.toast-fresh{animation:none;}
     .ticker.anim .tk-set{animation:none;}
     .ticker .tk-set + .tk-set{display:none;}

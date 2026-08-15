@@ -773,23 +773,8 @@ function initReveals(){
   }, { threshold: 0.08 });
   els.forEach(function(el){ io.observe(el); });
 }
-/* animated count-up to target (th-TH formatting; tabular-nums via CSS) */
-function countUp(el, target, dec, prefix){
-  if(!el) return;
-  if(reducedMotion() || !('IntersectionObserver' in window)){
-    countUpNow(el, target, dec, prefix);
-    return;
-  }
-  const io = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(en.isIntersecting){
-        io.disconnect();
-        countUpNow(el, target, dec, prefix);
-      }
-    });
-  }, { threshold: 0.3 });
-  io.observe(el);
-}
+/* animated count-up to target (th-TH formatting; tabular-nums via CSS).
+   Seeds from el.dataset.v (previous value) so prices never animate from 0. */
 function countUpNow(el, target, dec, prefix){
   if(!el) return;
   const fmt = function(v){
