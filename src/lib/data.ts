@@ -146,7 +146,7 @@ const SOUTH: Province[] = [
 
 export const PROVINCES: Province[] = [...NORTH, ...NE, ...CENTRAL, ...EAST_WEST, ...SOUTH];
 
-/* ---------- CROPS (10) ---------- */
+/* ---------- CROPS (25) ---------- */
 export const CROPS: Crop[] = [
   {
     id: 'durian', th: 'ทุเรียน', en: 'Durian', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 150, dec: 1,
@@ -217,6 +217,111 @@ export const CROPS: Crop[] = [
     harvest: [7, 9], peak: [8, 9], grades: false,
     main: ['chiangmai', 'chiangrai', 'lamphun', 'lampang', 'phayao', 'nan'],
     tip: { th: 'ลำไยเกรด AA–C ราคาต่างกันมาก · คัดเกรดก่อนขาย ลำไยนอกฤดูราคาดีแต่ต้นทุนสูง', en: 'Grades AA–C differ hugely in price · sort before selling; off-season longan pays more but costs more.' }
+  },
+  {
+    id: 'pork', th: 'สุกร', en: 'Pork', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 73.6, dec: 2,
+    season: [1.06, 1.08, 1.02, 0.98, 0.97, 0.98, 1.0, 1.02, 1.03, 1.04, 1.05, 1.07],
+    harvest: [1, 12], peak: [1, 2, 12], grades: false,
+    main: ['nakhonpathom', 'ratchaburi', 'chachoengsao', 'chonburi', 'lophuri', 'saraburi', 'khonkaen', 'chiangmai', 'phayao', 'nakhonratchasima', 'suphanburi', 'ayutthaya'],
+    tip: { th: 'ราคาสุกรผูกกับต้นทุนอาหารสัตว์ (ข้าวโพด–กากถั่ว) · ช่วงเทศกาลตรุษจีน–ปีใหม่ ความต้องการพุ่ง ราคาดี', en: 'Pig prices track feed costs (maize–soybean) · demand spikes around Chinese New Year and New Year holidays.' }
+  },
+  {
+    id: 'egg', th: 'ไข่ไก่', en: 'Egg', unit: { th: 'บาท/ฟอง', en: 'THB/egg' }, base: 3.5, dec: 2,
+    season: [1.0, 1.02, 1.05, 1.08, 1.06, 1.02, 0.98, 0.96, 0.95, 0.96, 0.98, 1.0],
+    harvest: [1, 12], peak: [4, 5], grades: false,
+    main: ['chachoengsao', 'chonburi', 'nakhonpathom', 'saraburi', 'lophuri', 'ayutthaya', 'nakhonratchasima', 'chiangmai'],
+    tip: { th: 'หน้าร้อนไก่ไข่น้อยลง ราคามักขึ้น · ฟองใหญ่ (เบอร์ 0–2) ได้ราคาแพงกว่าฟองเล็ก', en: 'Hot season cuts egg output and lifts prices · larger eggs (sizes 0–2) fetch a premium.' }
+  },
+  {
+    id: 'broiler', th: 'ไก่เนื้อ', en: 'Broiler', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 42.2, dec: 2,
+    season: [1.05, 1.06, 1.02, 0.99, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05],
+    harvest: [1, 12], peak: [1, 2, 12], grades: false,
+    main: ['chonburi', 'chachoengsao', 'nakhonpathom', 'saraburi', 'lophuri', 'ayutthaya', 'khonkaen', 'nakhonratchasima'],
+    tip: { th: 'ไก่เนื้อราคาผูกกับต้นทุนอาหารและกำลังผลิตของฟาร์มรายใหญ่ · ช่วงเทศกาลราคาดี', en: 'Broiler prices track feed costs and big-farm supply · holiday seasons pay better.' }
+  },
+  {
+    id: 'beef', th: 'โคเนื้อ', en: 'Beef', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 49.9, dec: 1,
+    season: [1.02, 1.0, 0.98, 0.97, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04],
+    harvest: [1, 12], peak: [12, 1], grades: false,
+    main: ['nakhonratchasima', 'buriram', 'surin', 'srisaket', 'amnatcharoen', 'ubon', 'loei', 'kanchanaburi', 'suphanburi', 'phetchaburi'],
+    tip: { th: 'โคขุนน้ำหนัก 350–450 กก. ขายได้ราคาดี · ช่วงปีใหม่–ตรุษจีน ความต้องการเนื้อวัวพุ่ง', en: 'Fattened cattle at 350–450 kg sell well · beef demand peaks around New Year and Chinese New Year.' }
+  },
+  {
+    id: 'shrimp', th: 'กุ้ง', en: 'Shrimp', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 141, dec: 1,
+    season: [1.08, 1.1, 1.05, 1.0, 0.96, 0.95, 0.96, 0.98, 1.0, 1.02, 1.05, 1.07],
+    harvest: [1, 12], peak: [12, 1, 2], grades: false,
+    main: ['suratthani', 'nakhonsithammarat', 'songkhla', 'phatthalung', 'trang', 'chanthaburi', 'rayong', 'trat', 'samutsakhon', 'samutprakan'],
+    tip: { th: 'กุ้งขาวไซซ์ใหญ่ (70 ตัว/กก.) ราคาดีกว่าไซซ์เล็ก · โรคระบาด (EMS) ลดผลผลิตทั่วโลก ดันราคาขึ้น', en: 'Large white shrimp (70/kg) fetch more than small sizes · disease outbreaks (EMS) cut global supply and lift prices.' }
+  },
+  {
+    id: 'tilapia', th: 'ปลานิล', en: 'Tilapia', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 60, dec: 1,
+    season: [1.04, 1.05, 1.02, 0.99, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05],
+    harvest: [1, 12], peak: [1, 2], grades: false,
+    main: ['nakhonpathom', 'ayutthaya', 'suphanburi', 'nakhonsawan', 'phichit', 'khonkaen', 'udonthani', 'nakhonratchasima'],
+    tip: { th: 'ปลานิลขนาด 500 กรัมขึ้นไปราคาดี · ปล่อยรุ่นใหม่ช่วงต้นปี ราคามักสูงก่อนผลผลิตออกพร้อมกัน', en: 'Tilapia over 500 g fetch better prices · restock early in the year before supply floods the market.' }
+  },
+  {
+    id: 'milk', th: 'น้ำนมดิบ', en: 'Raw milk', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 21.4, dec: 2,
+    season: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    harvest: [1, 12], peak: [], grades: false,
+    main: ['lophuri', 'saraburi', 'nakhonratchasima', 'chiangmai', 'chiangrai', 'khonkaen', 'nakhonpathom', 'ratchaburi'],
+    tip: { th: 'ราคาน้ำนมดิบถูกกำหนดโดยคณะกรรมการโคนมฯ ตามต้นทุนอาหาร · ฤดูแล้งผลผลิตลด ราคามักขยับขึ้น', en: 'Raw milk prices are set by the dairy board based on feed costs · dry-season output dips usually nudge prices up.' }
+  },
+  {
+    id: 'coffee', th: 'กาแฟ', en: 'Coffee', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 188, dec: 1,
+    season: [1.1, 1.12, 1.08, 1.02, 0.97, 0.95, 0.96, 0.98, 1.0, 1.03, 1.06, 1.08],
+    harvest: [11, 2], peak: [1, 2], grades: false,
+    main: ['chiangmai', 'chiangrai', 'maehongson', 'tak', 'lamphun', 'ranong', 'chumphon', 'suratthani'],
+    tip: { th: 'กาแฟอาราบิก้า (เหนือ) ราคาสูงกว่าโรบัสต้า (ใต้) · ราคาโลกผันผวนตามสภาพอากาศในบราซิล–เวียดนาม', en: 'Arabica (North) out-prices Robusta (South) · world prices swing with weather in Brazil and Vietnam.' }
+  },
+  {
+    id: 'coconut', th: 'มะพร้าว', en: 'Coconut', unit: { th: 'บาท/ผล', en: 'THB/fruit' }, base: 7.9, dec: 2,
+    season: [1.04, 1.03, 1.01, 0.99, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05],
+    harvest: [1, 12], peak: [], grades: false,
+    main: ['prachuapkhirikhan', 'chumphon', 'suratthani', 'nakhonsithammarat', 'samutsongkhram', 'samutsakhon', 'rayong', 'chonburi'],
+    tip: { th: 'มะพร้าวแกง–มะพร้าวน้ำหอมราคาต่างกันมาก · ภัยแล้ง–น้ำเค็มลดผลผลิต ดันราคาขึ้น', en: 'Cooking vs aromatic coconuts differ hugely in price · drought and saltwater intrusion cut supply and lift prices.' }
+  },
+  {
+    id: 'pineapple', th: 'สับปะรด', en: 'Pineapple', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 12, dec: 1,
+    season: [1.1, 1.12, 1.15, 1.12, 1.05, 0.98, 0.95, 0.96, 0.98, 1.0, 1.03, 1.06],
+    harvest: [1, 12], peak: [3, 4, 5], grades: false,
+    main: ['prachuapkhirikhan', 'phetchaburi', 'rayong', 'chonburi', 'nakhonratchasima', 'khonkaen'],
+    tip: { th: 'สับปะรดโรงงาน (ปัตตาเวีย) ราคาต่ำกว่าพันธุ์กินสด · ผลผลิตพร้อมกัน มี.ค.–พ.ค. ราคามักต่ำสุด', en: 'Processing pineapples (Pattavia) sell below fresh-eating varieties · the Mar–May glut usually bottoms prices.' }
+  },
+  {
+    id: 'onion', th: 'หอมหัวใหญ่', en: 'Onion', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 25, dec: 1,
+    season: [1.15, 1.2, 1.18, 1.1, 1.0, 0.95, 0.93, 0.94, 0.96, 0.98, 1.02, 1.08],
+    harvest: [2, 4], peak: [3, 4], grades: false,
+    main: ['tak', 'chiangmai', 'lamphun', 'maehongson'],
+    tip: { th: 'หอมหัวใหญ่เก็บเกี่ยว มี.ค.–เม.ย. · เก็บในโรงเรือนระบายอากาศดี ขายยืดเวลาได้', en: 'Onions harvest Mar–Apr · store in a well-ventilated shed to stretch the selling window.' }
+  },
+  {
+    id: 'shallot', th: 'หอมแดง', en: 'Shallot', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 35, dec: 1,
+    season: [1.12, 1.18, 1.2, 1.15, 1.05, 0.97, 0.94, 0.95, 0.97, 1.0, 1.04, 1.08],
+    harvest: [2, 4], peak: [3, 4], grades: false,
+    main: ['srisaket', 'phichit', 'nakhonsawan', 'chiangmai', 'lamphun'],
+    tip: { th: 'หอมแดงศรีสะเกษขึ้นชื่อ · เก็บตากให้แห้งสนิทก่อนมัดขาย ป้องกันเน่าเสียระหว่างขนส่ง', en: 'Si Sa Ket shallots are famous · dry them thoroughly before bundling to prevent rot in transit.' }
+  },
+  {
+    id: 'garlic', th: 'กระเทียม', en: 'Garlic', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 90, dec: 1,
+    season: [1.2, 1.25, 1.22, 1.1, 1.0, 0.95, 0.93, 0.94, 0.96, 0.98, 1.02, 1.1],
+    harvest: [1, 3], peak: [2, 3], grades: false,
+    main: ['maehongson', 'chiangmai', 'lamphun', 'srisaket', 'phichit'],
+    tip: { th: 'กระเทียมไทยแข่งกับนำเข้า (จีน) · เก็บเกี่ยว ม.ค.–มี.ค. กระเทียมกลีบใหญ่ราคาดีกว่า', en: 'Thai garlic competes with Chinese imports · harvests run Jan–Mar; large-clove garlic sells better.' }
+  },
+  {
+    id: 'mango', th: 'มะม่วง', en: 'Mango', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 28, dec: 1,
+    season: [1.1, 1.15, 1.2, 1.18, 1.1, 1.0, 0.95, 0.94, 0.96, 0.98, 1.0, 1.05],
+    harvest: [3, 6], peak: [4, 5], grades: false,
+    main: ['chachoengsao', 'nakhonpathom', 'phetchaburi', 'chiangmai', 'phitsanulok', 'nakhonratchasima', 'rayong'],
+    tip: { th: 'มะม่วงน้ำดอกไม้–เขียวเสวยราคาต่างกัน · ช่วงผลผลิตพร้อมกัน เม.ย.–พ.ค. ราคามักต่ำสุด', en: 'Nam Dok Mai vs Kiew Sawoey differ in price · the Apr–May glut usually brings the lowest prices.' }
+  },
+  {
+    id: 'banana', th: 'กล้วย', en: 'Banana', unit: { th: 'บาท/กก.', en: 'THB/kg' }, base: 20, dec: 1,
+    season: [1.03, 1.02, 1.0, 0.98, 0.97, 0.98, 0.99, 1.0, 1.01, 1.02, 1.03, 1.04],
+    harvest: [1, 12], peak: [], grades: false,
+    main: ['tak', 'kanchanaburi', 'ratchaburi', 'phetchaburi', 'nakhonsawan', 'phitsanulok', 'chumphon'],
+    tip: { th: 'กล้วยน้ำว้า–หอมทองราคาต่างกัน · ตัดเป็นหวีคัดขนาดขายได้ราคาดีกว่าขายทั้งเครือ', en: 'Nam Wa vs Hom Thong differ in price · cutting and sizing hands sells better than whole bunches.' }
   }
 ];
 

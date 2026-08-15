@@ -7,7 +7,7 @@
    3. vite.config.ts PWA must precache the app shell and never cache /api.
    4. Every i18n key used by src code must exist in BOTH T.th and T.en.
    5. The brand-mark SVG grammar must stay intact (single source: BrandMark.tsx).
-   6. Dataset contract: 77 provinces, 10 crops, 4 grades; engine CUR_WEEK = 32. */
+   6. Dataset contract: 77 provinces, 25 crops, 4 grades; engine CUR_WEEK = 32. */
 'use strict';
 const assert = require('assert');
 const fs = require('fs');
@@ -182,7 +182,7 @@ const data = readSrc('lib/data.ts');
 const provBlock = data.slice(data.indexOf('const NORTH'), data.indexOf('export const PROVINCES'));
 ok('data.ts defines 77 provinces', (provBlock.match(/\{ id: '/g) || []).length === 77);
 const cropBlock = data.slice(data.indexOf('export const CROPS'), data.indexOf('export const cropById'));
-ok('data.ts defines 10 crops', (cropBlock.match(/id: '/g) || []).length === 10);
+ok('data.ts defines 25 crops', (cropBlock.match(/id: '/g) || []).length === 25);
 ok('GRADES A/B/C/D intact', data.includes('A: 1.15') && data.includes('B: 1.0') && data.includes('C: 0.85') && data.includes('D: 0.7'));
 
 console.log('engine contract:');

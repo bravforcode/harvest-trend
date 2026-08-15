@@ -35,7 +35,7 @@ export function HomePage() {
         <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-moss">{t.heroSub}</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[13px] font-semibold text-moss">
           <span><strong className="text-forest">77</strong> {t.heroStat1}</span>
-          <span><strong className="text-forest">10</strong> {t.heroStat2}</span>
+          <span><strong className="text-forest">25</strong> {t.heroStat2}</span>
           <span><strong className="text-forest">4</strong> {t.heroStat3}</span>
         </div>
         <Button variant="gold" size="lg" className="mt-5" onClick={scrollToPicker}>

@@ -3,15 +3,23 @@
 
   Sources (all real government data, verified reachable):
     1. data.go.th — Thai Government Open Data (CKAN datastore API, no key required)
-       - สำนักงานจังหวัดตราด · ราคาทุเรียนเฉลี่ย (yearly)
-       - สำนักงานจังหวัดตราด · ราคาเงาะ (monthly)
-       - สำนักงานจังหวัดอำนาจเจริญ · ราคาอ้อย (yearly)
-       - สำนักงานจังหวัดอำนาจเจริญ · ราคายางพารา (yearly)
+       - สำนักงานจังหวัดตราด · ราคาทุเรียนเฉลี่ย (yearly) / ราคาเงาะ (monthly)
+       - สำนักงานจังหวัดอำนาจเจริญ · ราคาอ้อย / ราคายางพารา / ราคาโคเนื้อ (yearly)
        - สำนักงานจังหวัดแม่ฮ่องสอน · ราคาข้าวเปลือก / ราคาข้าวโพดเลี้ยงสัตว์ (yearly)
        - สำนักงานจังหวัดสุราษฎร์ธานี · ราคาเฉลี่ยผลปาล์มน้ำมัน (monthly)
-       - สำนักงานเศรษฐกิจการเกษตร (OAE) · ราคามันสำปะหลังสด (national, monthly)
-    2. BOT (ธนาคารแห่งประเทศไทย) — BTWS_STAT reportID=491
-       ราคาสินค้าเกษตรสำคัญที่เกษตรกรขายได้ในภาคเหนือ (monthly, current year)
+       - สำนักงานจังหวัดลพบุรี · ข้าวหอมมะลิ/ข้าวเจ้า/ข้าวโพด/มันสำปะหลัง/สุกร/ไก่เนื้อ (yearly) + น้ำนมดิบ (monthly)
+       - สำนักงานพาณิชย์จังหวัดสุพรรณบุรี · ราคาข้าวเปลือกเจ้า 15% (monthly)
+       - สำนักงานจังหวัดปราจีนบุรี · ราคาทุเรียน (yearly)
+       - สำนักงานจังหวัดฉะเชิงเทรา · ราคาขายปลีกมะม่วง (yearly)
+       - สำนักงานจังหวัดตาก · ราคากล้วยน้ำว้า (yearly)
+       - สำนักงานเศรษฐกิจการเกษตร (OAE) · มันสำปะหลังสด (national, monthly)
+       - OAE · สุกร / ไข่ไก่ / ไก่เนื้อ / โคเนื้อ / กุ้งขาว / กาแฟ (national, monthly)
+    2. BOT (ธนาคารแห่งประเทศไทย) — BTWS_STAT
+       - reportID=491 ราคาสินค้าเกษตรภาคเหนือ (monthly)
+       - reportID=545 ราคาสินค้าเกษตรภาคตะวันออกเฉียงเหนือ (monthly)
+       - reportID=588 ราคาสินค้าเกษตรภาคใต้ (monthly)
+       - reportID=997 สถิติการเกษตรภาคใต้ (monthly)
+       - reportID=89 ราคาขายส่งตลาดสำคัญ กทม. (ข้าวสาร/ยาง/ข้าวโพด/มันสำปะหลัง)
 
   In-memory cache TTL 60s (Vercel instance). GET /api/prices → JSON snapshot.
   Exports fetchPrices() for api/line-webhook.js and _internals for tests.
@@ -86,6 +94,14 @@ const lastByMonth = (recs, getYear, getMonth) => recs.reduce((best, r) => {
   return (!best || y > best._y || (y === best._y && m > best._m)) ? Object.assign({ _y: y, _m: m }, r) : best;
 }, null);
 
+/* OAE national monthly datasets: filter to ประเทศไทย rows, take latest month */
+const oaeLatest = async rid => {
+  const recs = await datastoreAll(rid);
+  const nat = recs.filter(r => String(r['regional_name'] || '').trim() === 'ประเทศไทย');
+  return lastByMonth(nat, r => r['year'], r => r['month'] - 1);
+};
+const oaeDate = r => String(r['year']) + '/' + String(r['month']).padStart(2, '0');
+
 /* ---------- source registry (crop → real datasets) ---------- */
 const SOURCES = [
   { crop: 'durian',    prov: 'trat',            label: 'สำนักงานจังหวัดตราด', dateOf: 'ปี (เฉลี่ยรายปี)',
@@ -132,13 +148,87 @@ const SOURCES = [
   { crop: 'cassava',   prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
     load: async () => lastByMonth(await datastoreAll('d21158de-0193-4f3b-b703-fc350687106a'), r => r['year'], r => r['month'] - 1),
     to: r => ({ price: num(r['value']), date: String(r['year']) + '/' + String(r['month']).padStart(2, '0'), unit: 'บาท/กก.' }) },
+
+  /* OAE national (monthly, current year) — livestock / fishery / coffee */
+  { crop: 'pork',     prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('d39fc22e-625b-4e89-8ca4-843fc52f9783'),
+    to: r => ({ price: num(r['Value']), date: oaeDate(r), unit: 'บาท/กก.' }) },
+  { crop: 'egg',      prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('10ebc3b6-d5ba-4025-b5f3-261b71a6458c'),
+    to: r => ({ price: num(r['value']) / 100, date: oaeDate(r), unit: 'บาท/ฟอง' }) }, // บาท/ร้อยฟอง → บาท/ฟอง
+  { crop: 'broiler',  prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('8d6439a5-ddab-4744-b530-a464499ad8f5'),
+    to: r => ({ price: num(r['value']), date: oaeDate(r), unit: 'บาท/กก.' }) },
+  { crop: 'beef',     prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('ecf31b91-5042-4908-b3d2-689343a421e1'),
+    to: r => ({ price: num(r['value']) / 400, date: oaeDate(r), unit: 'บาท/กก.' }) }, // บาท/ตัว (350–450 กก.) → บาท/กก.
+  { crop: 'shrimp',   prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('e78db1eb-672b-44d9-8500-4848446fe73f'),
+    to: r => ({ price: num(r['value']), date: oaeDate(r), unit: 'บาท/กก.' }) },
+  { crop: 'coffee',   prov: '*',               label: 'สำนักงานเศรษฐกิจการเกษตร (OAE) · ทั้งประเทศ', dateOf: 'ปี/เดือน',
+    load: async () => oaeLatest('90815570-5733-4889-ae90-e88e1298e23c'),
+    to: r => ({ price: num(r['values']), date: oaeDate(r), unit: 'บาท/กก.' }) },
+
+  /* provincial offices (data.go.th) */
+  { crop: 'milk',     prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี (น้ำนมดิบ)', dateOf: 'ปี/เดือน',
+    load: async () => lastByMonth(await datastoreAll('b6d3376e-b511-4288-a445-4d6d9effc873'), r => r['ปี'], r => thMonthIdx(r['เดือน'])),
+    to: r => ({ price: num(r['ราคารับซื้อ']), date: String(r['ปี']) + '/' + TH_MONTHS[thMonthIdx(r['เดือน'])], unit: 'บาท/กก.' }) },
+  { crop: 'pork',     prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('99a86152-369d-4567-906d-67f2dfaf37c7'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'broiler',  prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('4fad26ab-18c1-4b37-823c-b7f550514a2f'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'rice',     prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี (ข้าวหอมมะลิ)', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('14f201d4-d176-494a-b68a-6e1bc6184b62'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']) / 1000, date: String(r['ปี']), unit: 'บาท/กก.' }) }, // บาท/ตัน → บาท/กก.
+  { crop: 'rice',     prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี (ข้าวเปลือกเจ้า)', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('b83fb2fa-f226-4b48-9b04-7941dc7d6000'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']) / 1000, date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'maize',    prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('c0471ba8-ff34-4c5b-bd2c-b2bae38b2881'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']) / 1000, date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'cassava',  prov: 'lophuri',         label: 'สำนักงานจังหวัดลพบุรี', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('2978b279-131d-43d7-be81-d162a9c4a8bc'), r => r['ปี']),
+    to: r => ({ price: num(r['จำนวน']) / 1000, date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'rice',     prov: 'suphanburi',      label: 'สำนักงานพาณิชย์จังหวัดสุพรรณบุรี (ข้าวเปลือกเจ้า 15%)', dateOf: 'ปี/เดือน',
+    load: async () => {
+      const recs = await datastoreAll('5628dc6c-fe2f-4315-b53d-ceac3cb61006');
+      const plain = recs.filter(r => String(r['ชนิดข้าว'] || '').indexOf('ข้าวเปลือกเจ้า') !== -1);
+      return lastByMonth(plain, r => r['ปี'], r => thMonthIdx(r['เดือน']));
+    },
+    to: r => ({ price: num(r['ราคาเฉลี่ย']) / 1000, date: String(r['ปี']) + '/' + TH_MONTHS[thMonthIdx(r['เดือน'])], unit: 'บาท/กก.' }) },
+  { crop: 'durian',   prov: 'prachinburi',     label: 'สำนักงานจังหวัดปราจีนบุรี', dateOf: 'ปี',
+    load: async () => lastByYear(await datastoreAll('a3d2bf90-917a-478b-9044-14440e7d17b0'), r => r['ปี']),
+    to: r => ({ price: num(r['ราคาที่เกษตรกรขายได้']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'mango',    prov: 'chachoengsao',    label: 'สำนักงานจังหวัดฉะเชิงเทรา (ขายปลีก)', dateOf: 'ปี',
+    load: async () => {
+      const recs = await datastoreAll('b3c8c409-7f67-4c56-8cac-3a88e867837b');
+      const retail = recs.filter(r => String(r['ประเภท'] || '').indexOf('ขายปลีก') !== -1);
+      return lastByYear(retail, r => r['ปี']);
+    },
+    to: r => ({ price: num(r['ราคา']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'banana',   prov: 'tak',             label: 'สำนักงานจังหวัดตาก (กล้วยน้ำว้า)', dateOf: 'ปี',
+    load: async () => {
+      const recs = await datastoreAll('1569291f-bc2b-45c2-97ab-ba466954f995');
+      const nw = recs.filter(r => String(r['รายการ'] || '').indexOf('กล้วยน้ำว้า') !== -1);
+      return lastByYear(nw, r => r['ปี']);
+    },
+    to: r => ({ price: num(r['บาท/กก.']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
+  { crop: 'beef',     prov: 'amnatcharoen',    label: 'สำนักงานจังหวัดอำนาจเจริญ (โคเนื้อ)', dateOf: 'ปี',
+    load: async () => {
+      const recs = await datastoreAll('3da73315-ac80-4bf2-ad59-b8ca68f93f06');
+      const beef = recs.filter(r => String(r['ประเภท'] || '').indexOf('โคเนื้อ') !== -1);
+      return lastByYear(beef, r => r['ปี']);
+    },
+    to: r => ({ price: num(r['ข้อมูล']), date: String(r['ปี']), unit: 'บาท/กก.' }) },
 ];
 
 /* ---------- BOT (ธปท.) reports — HTML tables, works from Vercel ---------- */
-/* pick: 'last' → values are months left→right (rightmost = latest, report 491)
-          'first' → values are [current, previous] (leftmost = latest, 997/89)  */
+/* All BOT tables render months left→right with the LATEST month leftmost
+   (verified against the <th> headers: มิ.ย. 2569 … ม.ค. 2569) → pick 'first'. */
 const BOT_REPORTS = [
-  { id: 491, prov: 'rg:north', pick: 'last', label: 'ธนาคารแห่งประเทศไทย · ภาคเหนือ', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
+  { id: 491, prov: 'rg:north', pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ภาคเหนือ', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
     rows: [
       { re: /ข้าวเปลือก/,  crop: 'rice',      tag: 'ข้าวเปลือก',  prio: name => /ข้าวเปลือกเหนียว/.test(name) ? 1 : (/ข้าวเปลือกเจ้า/.test(name) ? 3 : 2) },
       { re: /ข้าวโพด/,    crop: 'maize',     tag: 'ข้าวโพด' },
@@ -153,10 +243,33 @@ const BOT_REPORTS = [
       { re: /ทุเรียน/,    crop: 'durian', tag: 'ทุเรียน' }
     ] },
   { id: 89,  prov: 'rg:*',   pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ราคาขายส่งตลาดสำคัญ (กรุงเทพฯ)', source: 'ธนาคารแห่งประเทศไทย (ขายส่ง)',
-    /* product group rows: "ยางแผ่นรมควัน 1/" followed by "ชั้น 1/2/3" sub-rows */
+    /* product group rows: "ยางแผ่นรมควัน 1/" followed by "ชั้น 1/2/3" sub-rows; "ข้าวสาร" followed by "100%/5%/..." */
     rows: [
+      { re: /^ข้าวสาร$/,     group: true, crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวสาร', prio: name => /%/.test(name) ? 2 : 0 },
+      { re: /^ปลายข้าว/,     crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ปลายข้าว', prio: name => 1 },
       { re: /ยางแผ่นรมควัน/, group: true, crop: 'rubber', div: 1000, unit: 'บาท/กก.', tag: 'ยางพารา' },
-      { re: /^ข้าวโพด$/,     crop: 'maize', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวโพด' }
+      { re: /^ข้าวโพด$/,     crop: 'maize', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวโพด' },
+      { re: /^แป้งมัน/,      crop: 'cassava', div: 1000, unit: 'บาท/กก.', tag: 'แป้งมัน' },
+      { re: /^มันอัดเม็ด/,    crop: 'cassava', div: 1000, unit: 'บาท/กก.', tag: 'มันอัดเม็ด', prio: name => 1 }
+    ] },
+  { id: 545, prov: 'rg:ne', pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ภาคตะวันออกเฉียงเหนือ', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
+    rows: [
+      { re: /ข้าวเปลือกหอมมะลิ/, crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวหอมมะลิ', prio: name => 4 },
+      { re: /ข้าวเปลือกเจ้า/,    crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวเจ้า', prio: name => 3 },
+      { re: /ข้าวเปลือก/,       crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวเหนียว', prio: name => 2 },
+      { re: /หัวมันสำปะหลัง/,   crop: 'cassava', tag: 'มันสำปะหลัง' },
+      { re: /มันเส้น/,          crop: 'cassava', tag: 'มันเส้น', prio: name => 1 },
+      { re: /อ้อย/,             crop: 'sugarcane', unit: 'บาท/ตัน', tag: 'อ้อยโรงงาน' },
+      { re: /ข้าวโพด/,          crop: 'maize', tag: 'ข้าวโพด' },
+      { re: /ยางพารา/,          crop: 'rubber', tag: 'ยางพารา' }
+    ] },
+  { id: 588, prov: 'rg:south', pick: 'first', label: 'ธนาคารแห่งประเทศไทย · ภาคใต้', source: 'ธนาคารแห่งประเทศไทย (รายเดือน)',
+    rows: [
+      { re: /ยางแผ่นดิบ/,   crop: 'rubber', tag: 'ยางแผ่นดิบ' },
+      { re: /ปาล์มทั้งทะลาย/, crop: 'palm', tag: 'ปาล์มน้ำมัน' },
+      { re: /เมล็ดกาแฟ/,    crop: 'coffee', tag: 'กาแฟ' },
+      { re: /มะพร้าว/,      crop: 'coconut', div: 100, unit: 'บาท/ผล', tag: 'มะพร้าว' },
+      { re: /ข้าวเปลือกเจ้า/, crop: 'rice', div: 1000, unit: 'บาท/กก.', tag: 'ข้าวเจ้า 25%' }
     ] }
 ];
 
@@ -204,7 +317,7 @@ function normalizeBot(rows, report){
         break;
       }
     }
-    if(!spec && group && /ชั้น/.test(name)) spec = group;
+    if(!spec && group && (/ชั้น/.test(name) || /%/.test(name))) spec = group;
     if(!spec || val === null) continue;
     const prio = (spec.prio && spec.prio(name)) || 0;
     const cur = seen[spec.crop];
