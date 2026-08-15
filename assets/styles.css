@@ -706,11 +706,13 @@
   .btn-gold:active::before, .btn-forest:active::before, .btn-warn:active::before { background:rgba(28,46,32,.1); }
   .btn-gold>*,.btn-forest>*,.btn-warn>*{position:relative;z-index:1;}
 
-  /* 1.3 Shine sweep utility — gradient text (no per-character animation; Thai-safe) */
+  /* 1.3 Shine sweep utility — gradient text (no per-character animation; Thai-safe).
+     Base colour stays visible (alpha .7); the clipped gradient band brightens it. */
   .shine-gold {
-    background:linear-gradient(120deg, transparent 40%, rgba(255,253,246,.9) 50%, transparent 60%);
+    color:rgba(243,227,188,.7);
+    background:linear-gradient(120deg, rgba(243,227,188,0) 40%, rgba(255,253,246,.9) 50%, rgba(243,227,188,0) 60%);
     background-size:200% 100%;
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    -webkit-background-clip:text; background-clip:text;
     animation:shineSweep 8s linear infinite;
   }
   .shine-static {
