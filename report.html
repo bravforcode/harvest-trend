@@ -104,7 +104,7 @@
 </header>
 
 <main class="wrap" id="main">
-  <section id="report" class="panel" aria-labelledby="report-title">
+  <section id="report" class="panel rv" aria-labelledby="report-title">
     <h2 id="report-title" data-i18n="reportTitle">ช่วยรายงานราคาที่ขายได้จริง</h2>
     <p class="sub" id="report-sub" data-i18n="reportSub"></p>
     <div class="report-grid">
@@ -121,6 +121,8 @@
           <label for="rep-price" data-i18n="fPrice">ราคาที่ขายได้ (บาท/หน่วย)</label>
           <input id="rep-price" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="เช่น 150" data-i18n-ph="fPricePh">
           <div class="hint" id="rep-price-hint"></div>
+          <div class="err-msg" id="rep-price-err" data-i18n="repBad">กรุณากรอกราคาที่ถูกต้อง</div>
+          <div class="watch-row" id="rep-quick-row"></div>
         </div>
         <div class="field">
           <label for="rep-note" data-i18n="fNote">หมายเหตุ (ไม่บังคับ)</label>
@@ -134,7 +136,12 @@
       <div>
         <h3 class="sub" style="font-size:14px;font-weight:700;color:var(--ink);margin:0 0 8px" data-i18n="repListT">รายงานล่าสุดในเครื่องนี้</h3>
         <div class="rep-list" id="rep-list"></div>
-        <p class="rep-empty" id="rep-empty" data-i18n="repEmpty">ยังไม่มีรายงาน · ข้อมูลจะถูกบันทึกในเครื่องของคุณเท่านั้น (ต้นแบบ)</p>
+        <div class="empty-box" id="rep-empty" hidden>
+          <span class="empty-ic" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M8 14l4-4 4 4"/><path d="M4 4h16"/></svg>
+          </span>
+          <p class="empty-ds" data-i18n="repEmpty">ยังไม่มีรายงาน · ข้อมูลจะถูกบันทึกในเครื่องของคุณเท่านั้น (ต้นแบบ)</p>
+        </div>
         <p class="watch-tip" data-i18n="repTip">ข้อมูลนี้เก็บใน localStorage ของเบราว์เซอร์คุณเท่านั้น ไม่มีการส่งไปยังเซิร์ฟเวอร์ ในเวอร์ชันจริงจะถูกส่งเข้าระบบเพื่อช่วยให้ทุกคนเห็นราคาตลาดสด</p>
       </div>
     </div>
@@ -163,15 +170,37 @@ function updateRepForm(){
   $('rep-prov').value = p[state.lang] + ' · ' + REGIONS[p.rg][state.lang];
   $('rep-crop').value = c[state.lang] + ' (' + c.unit[state.lang] + ')';
   $('rep-price-hint').textContent = T[state.lang].priceSubTpl.replace('{crop}', c[state.lang]);
+  renderQuickFill();
 }
 
+/* one-tap fill from the engine's current estimate (labelled "โดยประมาณ") */
+function renderQuickFill(){
+  const row = $('rep-quick-row');
+  if(!row) return;
+  const t = T[state.lang], c = cropById(state.crop);
+  const sg = signals();
+  const last = sg.series.a[sg.series.a.length - 1];
+  const v = fmtVal(last);
+  row.innerHTML = '<button type="button" class="reg-chip" id="rep-quick-btn">' +
+    t.repQuick.replace('{p}', '~' + v + ' ' + c.unit[state.lang]) + '</button>';
+  $('rep-quick-btn').addEventListener('click', function(){
+    $('rep-price').value = v;
+    const f = $('rep-price').closest('.field');
+    if(f) f.classList.remove('invalid');
+    $('rep-price').removeAttribute('aria-invalid');
+    $('rep-price').focus();
+  });
+}
+
+var repShowAll = false;
 function renderReports(){
   const t = T[state.lang];
   const reps = store.get(REP_KEY, []);
   const list = $('rep-list');
   list.innerHTML = '';
   $('rep-empty').hidden = reps.length > 0;
-  reps.slice(0, 12).forEach((r, i) => {
+  const limit = repShowAll ? reps.length : 12;
+  reps.slice(0, limit).forEach((r, i) => {
     const p = provById(r.p), c = cropById(r.c);
     const div = document.createElement('div');
     div.className = 'rep-item';
@@ -182,13 +211,41 @@ function renderReports(){
       '<button class="rep-del" data-ri="' + i + '" aria-label="' + t.del + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
     list.appendChild(div);
   });
+  const old = document.getElementById('rep-more');
+  if(old) old.remove();
+  if(reps.length > 12){
+    const b = document.createElement('button');
+    b.className = 'btn btn-ghost';
+    b.id = 'rep-more';
+    b.textContent = t[repShowAll ? 'repCollapse' : 'repShowAll'].replace('{n}', reps.length);
+    b.addEventListener('click', function(){
+      repShowAll = !repShowAll;
+      renderReports();
+    });
+    const empty = $('rep-empty');
+    empty.parentNode.insertBefore(b, empty);
+  }
 }
 
 function submitReport(ev){
   ev.preventDefault();
   const t = T[state.lang];
+  const btn = $('rep-submit');
+  if(btn.classList.contains('is-loading')) return;
+  const field = $('rep-price').closest('.field');
   const price = parseFloat($('rep-price').value);
-  if(!(price > 0)){ toast(t.repBad); $('rep-price').focus(); return; }
+  if(!(price > 0)){
+    field.classList.add('invalid');
+    $('rep-price').setAttribute('aria-invalid', 'true');
+    toast(t.repBad, 'err');
+    $('rep-price').focus();
+    return;
+  }
+  field.classList.remove('invalid');
+  $('rep-price').removeAttribute('aria-invalid');
+  ensureBtnLbl(btn);
+  btn.classList.add('is-loading');
+  btn.disabled = true;
   const reps = store.get(REP_KEY, []);
   reps.unshift({
     p: state.prov, c: state.crop, price: fmtVal(price),
@@ -197,7 +254,11 @@ function submitReport(ev){
   store.set(REP_KEY, reps.slice(0, 60));
   $('rep-price').value = ''; $('rep-note').value = '';
   renderReports();
-  toast(t.repSaved);
+  btn.classList.remove('is-loading');
+  btn.classList.add('is-success');
+  btn.disabled = false;
+  setTimeout(function(){ btn.classList.remove('is-success'); }, 1400);
+  toast(t.repSaved, 'ok');
 }
 
 function renderReportPage(){
@@ -209,6 +270,11 @@ document.addEventListener('DOMContentLoaded', function(){
   hydrateState();
 
   $('rep-form').addEventListener('submit', submitReport);
+  $('rep-price').addEventListener('input', function(){
+    const f = this.closest('.field');
+    if(f) f.classList.remove('invalid');
+    this.removeAttribute('aria-invalid');
+  });
   $('rep-list').addEventListener('click', function(e){
     const b = e.target.closest('[data-ri]'); if(!b) return;
     const reps = store.get(REP_KEY, []);
