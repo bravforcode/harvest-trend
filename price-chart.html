@@ -282,7 +282,7 @@ function renderChart(){
   const sec = $('price'); sec.hidden = false;
   const t = T[state.lang], c = cropById(state.crop), p = provById(state.prov);
   $('price-title').textContent = t.priceTitleTpl.replace('{crop}', c[state.lang]).replace('{prov}', p[state.lang]);
-  $('price-sub').textContent = t.priceSubTpl.replace('{crop}', c[state.lang]);
+  $('price-sub').textContent = (LiveData.ok ? t.livePriceSubTpl : t.priceSubTpl).replace('{crop}', c[state.lang]);
   $('grade-row').hidden = !c.grades;
   if(c.grades) repositionSeg($('grade-row'));
   const sg = signals(), s = sg.series;

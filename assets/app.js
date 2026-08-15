@@ -1075,14 +1075,7 @@ function updateLiveBadge(){
     s.textContent = src;
     s.hidden = false;
   }
-  /* chart subtitle: say it is anchored to the real price when live */
-  const ps = document.getElementById('price-sub');
-  if(ps){
-    const c = cropById(state.crop);
-    ps.textContent = live
-      ? t.livePriceSubTpl.replace('{crop}', c ? c[state.lang] : '')
-      : t.priceSubTpl.replace('{crop}', c ? c[state.lang] : '');
-  }
+  /* chart subtitle text is the chart page's own render concern (renderChart) */
 }
 
 document.addEventListener('DOMContentLoaded', function(){

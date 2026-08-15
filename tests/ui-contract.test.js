@@ -118,4 +118,41 @@ const marks = PAGES.map(p => {
 ok('all 6 pages carry the brand-mark SVG', marks.every(x => !!x));
 ok('brand-mark SVG identical on all 6 pages', marks.every(x => x === marks[0]));
 
+console.log('DOM id contract (every $() id referenced by JS exists in the page):');
+/* ids referenced by shared app.js must exist on EVERY page (it runs on all) */
+function idsUsed(src){
+  const ids = {};
+  const re = /\$\('([^']+)'\)|getElementById\('([^']+)'\)/g;
+  let m;
+  while((m = re.exec(src))){
+    const id = m[1] || m[2];
+    if(id) ids[id] = true;
+  }
+  return Object.keys(ids);
+}
+const appIds = idsUsed(read('assets/app.js'));
+PAGES.forEach(p => {
+  const html = read(p);
+  const idSet = {};
+  let m;
+  const re = /id="([^"]+)"/g;
+  while((m = re.exec(html))) idSet[m[1]] = true;
+  appIds.forEach(id => {
+    ok('app.js id "' + id + '" exists on ' + p, !!idSet[id]);
+  });
+  /* page-specific inline script ids (dynamic ids created by the script itself are exempt) */
+  const scripts = html.split('</script>');
+  scripts.forEach(block => {
+    if(!block.includes('DOMContentLoaded')) return;
+    const created = {};
+    let cm;
+    const cre = /\.id\s*=\s*'([^']+)'/g;
+    while((cm = cre.exec(block))) created[cm[1]] = true;
+    idsUsed(block).forEach(id => {
+      if(created[id]) return;
+      ok(p + ' inline $("' + id + '") exists', !!idSet[id]);
+    });
+  });
+});
+
 console.log('\nui-contract.test.js: ' + n + ' checks OK');
