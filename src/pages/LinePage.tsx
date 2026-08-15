@@ -1,6 +1,7 @@
 /* Harvest Trend · รู้ทันราคา — LINE bot page: status, simulated chat demo,
    add-friend steps, commands, features, FAQ */
 import { useEffect, useRef, useState } from 'react';
+import QRCode from 'qrcode';
 import { Send } from 'lucide-react';
 import { CROPS, PROVINCES } from '@/lib/data';
 import { fmtVal, signalsFor, recommend, verdictSpeech, REC_KEY } from '@/lib/engine';
@@ -37,6 +38,7 @@ export function LinePage() {
   const [msgs, setMsgs] = useState<Msg[]>([{ from: 'bot', text: t.welcome }]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,8 +47,23 @@ export function LinePage() {
       .catch(() => setStatus('fail'));
   }, []);
 
+  /* real add-friend QR (warm orchard colors) */
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    let on = true;
+    QRCode.toDataURL('https://line.me/R/ti/p/@441sptre', {
+      width: 288,
+      margin: 1,
+      color: { dark: '#1C2E20', light: '#FFFDF6' }
+    })
+      .then(u => { if (on) setQrUrl(u); })
+      .catch(() => { /* keep null -> "Generating QR…" label */ });
+    return () => { on = false; };
+  }, []);
+
+  useEffect(() => {
+    /* scroll only the chat box itself — never the page window */
+    const box = endRef.current?.parentElement;
+    if (box) box.scrollTop = box.scrollHeight;
   }, [msgs, typing]);
 
   const botReply = (raw: string): string => {
@@ -168,11 +185,13 @@ export function LinePage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-5">
-            <div className="grid size-36 flex-none place-items-center rounded-2xl border-2 border-dashed border-line bg-ground text-center">
-              <div>
-                <p className="text-[11px] text-moss">{t.qrGen}</p>
-                <p className="mt-1 text-[12px] font-bold text-moss">@441sptre</p>
-              </div>
+            <div className="grid w-40 flex-none place-items-center gap-1 rounded-2xl border border-line bg-paper p-2 text-center">
+              {qrUrl ? (
+                <img src={qrUrl} alt={t.qrAlt.replace('{id}', '@441sptre')} width={128} height={128} className="size-32 rounded-lg" />
+              ) : (
+                <div className="grid size-32 place-items-center"><p className="text-[11px] text-moss">{t.qrGen}</p></div>
+              )}
+              <p className="text-[12px] font-bold text-moss">@441sptre</p>
             </div>
             <ol className="min-w-0 flex-1 space-y-2 text-[13.5px] leading-relaxed">
               <li>{rich(t.step1)}</li>
