@@ -409,12 +409,39 @@ async function sendReply(replyToken, messages){
   }
 }
 
+/* push API: proactive send, no replyToken needed. No-op until a real
+   LINE_CHANNEL_ACCESS_TOKEN is configured — scaffold only, nothing sends yet. */
+async function sendPush(userId, messages){
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  if (!token) return;
+  const r = await fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ to: userId, messages })
+  });
+  if (!r.ok){
+    const t = await r.text().catch(() => '');
+    console.error('[line] push failed HTTP ' + r.status + ': ' + t.slice(0, 300));
+  }
+}
+
 /* in-memory farmer reports — ponytail: prototype only; wiped on cold start.
    Upgrade path: Vercel Blob/KV or a database, then list reports on the site. */
 const reports = [];
 function storeReport(p, lang){
   reports.unshift({ p: p.prov, c: p.crop, price: p.price, date: fmtDate(lang, new Date()) });
   return reports.slice(0, 50);
+}
+
+/* in-memory LINE followers — ponytail: prototype only; per-instance and
+   wiped on cold start, so this cannot back real push alerts as-is (no
+   shared state across serverless instances). Placeholder until real
+   persistence (Vercel KV/Blob or a DB) lands; LINE_CHANNEL_ACCESS_TOKEN
+   stays unset, so no push actually sends yet regardless. */
+const followers = [];
+function storeFollower(userId){
+  if (userId && !followers.includes(userId)) followers.push(userId);
+  return followers;
 }
 
 /* ================= HANDLER ================= */
@@ -475,8 +502,9 @@ module.exports = async function handler(req, res){
         // bot invited into a group/room — greet members (console setting
         // "Allow bot to join group chats" must be ON or LINE auto-removes it)
         await sendReply(ev.replyToken, [buildJoinReply('th')]);
-      } else if (ev.type === 'follow' && ev.replyToken){
-        await sendReply(ev.replyToken, [buildWelcomeReply('th')]);
+      } else if (ev.type === 'follow'){
+        storeFollower(ev.source && ev.source.userId);
+        if (ev.replyToken) await sendReply(ev.replyToken, [buildWelcomeReply('th')]);
       }
     } catch (e) { /* keep webhook alive; LINE retries nothing on 200 */ }
   }
@@ -487,6 +515,6 @@ module.exports = async function handler(req, res){
 module.exports._internals = {
   parseCommand, buildPriceReply, buildHelpReply, buildWelcomeReply, buildJoinReply, buildUnknownReply,
   buildReportReply, verifySignature, priceAt, signals, recommend, storeReport,
-  processDemo,
+  processDemo, sendPush, storeFollower, followers,
   PROVINCES, CROPS, T, REC_KEY, fmtValFor, CUR_WEEK
 };
