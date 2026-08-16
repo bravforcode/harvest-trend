@@ -85,6 +85,32 @@ export interface Dict {
   costEven: string;
   costSource: string;
   viewCost: string;
+  /* sell calendar (P1) */
+  sellTitle: string;
+  sellSub: string;
+  sellPeak: string;
+  sellNow: string;
+  sellAll: string;
+  freshWarn: string;
+  /* price thresholds (P2) */
+  thrTitle: string;
+  thrSub: string;
+  thrPh: string;
+  thrSet: string;
+  thrRemove: string;
+  thrNone: string;
+  thrActive: string;
+  thrHit: string;
+  thrCurrent: string;
+  /* push (P4) */
+  pushTitle: string;
+  pushSub: string;
+  pushOn: string;
+  pushOff: string;
+  pushDenied: string;
+  pushUnsupported: string;
+  pushSaved: string;
+  pushFail: string;
   recKicker: string;
   youAt: string;
   confPrefix: string;
@@ -365,6 +391,17 @@ export const T: Record<Lang, Dict> = {
     costBreakEven: 'จุดคุ้มทุน (บาท/กก.)', costCurrent: 'ราคาขายปัจจุบัน',
     costProfit: 'กำไร', costLoss: 'ขาดทุน', costEven: 'คุ้มทุนพอดี',
     costSource: 'ที่มา', viewCost: 'คำนวณต้นทุน',
+    sellTitle: 'ปฏิทินจังหวะขายดีที่สุด', sellSub: 'สัปดาห์ที่ราคาพีคของปี (จากแบบจำลองตามฤดูกาล)',
+    sellPeak: 'ราคาพีค', sellNow: 'สัปดาห์นี้', sellAll: 'ตลอดทั้งปี',
+    freshWarn: 'ข้อมูลราชการบางแหล่งอาจไม่สด (เช่น OAE 2021, DIT 2023) — ราคาเป็นค่าประมาณล่าสุดเท่าที่มี',
+    thrTitle: 'ตั้งเกณฑ์ราคา', thrSub: 'ตั้งราคาที่ต้องการ แล้วแอปจะเตือนเมื่อราคาถึงเกณฑ์ (ในแอป)',
+    thrPh: 'เช่น 120', thrSet: 'ตั้งเกณฑ์', thrRemove: 'ลบ',
+    thrNone: 'ยังไม่มีเกณฑ์ — ตั้งเลย', thrActive: '{crop} ≥ {price} บาท', thrHit: 'ถึงเกณฑ์แล้ว! {crop} = {price} บาท',
+    thrCurrent: 'ราคาปัจจุบัน {price}',
+    pushTitle: 'แจ้งเตือนผ่านมือถือ', pushSub: 'เปิดเพื่อรับแจ้งเตือนราคา · iOS: ต้องติดตั้งแอปลงหน้าแรกก่อน',
+    pushOn: 'เปิดการแจ้งเตือน', pushOff: 'ปิดการแจ้งเตือน',
+    pushDenied: 'ถูกบล็อก — ไปเปิดในตั้งค่าเบราว์เซอร์', pushUnsupported: 'เบราว์เซอร์นี้ไม่รองรับ',
+    pushSaved: 'ตั้งค่าสำเร็จ', pushFail: 'ตั้งค่าไม่สำเร็จ',
     recKicker: 'คำแนะนำวันนี้', youAt: 'คุณอยู่ที่', confPrefix: 'ระดับความเชื่อมั่น:', confSuffix: '· จาก 4 สัญญาณ',
     watchAdd: 'ติดตามราคานี้', watchAdded: 'เพิ่มเข้ารายการติดตามแล้ว', watchExists: 'อยู่ในรายการติดตามแล้ว', watchRemoved: 'ลบออกจากรายการติดตามแล้ว',
     scrollReport: 'รายงานราคาที่ขายได้', viewChart: 'ดูกราฟราคา + สัญญาณ',
@@ -539,6 +576,17 @@ export const T: Record<Lang, Dict> = {
     costBreakEven: 'Break-even (THB/kg)', costCurrent: 'Current price',
     costProfit: 'Profit', costLoss: 'Loss', costEven: 'Break-even',
     costSource: 'Source', viewCost: 'Cost calculator',
+    sellTitle: 'Best selling weeks', sellSub: 'Weeks with the year\'s peak price (seasonal model)',
+    sellPeak: 'Peak', sellNow: 'This week', sellAll: 'All year',
+    freshWarn: 'Some official sources may be stale (e.g. OAE 2021, DIT 2023) — prices shown are the latest estimates available',
+    thrTitle: 'Price alert', thrSub: 'Set a target price and the app will flag when it is reached (in-app)',
+    thrPh: 'e.g. 120', thrSet: 'Set alert', thrRemove: 'Remove',
+    thrNone: 'No alerts yet — set one', thrActive: '{crop} ≥ {price} THB', thrHit: 'Alert! {crop} = {price} THB',
+    thrCurrent: 'Current {price}',
+    pushTitle: 'Push notifications', pushSub: 'Enable to receive price alerts · iOS: install the app to your home screen first',
+    pushOn: 'Enable', pushOff: 'Disable',
+    pushDenied: 'Blocked — enable in browser settings', pushUnsupported: 'Unsupported browser',
+    pushSaved: 'Saved', pushFail: 'Failed',
     recKicker: "Today's verdict", youAt: 'You are in', confPrefix: 'Confidence:', confSuffix: '· from 4 signals',
     watchAdd: 'Follow this price', watchAdded: 'Added to watchlist', watchExists: 'Already in watchlist', watchRemoved: 'Removed from watchlist',
     scrollReport: 'Report the price you got', viewChart: 'View chart + signals',

@@ -9,7 +9,7 @@
      flat warm-orchard zone colors (no text — replace with a branded design
      before production; zone rectangles match the area boxes exactly).
    - --replace: delete existing Harvest Trend rich menus before creating.
-   - Areas: 6 buttons = the web routes (uri actions, SITE_URL env or
+   - Areas: 8 buttons (2x4 grid) = the web routes (uri actions, SITE_URL env or
      https://harvest-ecc.vercel.app).
 */
 import fs from 'node:fs';
@@ -19,11 +19,11 @@ import zlib from 'node:zlib';
 const TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 const SITE = process.env.SITE_URL || 'https://harvest-ecc.vercel.app';
 const W = 1000, H = 500;
-const COLS = 3, ROWS = 2;
+const COLS = 2, ROWS = 4;
 /* warm orchard ledger palette, one per button */
-const COLORS = ['#2C4A24', '#4A7A3D', '#A87B1F', '#B6472E', '#2E5C9A', '#4A5A48'];
+const COLORS = ['#2C4A24', '#4A7A3D', '#A87B1F', '#B6472E', '#2E5C9A', '#4A5A48', '#7A5A22', '#3E5C46'];
 
-const ROUTES = ['/', '/chart', '/map', '/report', '/watch', '/about'];
+const ROUTES = ['/', '/chart', '/map', '/cost', '/report', '/watch', '/about', '/line'];
 
 /* ---------- minimal PNG writer (node zlib) ---------- */
 function crc32(buf) {

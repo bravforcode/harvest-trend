@@ -12,6 +12,7 @@ import { LiveBadge } from '@/components/layout/LiveBadge';
 import { ProvincePicker } from '@/components/ProvincePicker';
 import { CropChips } from '@/components/CropChips';
 import { VerdictCard } from '@/components/VerdictCard';
+import { SellCalendar } from '@/components/SellCalendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -121,6 +122,16 @@ export function HomePage() {
         transition={heroT}
       >
         <VerdictCard />
+      </motion.div>
+
+      {/* sell calendar */}
+      <motion.div
+        key={'sell:' + prov + ':' + crop}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={heroT}
+      >
+        <SellCalendar />
       </motion.div>
 
       {/* how it works */}

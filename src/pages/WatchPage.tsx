@@ -7,6 +7,7 @@ import { REC_KEY, fmtVal, recommend, signalsFor } from '@/lib/engine';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { getWatch, setWatch } from '@/lib/storage';
+import { ThresholdPanel } from '@/components/ThresholdPanel';
 import { VerdictCard } from '@/components/VerdictCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -146,6 +147,9 @@ export function WatchPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* threshold alerts */}
+      <ThresholdPanel />
 
       <p className="text-[12.5px] text-moss/80">{t.watchLineNote}</p>
     </div>

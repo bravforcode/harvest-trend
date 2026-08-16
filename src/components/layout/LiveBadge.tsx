@@ -32,20 +32,23 @@ export function LiveBadge() {
   }
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={`mx-auto mt-3 flex w-fit max-w-full items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] ${
-        live
-          ? 'border-leaf/40 bg-leaf-tint text-forest'
-          : fileMode
-            ? 'border-line bg-paper text-moss'
-            : 'border-clay/40 bg-clay-soft text-clay'
-      }`}
-    >
-      <span className={`size-2 flex-none rounded-full ${live ? 'bg-leaf' : fileMode ? 'bg-moss/50' : 'bg-clay'}`} aria-hidden="true" />
-      <span className="font-semibold">{title}</span>
-      <span className="opacity-75">{meta}</span>
+    <div className="flex flex-col items-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className={`mt-3 flex w-fit max-w-full items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] ${
+          live
+            ? 'border-leaf/40 bg-leaf-tint text-forest'
+            : fileMode
+              ? 'border-line bg-paper text-moss'
+              : 'border-clay/40 bg-clay-soft text-clay'
+        }`}
+      >
+        <span className={`size-2 flex-none rounded-full ${live ? 'bg-leaf' : fileMode ? 'bg-moss/50' : 'bg-clay'}`} aria-hidden="true" />
+        <span className="font-semibold">{title}</span>
+        <span className="opacity-75">{meta}</span>
+      </div>
+      <p className="mt-1.5 max-w-md text-center text-[11px] leading-snug text-moss/70">{t.freshWarn}</p>
     </div>
   );
 }
