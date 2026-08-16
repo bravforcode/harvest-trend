@@ -122,6 +122,12 @@ export interface Dict {
   llWelcome: string;
   llFail: string;
   llExpired: string;
+  /* farmer heatmap */
+  hmGov: string;
+  hmFarmers: string;
+  hmEmpty: string;
+  hmNote: string;
+  hmSynced: string;
   recKicker: string;
   youAt: string;
   confPrefix: string;
@@ -417,6 +423,8 @@ export const T: Record<Lang, Dict> = {
     llTitle: 'เชื่อมบัญชี LINE', llSub: 'เชื่อมเพื่อซิงค์ข้อมูลข้ามเครื่องในอนาคต (ต้องสร้าง LINE Login channel ก่อน — ดู docs/LINE-LOGIN-SETUP.md)',
     llConnect: 'เชื่อมบัญชี LINE', llDisconnect: 'ยกเลิกการเชื่อม', llWelcome: 'สวัสดี {name}',
     llFail: 'เชื่อมไม่สำเร็จ', llExpired: 'ลิงก์หมดอายุแล้ว — ลองใหม่',
+    hmGov: 'ราชการ/แบบจำลอง', hmFarmers: 'ราคาจากชาวบ้าน', hmEmpty: 'ยังไม่มีรายงานสำหรับพืชนี้ — ไปที่หน้า "รายงานราคา" แล้วส่งราคาของคุณ',
+    hmNote: 'รายงานจากเกษตรกร — ยังไม่ผ่านการตรวจสอบ ใช้เป็นข้อมูลประกอบเท่านั้น', hmSynced: 'ซิงค์กับระบบแล้ว',
     recKicker: 'คำแนะนำวันนี้', youAt: 'คุณอยู่ที่', confPrefix: 'ระดับความเชื่อมั่น:', confSuffix: '· จาก 4 สัญญาณ',
     watchAdd: 'ติดตามราคานี้', watchAdded: 'เพิ่มเข้ารายการติดตามแล้ว', watchExists: 'อยู่ในรายการติดตามแล้ว', watchRemoved: 'ลบออกจากรายการติดตามแล้ว',
     scrollReport: 'รายงานราคาที่ขายได้', viewChart: 'ดูกราฟราคา + สัญญาณ',
@@ -606,6 +614,8 @@ export const T: Record<Lang, Dict> = {
     llTitle: 'Connect LINE account', llSub: 'Link your LINE to sync data across devices (requires a LINE Login channel — see docs/LINE-LOGIN-SETUP.md)',
     llConnect: 'Connect LINE', llDisconnect: 'Disconnect', llWelcome: 'Hi {name}',
     llFail: 'Connection failed', llExpired: 'Link expired — try again',
+    hmGov: 'Official/Model', hmFarmers: 'Farmer reports', hmEmpty: 'No farmer reports for this crop yet — report your price on the "Report" page',
+    hmNote: 'Farmer reports are unverified — use as a reference only', hmSynced: 'Synced to the network',
     recKicker: "Today's verdict", youAt: 'You are in', confPrefix: 'Confidence:', confSuffix: '· from 4 signals',
     watchAdd: 'Follow this price', watchAdded: 'Added to watchlist', watchExists: 'Already in watchlist', watchRemoved: 'Removed from watchlist',
     scrollReport: 'Report the price you got', viewChart: 'View chart + signals',

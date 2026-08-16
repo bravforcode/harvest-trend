@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Bell, BellOff } from 'lucide-react';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
+import { getThresholds } from '@/lib/thresholds';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -87,10 +88,15 @@ export function PushToggle() {
       const p256dh = bufToB64(sub.getKey('p256dh'));
       const auth = bufToB64(sub.getKey('auth'));
       if (!p256dh || !auth) { toast(t.pushFail, 'err'); return; }
+      /* attach the first price threshold (if any) so the daily cron can alert */
+      const thr = getThresholds()[0] ?? null;
       const res = await fetch('api/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sub: { endpoint: sub.endpoint, p256dh, auth } })
+        body: JSON.stringify({
+          sub: { endpoint: sub.endpoint, p256dh, auth },
+          threshold: thr ? { p: thr.p, c: thr.c, price: thr.price } : undefined
+        })
       });
       if (!res.ok) {
         /* the browser-side subscription exists, but the server did not store

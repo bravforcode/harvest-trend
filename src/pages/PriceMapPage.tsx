@@ -4,13 +4,14 @@
    the seasonal model estimate — each province's tooltip states which. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, GeoJSON, useMap } from 'react-leaflet';
+import { MapContainer, GeoJSON, CircleMarker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import thaiGeo from '@/data/thailand-adm1.json';
 import { PROVINCES, provById, cropById } from '@/lib/data';
 import { CUR_WEEK, fmtVal, priceAt } from '@/lib/engine';
 import { LiveData } from '@/lib/live';
+import { isSupabaseReady, fetchRecentReports, type PriceReport } from '@/lib/supabase';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { CropChips } from '@/components/CropChips';
@@ -43,12 +44,22 @@ export function PriceMapPage() {
   const nav = useNavigate();
   const [crop, setCrop] = useState(app.crop);
   const [tick, setTick] = useState(0);
+  const [mode, setMode] = useState<'gov' | 'farmers'>('gov');
+  const [reports, setReports] = useState<PriceReport[] | null>(null);
 
   /* re-render when live prices refresh (LiveData polls every 10s) */
   useEffect(() => {
     const id = window.setInterval(() => setTick(x => x + 1), 10000);
     return () => window.clearInterval(id);
   }, []);
+
+  /* farmer reports (supabase, env-gated): fetch once per crop + mode */
+  useEffect(() => {
+    if (mode !== 'farmers' || !isSupabaseReady) { setReports(null); return; }
+    let on = true;
+    fetchRecentReports(crop, undefined, 100).then(rows => { if (on) setReports(rows); });
+    return () => { on = false; };
+  }, [mode, crop]);
 
   const c = cropById(crop);
   const nameToId = useMemo(thaiNameToProvId, []);
@@ -103,6 +114,23 @@ export function PriceMapPage() {
         <CropChips prov={app.prov} value={crop} onChange={setCrop} />
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setMode('gov')}
+          className={`cursor-pointer rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${mode === 'gov' ? 'bg-forest text-paper' : 'border border-line bg-paper text-moss hover:bg-gold-soft'}`}
+        >
+          {t.hmGov}
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('farmers')}
+          className={`cursor-pointer rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${mode === 'farmers' ? 'bg-forest text-paper' : 'border border-line bg-paper text-moss hover:bg-gold-soft'}`}
+        >
+          {t.hmFarmers}
+        </button>
+      </div>
+
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           <MapContainer
@@ -115,7 +143,27 @@ export function PriceMapPage() {
             attributionControl={false}
           >
             <FitBounds />
-            <GeoJSON
+            {mode === 'farmers' ? (
+              (reports ?? []).map((r, i) => {
+                const p = provById(r.province);
+                if (!p) return null;
+                return (
+                  <CircleMarker
+                    key={i}
+                    center={[p.lat, p.lng]}
+                    radius={8}
+                    pathOptions={{ color: '#1C2E20', weight: 1, fillColor: '#B6472E', fillOpacity: 0.75 }}
+                  >
+                    <Tooltip direction="top" opacity={1}>
+                      <strong>{p.th}</strong><br />
+                      {r.crop}: {fmtVal(Number(r.price), c)} {c.unit[lang]}<br />
+                      {r.created_at ? new Date(r.created_at).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-GB') : ''}
+                    </Tooltip>
+                  </CircleMarker>
+                );
+              })
+            ) : (
+              <GeoJSON
               key={crop}
               data={thaiGeo as unknown as GeoJSON.FeatureCollection}
               style={f => {
@@ -152,9 +200,16 @@ export function PriceMapPage() {
                 });
               }}
             />
+            )}
           </MapContainer>
         </CardContent>
       </Card>
+
+      {mode === 'farmers' && (
+        <p className="rounded-xl bg-ground px-4 py-3 text-[12px] leading-relaxed text-moss">
+          {reports && reports.length === 0 ? t.hmEmpty : t.hmNote}
+        </p>
+      )}
 
       {legend && (
         <div className="panel-paper flex flex-wrap items-center gap-x-4 gap-y-2 p-4">

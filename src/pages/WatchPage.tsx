@@ -1,5 +1,5 @@
 /* Harvest Trend · รู้ทันราคา — watchlist + compare (up to 3 side by side) */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Trash2 } from 'lucide-react';
 import { cropById, provById } from '@/lib/data';
@@ -7,6 +7,7 @@ import { REC_KEY, fmtVal, recommend, signalsFor } from '@/lib/engine';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { getWatch, setWatch } from '@/lib/storage';
+import { getLineSub, mergeWatch, pullWatchlist, syncWatch } from '@/lib/watch-sync';
 import { ThresholdPanel } from '@/components/ThresholdPanel';
 import { VerdictCard } from '@/components/VerdictCard';
 import { Badge } from '@/components/ui/badge';
@@ -39,8 +40,25 @@ export function WatchPage() {
 
   const refresh = () => setListState(getWatch());
 
+  /* LINE-synced watchlist: pull once on mount and merge when connected */
+  useEffect(() => {
+    let on = true;
+    if (!getLineSub()) return;
+    pullWatchlist().then(remote => {
+      if (!on || !remote) return;
+      const merged = mergeWatch(remote, getWatch());
+      if (merged.length !== getWatch().length) {
+        setWatch(merged);
+        refresh();
+      }
+    }).catch(() => { /* offline — local wins */ });
+    return () => { on = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const remove = (p: string, c: string) => {
-    setWatch(list.filter(x => !(x.p === p && x.c === c)));
+    const next = list.filter(x => !(x.p === p && x.c === c));
+    syncWatch(next);
     setCmp(x => x.filter(k => k !== p + '|' + c));
     refresh();
     toast(t.watchRemoved, 'err');
