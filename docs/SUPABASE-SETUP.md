@@ -1,5 +1,17 @@
 # Supabase Setup — Farmer Price Reports (Harvest Trend)
 
+> **STATUS: DONE 2026-08-16** — project LIVE: ref `gxzxvlmawkfimmvhykou`, region
+> **ap-southeast-1 (Singapore)**, org `vebihyveecbjubyiuysw`. Schema pushed
+> (price_reports + RLS), Vercel env set (`VITE_SUPABASE_URL`,
+> `VITE_SUPABASE_ANON_KEY`, all environments), `@supabase/supabase-js`
+> installed, report page syncs to the network (verified insert/select — RLS
+> allows anonymous rows, no sign-in required; `user_id` stays null unless the
+> optional anonymous toggle is on).
+>
+> Optional: enable **Auth → Sign In/Providers → Anonymous** in the dashboard
+> (https://supabase.com/dashboard/project/gxzxvlmawkfimmvhykou/auth/providers)
+> to tie rows to anonymous auth users. The app works without it.
+
 Backend scaffold for crowdsourced farmer price reports. Everything is **disabled by
 default**: without env vars the app behaves exactly as before. No UI is wired yet.
 

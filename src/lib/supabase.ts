@@ -102,11 +102,11 @@ export async function ensureClient(): Promise<SupabaseLike | null> {
 /* --- public API ---------------------------------------------------------- */
 
 /**
- * Insert a farmer price report. Signs in anonymously first when there is no
- * session (Supabase anonymous sign-in creates a real auth user with the
- * is_anonymous claim; the RLS insert policy covers it via auth.uid()).
- * The user_id column defaults to auth.uid() in the DB — the client never
- * guesses it. Never throws.
+ * Insert a farmer price report. Tries the plain anon insert first — the RLS
+ * insert policy allows anonymous rows (auth.uid() is null → user_id stays
+ * null), so no sign-in is required. If the insert is rejected, falls back to
+ * anonymous sign-in (when enabled in the dashboard) and retries, which ties
+ * the row to an auth user. Never throws.
  */
 export async function submitPriceReport(input: PriceReportInput): Promise<SubmitResult> {
   const supabase = await ensureClient();
@@ -114,33 +114,31 @@ export async function submitPriceReport(input: PriceReportInput): Promise<Submit
     return { ok: false, reason: isSupabaseReady ? 'client_unavailable' : 'not_configured' };
   }
 
+  const row = {
+    crop: input.crop,
+    province: input.province,
+    price: input.price,
+    unit: input.unit ?? null,
+    note: input.note ?? null,
+    lat: input.lat ?? null,
+    lng: input.lng ?? null,
+  };
+  const insert = async () =>
+    supabase.from('price_reports').insert(row).select('id').single();
+
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData?.session) {
-      const { error: anonError } = await supabase.auth.signInAnonymously();
-      if (anonError) {
-        return { ok: false, reason: `anon_signin_failed: ${String(anonError)}` };
-      }
+    const { data, error } = await insert();
+    if (!error) {
+      const id = (data as { id?: string } | null)?.id;
+      return id ? { ok: true, id } : { ok: false, reason: 'insert_failed: no id returned' };
     }
-
-    const { data, error } = await supabase
-      .from('price_reports')
-      .insert({
-        crop: input.crop,
-        province: input.province,
-        price: input.price,
-        unit: input.unit ?? null,
-        note: input.note ?? null,
-        lat: input.lat ?? null,
-        lng: input.lng ?? null,
-      })
-      .select('id')
-      .single();
-
-    if (error) return { ok: false, reason: `insert_failed: ${String(error)}` };
-    const row = data as { id?: string } | null;
-    if (!row?.id) return { ok: false, reason: 'insert_failed: no id returned' };
-    return { ok: true, id: row.id };
+    /* anon insert rejected → try anonymous sign-in once, then retry */
+    const { error: anonError } = await supabase.auth.signInAnonymously();
+    if (anonError) return { ok: false, reason: `insert_failed: ${String(error)}` };
+    const retry = await insert();
+    if (retry.error) return { ok: false, reason: `insert_failed: ${String(retry.error)}` };
+    const id = (retry.data as { id?: string } | null)?.id;
+    return id ? { ok: true, id } : { ok: false, reason: 'insert_failed: no id returned' };
   } catch (err) {
     return { ok: false, reason: `unexpected: ${err instanceof Error ? err.message : String(err)}` };
   }
