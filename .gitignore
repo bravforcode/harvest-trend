@@ -1,5 +1,9 @@
-.vercel
-.env*
-node_modules
-dist
-.lean-ctx-init
+# local env (never commit secrets)
+.env.local
+*.local
+
+# supabase CLI artifacts
+supabase/.temp/
+
+# generated rich menu placeholder
+rich-menu-default.png

@@ -1,8 +1,9 @@
-/* Harvest Trend · รู้ทันราคา — report the price you actually got (localStorage only) */
+/* Harvest Trend · รู้ทันราคา — report the price you actually got (local, synced to Supabase when configured) */
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { cropById, provById } from '@/lib/data';
 import { CUR_WEEK, fmtVal, priceAt } from '@/lib/engine';
+import { isSupabaseReady, submitPriceReport } from '@/lib/supabase';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { getReports, setReports, type ReportItem } from '@/lib/storage';
@@ -29,7 +30,7 @@ export function ReportPage() {
   const c = cropById(rCrop);
   const est = c ? priceAt(rCrop, rProv, CUR_WEEK) : 0;
 
-  const submit = () => {
+  const submit = async () => {
     const v = parseFloat(price);
     if (!(v > 0)) { toast(t.repBad, 'err'); return; }
     const item: ReportItem = {
@@ -41,7 +42,17 @@ export function ReportPage() {
     setReps(next);
     setPrice('');
     setNote('');
-    toast(t.repSaved);
+    /* sync to the shared network when Supabase is configured (env-gated);
+       otherwise keep the local-only behavior and say so */
+    if (isSupabaseReady) {
+      const r = await submitPriceReport({
+        crop: rCrop, province: rProv, price: v,
+        unit: c ? c.unit.th : undefined, note: note.trim()
+      });
+      toast(r.ok ? t.repShared : t.repSyncFail, r.ok ? undefined : 'err');
+    } else {
+      toast(t.repSaved);
+    }
   };
 
   const remove = (i: number) => {

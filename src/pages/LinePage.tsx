@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { LineLogin } from '@/components/LineLogin';
 import { PushToggle } from '@/components/PushToggle';
 
 interface Msg { from: 'user' | 'bot'; text: string }
@@ -181,6 +182,9 @@ export function LinePage() {
 
       {/* web push (env-gated — renders nothing without VITE_VAPID_PUBLIC_KEY) */}
       <PushToggle />
+
+      {/* line login (env-gated) */}
+      <LineLogin />
 
       {/* add friend */}
       <Card>

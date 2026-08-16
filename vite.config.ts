@@ -15,6 +15,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'og-image.png'],
       manifest: {
         name: 'Harvest Trend · รู้ทันราคา',
@@ -33,26 +36,10 @@ export default defineConfig({
         ]
       },
       workbox: {
-        /* network-first for everything (same contract as the old sw.js):
-           a deploy is visible on the next navigation; the cache is only an
-           offline fallback. /api responses are never cached. */
-        navigateFallback: '/index.html',
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\//,
-            handler: 'NetworkOnly'
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'google-fonts', expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 30 } }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'gstatic-fonts', expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 * 24 * 30 } }
-          }
-        ]
+        /* network-first shell + never-cache /api are implemented in
+           src/sw.ts (injectManifest) — see the navigation fallback and the
+           NetworkOnly /api route there. */
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
       }
     })
   ],

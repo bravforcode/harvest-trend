@@ -103,11 +103,14 @@ const app = readSrc('App.tsx');
   ok('App.tsx has route ' + r, app.includes('<Route path="' + r + '"'));
 });
 
-console.log('PWA contract (vite.config.ts):');
+console.log('PWA contract (injectManifest src/sw.ts):');
 const vc = read('vite.config.ts');
+const sw = readSrc('sw.ts');
 ok('VitePWA plugin configured', vc.includes('VitePWA('));
-ok('navigateFallback precaches the app shell', vc.includes("navigateFallback: '/index.html'"));
-ok('/api/ is never cached (NetworkOnly)', vc.includes("handler: 'NetworkOnly'"));
+ok('injectManifest strategy configured', vc.includes("strategies: 'injectManifest'"));
+ok('sw.ts handles navigation fallback (offline shell)', sw.includes("request.mode === 'navigate'") && sw.includes("caches.match('/index.html')"));
+ok('sw.ts never caches /api (NetworkOnly)', sw.includes('NetworkOnly') && sw.includes("'/api/'"));
+ok('sw.ts has a web-push handler', sw.includes("addEventListener('push'") && sw.includes('showNotification'));
 ['icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'og-image.png'].forEach(f => {
   ok('includeAssets lists ' + f, vc.includes("'" + f + "'"));
 });

@@ -111,6 +111,17 @@ export interface Dict {
   pushUnsupported: string;
   pushSaved: string;
   pushFail: string;
+  /* report sync (supabase) */
+  repShared: string;
+  repSyncFail: string;
+  /* LINE login */
+  llTitle: string;
+  llSub: string;
+  llConnect: string;
+  llDisconnect: string;
+  llWelcome: string;
+  llFail: string;
+  llExpired: string;
   recKicker: string;
   youAt: string;
   confPrefix: string;
@@ -402,6 +413,10 @@ export const T: Record<Lang, Dict> = {
     pushOn: 'เปิดการแจ้งเตือน', pushOff: 'ปิดการแจ้งเตือน',
     pushDenied: 'ถูกบล็อก — ไปเปิดในตั้งค่าเบราว์เซอร์', pushUnsupported: 'เบราว์เซอร์นี้ไม่รองรับ',
     pushSaved: 'ตั้งค่าสำเร็จ', pushFail: 'ตั้งค่าไม่สำเร็จ',
+    repShared: 'ส่งขึ้นระบบแล้ว — ราคาของคุณช่วยเพื่อนเกษตรกรทั่วประเทศ', repSyncFail: 'บันทึกในเครื่องแล้ว แต่ส่งขึ้นระบบไม่สำเร็จ',
+    llTitle: 'เชื่อมบัญชี LINE', llSub: 'เชื่อมเพื่อซิงค์ข้อมูลข้ามเครื่องในอนาคต (ต้องสร้าง LINE Login channel ก่อน — ดู docs/LINE-LOGIN-SETUP.md)',
+    llConnect: 'เชื่อมบัญชี LINE', llDisconnect: 'ยกเลิกการเชื่อม', llWelcome: 'สวัสดี {name}',
+    llFail: 'เชื่อมไม่สำเร็จ', llExpired: 'ลิงก์หมดอายุแล้ว — ลองใหม่',
     recKicker: 'คำแนะนำวันนี้', youAt: 'คุณอยู่ที่', confPrefix: 'ระดับความเชื่อมั่น:', confSuffix: '· จาก 4 สัญญาณ',
     watchAdd: 'ติดตามราคานี้', watchAdded: 'เพิ่มเข้ารายการติดตามแล้ว', watchExists: 'อยู่ในรายการติดตามแล้ว', watchRemoved: 'ลบออกจากรายการติดตามแล้ว',
     scrollReport: 'รายงานราคาที่ขายได้', viewChart: 'ดูกราฟราคา + สัญญาณ',
@@ -587,6 +602,10 @@ export const T: Record<Lang, Dict> = {
     pushOn: 'Enable', pushOff: 'Disable',
     pushDenied: 'Blocked — enable in browser settings', pushUnsupported: 'Unsupported browser',
     pushSaved: 'Saved', pushFail: 'Failed',
+    repShared: 'Shared to the network — your price helps farmers nationwide', repSyncFail: 'Saved locally, but failed to sync',
+    llTitle: 'Connect LINE account', llSub: 'Link your LINE to sync data across devices (requires a LINE Login channel — see docs/LINE-LOGIN-SETUP.md)',
+    llConnect: 'Connect LINE', llDisconnect: 'Disconnect', llWelcome: 'Hi {name}',
+    llFail: 'Connection failed', llExpired: 'Link expired — try again',
     recKicker: "Today's verdict", youAt: 'You are in', confPrefix: 'Confidence:', confSuffix: '· from 4 signals',
     watchAdd: 'Follow this price', watchAdded: 'Added to watchlist', watchExists: 'Already in watchlist', watchRemoved: 'Removed from watchlist',
     scrollReport: 'Report the price you got', viewChart: 'View chart + signals',
