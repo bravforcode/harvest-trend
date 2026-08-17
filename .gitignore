@@ -1,9 +1,28 @@
-# local env (never commit secrets)
-.env.local
-*.local
+# Dependencies
+node_modules/
 
-# supabase CLI artifacts
+# Build output
+dist/
+dist-ssr/
+
+# Local tooling artifacts
+.vercel/
+.freebuff/
+.lean-ctx-init
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
 supabase/.temp/
 
-# generated rich menu placeholder
-rich-menu-default.png

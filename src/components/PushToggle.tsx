@@ -10,7 +10,7 @@ import { getThresholds } from '@/lib/thresholds';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-const VAPID_PUBLIC_KEY: string = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+const VAPID_PUBLIC_KEY: string = (import.meta.env.VITE_VAPID_PUBLIC_KEY || '').replace(/[\r\n"]/g, '').trim();
 
 /* standard URL-safe base64 → Uint8Array (push subscribe wants raw key bytes) */
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {

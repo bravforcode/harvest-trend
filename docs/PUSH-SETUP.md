@@ -64,24 +64,25 @@ To test the cron locally, simulate Vercel's caller:
 curl -H "User-Agent: vercel-cron/1.0" https://your-app.vercel.app/api/push-check
 ```
 
-## ⚠️ Honest storage caveat (read this before relying on it)
+## Storage (2026-08-17 update — shared store live)
 
-Subscriptions are stored **in-memory per serverless instance**
-(`api/push.js`, a module-level `Map`, capped at 100). Vercel functions are
-ephemeral, so:
+Subscriptions are stored in **Supabase `push_subs`** (server-managed, RLS
+denies all clients, accessed with the service role via `SUPABASE_URL` +
+`SUPABASE_SERVICE_ROLE_KEY`) — durable across cold starts and serverless
+instances. The module-level `Map` in `api/push.js` remains **only as a
+fallback** when those env vars are missing.
 
-- Cold starts **lose all subscriptions**.
-- The daily cron is routed to an **arbitrary warm instance**, so it only sees
-  the subscriptions that instance happened to register. Alerts are only
-  reliable in the toy case where the subscriber and the cron land on the same
-  warm instance.
-- The cap (100) is per instance, not global.
+Threshold matching resolves a province the same way the client does
+(`currentPriceFor`): exact live price → region live (`rg:north` …) → national
+(`*`) → seasonal model estimate. This fixed a bug where province-scoped
+thresholds never fired because live prices are region-scoped.
 
-**Migration path (recommended before real users):** replace the `Map` in
-`api/push.js` with a shared store — Vercel KV / Upstash Redis (key by
-`endpoint`, value `{sub, threshold}`) or Supabase (a `push_subs` table). The
-handler shape (`sendPushes(fetchPrices)`, `threshold: {p, c, price}`) is
-already isolated so the swap is contained to `api/push.js`.
+Remaining honest limits:
+- `MAX_SUBS = 100` per refresh batch (cron reads with `.limit(100)`).
+- The daily cron is one-shot per day (Vercel Hobby plan); price crossings
+  between runs are only caught on the next run.
+- `VAPID_*` keys are normalized in code (trailing `\r\n"` from the dashboard
+  paste no longer breaks `web-push` — verified against prod 2026-08-17).
 
 ## 6. Push events in the service worker (future work)
 

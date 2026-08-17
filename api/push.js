@@ -17,6 +17,13 @@
 const MAX_SUBS = 100;
 const memSubs = new Map(); // fallback store: endpoint -> { sub, threshold }
 
+/* VAPID keys from the Vercel dashboard sometimes carry trailing whitespace /
+   quote characters (e.g. pasted as "KEY\r\n" or "KEY"). web-push rejects
+   anything that isn't strict URL-safe base64, so normalize before use. */
+function cleanVapidKey(v){
+  return String(v || '').replace(/[\r\n"]/g, '').trim();
+}
+
 function readBody(req){
   let raw;
   if(typeof req.body === 'string') raw = req.body;
@@ -107,8 +114,37 @@ module.exports = async function handler(req, res){
   crossed (current price >= threshold). One-shot: the threshold is cleared
   after a successful send. 404/410 = expired subscription — dropped.
 */
+
+/* Resolve the price the client would show for (crop, prov): exact live →
+   region live → national live → seasonal model estimate. Mirrors the client's
+   LiveData.get() fallback chain so a threshold alert fires exactly when the
+   on-screen price would have hit it. */
+async function currentPriceFor(prices, crop, prov){
+  const exact = prices.find(x => x.crop === crop && x.prov === prov);
+  if(exact && exact.price > 0) return exact.price;
+  let rg = null;
+  try{
+    const { PROVINCES } = require('./line-webhook.js')._internals;
+    const p = PROVINCES.find(x => x.id === prov);
+    if(p) rg = p.rg;
+  }catch{ /* engine unavailable — skip region/model fallback */ }
+  if(rg){
+    const region = prices.find(x => x.crop === crop && x.prov === 'rg:' + rg);
+    if(region && region.price > 0) return region.price;
+  }
+  const national = prices.find(x => x.crop === crop && x.prov === '*');
+  if(national && national.price > 0) return national.price;
+  /* no live data at all → model estimate (matches what the app shows offline) */
+  try{
+    const { priceAt, CUR_WEEK } = require('./line-webhook.js')._internals;
+    const v = priceAt(crop, prov, 'B', CUR_WEEK);
+    if(v > 0) return v;
+  }catch{ /* keep null */ }
+  return null;
+}
+
 async function sendPushes(fetchPrices){
-  const pub = process.env.VAPID_PUBLIC_KEY, priv = process.env.VAPID_PRIVATE_KEY;
+  const pub = cleanVapidKey(process.env.VAPID_PUBLIC_KEY), priv = cleanVapidKey(process.env.VAPID_PRIVATE_KEY);
   if(!pub || !priv) return { sent: 0, checked: 0, note: 'VAPID keys not configured' };
   let webpush = null;
   try{ webpush = require('web-push'); }
@@ -142,11 +178,11 @@ async function sendPushes(fetchPrices){
   for(const entry of entries){
     const th = entry.threshold;
     checked++;
-    const cur = prices.find(x => x.crop === th.c && x.prov === th.p);
-    if(!cur || !(cur.price >= th.price)) continue;
+    const cur = await currentPriceFor(prices, th.c, th.p);
+    if(!cur || !(cur >= th.price)) continue;
     const payload = JSON.stringify({
       title: 'Harvest Trend · รู้ทันราคา',
-      body: th.c + ' (' + th.p + ') ถึงเป้าหมาย ' + th.price + ' บาท — ตอนนี้ ' + cur.price + ' บาท'
+      body: th.c + ' (' + th.p + ') ถึงเป้าหมาย ' + th.price + ' บาท — ตอนนี้ ' + cur + ' บาท'
     });
     try{
       await webpush.sendNotification(entry.sub, payload);

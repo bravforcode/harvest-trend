@@ -32,24 +32,38 @@ const DATA_GOV = 'https://data.go.th/api/3/action';
 const BOT_URL = 'https://app.bot.or.th/BTWS_STAT/statistics/BOTWEBSTAT.aspx?reportID=491&language=TH';
 const UA_CUSTOM = 'harvest-ecc/1.0 (+https://harvest-ecc.vercel.app)';
 const UA_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+/* data.go.th sits behind a Cloudflare WAF that intermittently 403s datacenter
+   IPs (verified 2026-08-17: the same CKAN URL returns success:true from a
+   residential IP but HTTP 403 from Vercel). Try a few realistic UAs with one
+   retry pass — bounded so a blocked source costs ~1–2s, not minutes. */
+const UA_MOBILE = 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36';
+const UAS = [UA_CUSTOM, UA_BROWSER, UA_MOBILE];
+const RETRY_BACKOFF_MS = [400];
 
 /* ---------- helpers ---------- */
+/* Try the UA list; on total failure back off and retry the whole list once.
+   Bounded to 2 passes so a WAF that blocks us costs ~1–2s per source, not
+   the whole function budget. Deterministic errors (bad resource id) surface
+   as the last error message. */
 async function getJson(url){
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), FETCH_TIMEOUT);
   try{
-    /* some Thai gov WAFs reject datacenter IPs with non-browser UAs — try both */
-    for(const ua of [UA_CUSTOM, UA_BROWSER]){
-      try{
-        const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': ua, 'Accept': 'application/json' } });
-        if(!r.ok) throw new Error('HTTP ' + r.status);
-        return await r.json();
-      }catch(e){
-        if(e.name === 'AbortError') throw e;
-        if(ua === UA_BROWSER) throw e; // both failed
+    let lastErr = null;
+    for(let pass = 0; pass < 2; pass++){
+      for(const ua of UAS){
+        try{
+          const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': ua, 'Accept': 'application/json' } });
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return await r.json();
+        }catch(e){
+          if(e.name === 'AbortError') throw e;
+          lastErr = e;
+        }
       }
+      if(pass === 0) await new Promise(r => setTimeout(r, RETRY_BACKOFF_MS[0]));
     }
-    throw new Error('unreachable');
+    throw lastErr || new Error('unreachable');
   } finally { clearTimeout(t); }
 }
 
@@ -366,52 +380,73 @@ async function loadRambutan(){
 }
 
 /* ---------- aggregation ---------- */
+/* Whole-refresh budget: stay safely inside Vercel's default function time
+   limit (10s) even when every data.go.th source 403s. 8s of work is plenty;
+   anything we haven't fetched by then returns as errors (partial snapshot). */
+const REFRESH_DEADLINE_MS = 8000;
 let cache = null; // { at, prices, errors }
+let inflight = null; // in-flight refresh promise (dedupe concurrent callers)
 
-async function fetchPrices(){
-  const now = Date.now();
-  if(cache && now - cache.at < CACHE_TTL) return cache.prices;
-  if(cache) return cache.prices; // stale-while-refreshing: serve last good snapshot immediately
-
+async function refresh(){
   const errors = [];
   const prices = [];
 
-  /* data.go.th (CKAN) — sequential to keep the WAF calm; retry once UNLESS the
-     failure is a deterministic 403 (Cloudflare IP block — retrying is pointless) */
-  for(const s of SOURCES){
-    for(let attempt = 0; attempt < 2; attempt++){
-      try{
-        const rec = await s.load();
-        if(!rec) break;
-        const v = s.to(rec);
-        if(v && v.price > 0){
-          prices.push({ crop: s.crop, prov: s.prov, price: v.price, unit: v.unit, date: v.date, source: s.label });
-          break;
-        }
-      }catch(e){
-        const msg = e && e.message || String(e);
-        if(attempt === 0 && msg.indexOf('HTTP 403') === -1){
-          await new Promise(r => setTimeout(r, 400)); // transient? brief pause then retry
-        }else{
-          errors.push(s.crop + ':' + s.prov + ' — ' + msg);
-          break;
-        }
-      }
-    }
-  }
-
-  try{
-    const rambutan = await loadRambutan();
-    if(rambutan) prices.push({ crop: 'rambutan', prov: 'trat', price: rambutan.price, unit: rambutan.unit, date: rambutan.date, source: 'สำนักงานจังหวัดตราด (เฉลี่ยสายพันธุ์)' });
-  }catch(e){ errors.push('rambutan — ' + (e && e.message || String(e))); }
-
-  /* BOT (ธปท.) — works from Vercel */
+  /* BOT (ธปท.) runs FIRST and is never deadline-gated — it is the only source
+     verified to work from Vercel's datacenter IPs (data.go.th 403s there), so
+     we must never let flaky CKAN sources crowd it out of the budget. The
+     deadline is computed AFTER BOT so a slow BOT can't eat the flaky-source
+     budget that follows. */
   const bot = await loadBot();
+  const deadline = Date.now() + REFRESH_DEADLINE_MS;
   if(bot.out.length) prices.push.apply(prices, bot.out);
   errors.push.apply(errors, bot.errors);
 
+  if(Date.now() <= deadline){
+    try{
+      const rambutan = await loadRambutan();
+      if(rambutan) prices.push({ crop: 'rambutan', prov: 'trat', price: rambutan.price, unit: rambutan.unit, date: rambutan.date, source: 'สำนักงานจังหวัดตราด (เฉลี่ยสายพันธุ์)' });
+    }catch(e){ errors.push('rambutan — ' + (e && e.message || String(e))); }
+  }
+
+  for(const s of SOURCES){
+    if(Date.now() > deadline){
+      errors.push('deadline exceeded — partial snapshot (' + prices.length + ' prices)');
+      break;
+    }
+    try{
+      const rec = await s.load();
+      const v = rec ? s.to(rec) : null;
+      if(v && v.price > 0){
+        prices.push({ crop: s.crop, prov: s.prov, price: v.price, unit: v.unit, date: v.date, source: s.label });
+      }
+    }catch(e){
+      errors.push(s.crop + ':' + s.prov + ' — ' + (e && e.message || String(e)));
+    }
+  }
+
   cache = { at: Date.now(), prices, errors };
-  return prices;
+  return cache;
+}
+
+async function fetchPrices(){
+  const now = Date.now();
+  if(cache && now - cache.at < CACHE_TTL) return cache.prices; // fresh
+  if(inflight) return inflight; // a refresh is already running — share it
+  /* stale (or first call): start a refresh. All callers share the in-flight
+     promise and get the fresh snapshot; if the refresh itself fails we fall
+     back to the last good snapshot (stale-while-refreshing). */
+  const stale = cache;
+  inflight = (async () => {
+    try{
+      return (await refresh()).prices;
+    }catch(e){
+      if(stale) return stale.prices;
+      throw e;
+    } finally {
+      inflight = null;
+    }
+  })();
+  return inflight;
 }
 
 /* ---------- HTTP handler (Vercel) ---------- */

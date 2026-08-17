@@ -8,15 +8,17 @@ import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { HomePage } from '@/pages/HomePage';
 import { PriceChartPage } from '@/pages/PriceChartPage';
-import { WatchPage } from '@/pages/WatchPage';
-import { ReportPage } from '@/pages/ReportPage';
-import { AboutPage } from '@/pages/AboutPage';
-import { LinePage } from '@/pages/LinePage';
 
-/* code-split: map page pulls in leaflet + react-leaflet (~47KB gzip) — loaded
-   on demand; cost calc is light but shares the same on-demand slot */
+/* code-split every secondary page so the first screen (pick → verdict) stays
+   small: map pulls in leaflet+react-leaflet (~47KB gzip), line pulls in
+   qrcode, cost/watch/report/about carry their own components. Only Home +
+   Chart stay in the main chunk. */
 const PriceMapPage = lazy(() => import('@/pages/PriceMapPage').then((m) => ({ default: m.PriceMapPage })));
 const CostCalcPage = lazy(() => import('@/pages/CostCalcPage').then((m) => ({ default: m.CostCalcPage })));
+const WatchPage = lazy(() => import('@/pages/WatchPage').then((m) => ({ default: m.WatchPage })));
+const ReportPage = lazy(() => import('@/pages/ReportPage').then((m) => ({ default: m.ReportPage })));
+const AboutPage = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const LinePage = lazy(() => import('@/pages/LinePage').then((m) => ({ default: m.LinePage })));
 
 function ScrollToTop() {
   const { pathname } = useLocation();

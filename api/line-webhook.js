@@ -11,6 +11,8 @@
 const crypto = require('crypto');
 /* real price aggregator (data.go.th + BOT) — see api/prices.js */
 const { fetchPrices } = require('./prices.js');
+/* durable followers list — see loadFollowers/saveFollowers below */
+const { put, head } = require('@vercel/blob');
 
 /* ================= DATA (mirror of assets/app.js) ================= */
 const REGION_FACTOR = { north: 0.97, ne: 0.95, central: 1.0, east: 1.08, west: 1.0, south: 1.02 };
@@ -72,6 +74,21 @@ const CROPS = [
   { id:'rambutan', th:'เงาะ', en:'Rambutan', unit:{th:'บาท/กก.',en:'THB/kg'}, base:26, dec:1, season:[1.3,1.25,1.18,1.0,0.85,0.9,1.0,1.12,1.2,1.28,1.32,1.32], harvest:[5,8], peak:[6,7], grades:false },
   { id:'mangosteen', th:'มังคุด', en:'Mangosteen', unit:{th:'บาท/กก.',en:'THB/kg'}, base:62, dec:1, season:[1.35,1.3,1.2,1.0,0.85,0.92,1.05,1.18,1.26,1.32,1.36,1.36], harvest:[5,9], peak:[6,7,8], grades:false },
   { id:'longan', th:'ลำไย', en:'Longan', unit:{th:'บาท/กก.',en:'THB/kg'}, base:36, dec:1, season:[1.05,1.0,0.95,0.9,0.95,1.0,1.08,1.15,1.18,1.15,1.1,1.07], harvest:[7,9], peak:[8,9], grades:false },
+  { id:'pork', th:'สุกร', en:'Pork', unit:{th:'บาท/กก.',en:'THB/kg'}, base:73.6, dec:2, season:[1.06,1.08,1.02,0.98,0.97,0.98,1.0,1.02,1.03,1.04,1.05,1.07], harvest:[1,12], peak:[1,2,12], grades:false },
+  { id:'egg', th:'ไข่ไก่', en:'Egg', unit:{th:'บาท/ฟอง',en:'THB/egg'}, base:3.5, dec:2, season:[1.0,1.02,1.05,1.08,1.06,1.02,0.98,0.96,0.95,0.96,0.98,1.0], harvest:[1,12], peak:[4,5], grades:false },
+  { id:'broiler', th:'ไก่เนื้อ', en:'Broiler', unit:{th:'บาท/กก.',en:'THB/kg'}, base:42.2, dec:2, season:[1.05,1.06,1.02,0.99,0.98,0.99,1.0,1.01,1.02,1.03,1.04,1.05], harvest:[1,12], peak:[1,2,12], grades:false },
+  { id:'beef', th:'โคเนื้อ', en:'Beef', unit:{th:'บาท/กก.',en:'THB/kg'}, base:49.9, dec:1, season:[1.02,1.0,0.98,0.97,0.97,0.98,0.99,1.0,1.01,1.02,1.03,1.04], harvest:[1,12], peak:[12,1], grades:false },
+  { id:'shrimp', th:'กุ้ง', en:'Shrimp', unit:{th:'บาท/กก.',en:'THB/kg'}, base:141, dec:1, season:[1.08,1.1,1.05,1.0,0.96,0.95,0.96,0.98,1.0,1.02,1.05,1.07], harvest:[1,12], peak:[12,1,2], grades:false },
+  { id:'tilapia', th:'ปลานิล', en:'Tilapia', unit:{th:'บาท/กก.',en:'THB/kg'}, base:60, dec:1, season:[1.04,1.05,1.02,0.99,0.98,0.99,1.0,1.01,1.02,1.03,1.04,1.05], harvest:[1,12], peak:[1,2], grades:false },
+  { id:'milk', th:'น้ำนมดิบ', en:'Raw milk', unit:{th:'บาท/กก.',en:'THB/kg'}, base:21.4, dec:2, season:[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0], harvest:[1,12], peak:[], grades:false },
+  { id:'coffee', th:'กาแฟ', en:'Coffee', unit:{th:'บาท/กก.',en:'THB/kg'}, base:188, dec:1, season:[1.1,1.12,1.08,1.02,0.97,0.95,0.96,0.98,1.0,1.03,1.06,1.08], harvest:[11,2], peak:[1,2], grades:false },
+  { id:'coconut', th:'มะพร้าว', en:'Coconut', unit:{th:'บาท/ผล',en:'THB/fruit'}, base:7.9, dec:2, season:[1.04,1.03,1.01,0.99,0.98,0.99,1.0,1.01,1.02,1.03,1.04,1.05], harvest:[1,12], peak:[], grades:false },
+  { id:'pineapple', th:'สับปะรด', en:'Pineapple', unit:{th:'บาท/กก.',en:'THB/kg'}, base:12, dec:1, season:[1.1,1.12,1.15,1.12,1.05,0.98,0.95,0.96,0.98,1.0,1.03,1.06], harvest:[1,12], peak:[3,4,5], grades:false },
+  { id:'onion', th:'หอมหัวใหญ่', en:'Onion', unit:{th:'บาท/กก.',en:'THB/kg'}, base:25, dec:1, season:[1.15,1.2,1.18,1.1,1.0,0.95,0.93,0.94,0.96,0.98,1.02,1.08], harvest:[2,4], peak:[3,4], grades:false },
+  { id:'shallot', th:'หอมแดง', en:'Shallot', unit:{th:'บาท/กก.',en:'THB/kg'}, base:35, dec:1, season:[1.12,1.18,1.2,1.15,1.05,0.97,0.94,0.95,0.97,1.0,1.04,1.08], harvest:[2,4], peak:[3,4], grades:false },
+  { id:'garlic', th:'กระเทียม', en:'Garlic', unit:{th:'บาท/กก.',en:'THB/kg'}, base:90, dec:1, season:[1.2,1.25,1.22,1.1,1.0,0.95,0.93,0.94,0.96,0.98,1.02,1.1], harvest:[1,3], peak:[2,3], grades:false },
+  { id:'mango', th:'มะม่วง', en:'Mango', unit:{th:'บาท/กก.',en:'THB/kg'}, base:28, dec:1, season:[1.1,1.15,1.2,1.18,1.1,1.0,0.95,0.94,0.96,0.98,1.0,1.05], harvest:[3,6], peak:[4,5], grades:false },
+  { id:'banana', th:'กล้วย', en:'Banana', unit:{th:'บาท/กก.',en:'THB/kg'}, base:20, dec:1, season:[1.03,1.02,1.0,0.98,0.97,0.98,0.99,1.0,1.01,1.02,1.03,1.04], harvest:[1,12], peak:[], grades:false }
 ];
 const REGIONS = { north:{th:'ภาคเหนือ',en:'North'}, ne:{th:'ภาคอีสาน',en:'Northeast'}, central:{th:'ภาคกลาง',en:'Central'}, east:{th:'ภาคตะวันออก',en:'East'}, west:{th:'ภาคตะวันตก',en:'West'}, south:{th:'ภาคใต้',en:'South'} };
 
@@ -93,11 +110,11 @@ const T = {
     range26:'ช่วง 26 สัปดาห์', minLbl:'ต่ำสุด', maxLbl:'สูงสุด', avgLbl:'เฉลี่ย',
     sig1n:'โมเมนตัมราคา', sig2n:'ปริมาณผลผลิต', sig3n:'ช่วงเก็บเกี่ยว', sig4n:'สภาพอากาศ',
     verdict:'คำแนะนำ', price:'ราคา', hint:'ส่งคำสั่ง "ราคา <จังหวัด> <พืช>" เช่น "ราคา ระยอง ทุเรียน" หรือ "price Rayong durian"',
-    helpTitle:'วิธีใช้บอท gracia', helpBody:'ส่งข้อความต่อไปนี้ได้เลย:\n\n• ราคา ระยอง ทุเรียน — ดูราคา+คำแนะนำ (ใส่เกรดได้: "เกรด B")\n• ราคา จันทบุรี มังคุด เกรด C\n• price chanthaburi mangosteen — ภาษาอังกฤษ\n• รายงาน 150 ระยอง ทุเรียน — ส่งรายงานราคาที่ขายได้\n• ช่วย / help — ดูคำสั่งทั้งหมด\n\nครอบคลุม 77 จังหวัด 10 พืชหลัก',
+    helpTitle:'วิธีใช้บอท gracia', helpBody:'ส่งข้อความต่อไปนี้ได้เลย:\n\n• ราคา ระยอง ทุเรียน — ดูราคา+คำแนะนำ (ใส่เกรดได้: "เกรด B")\n• ราคา จันทบุรี มังคุด เกรด C\n• price chanthaburi mangosteen — ภาษาอังกฤษ\n• รายงาน 150 ระยอง ทุเรียน — ส่งรายงานราคาที่ขายได้\n• ช่วย / help — ดูคำสั่งทั้งหมด\n\nครอบคลุม 77 จังหวัด 25 พืชหลัก',
     unknown:'ไม่เข้าใจคำสั่ง ลองพิมพ์ "ช่วย" เพื่อดูวิธีใช้',
     welcome:'สวัสดีครับ ยินดีต้อนรับสู่บอท gracia 🌾\nส่ง "ราคา ระยอง ทุเรียน" เพื่อดูราคาและคำแนะนำจังหวะขาย หรือ "ช่วย" เพื่อดูคำสั่งทั้งหมด',
-    reportAsked:'ไม่ได้ราคา ลองพิมพ์: "รายงาน 150 ระยอง ทุเรียน"',
-    reportSaved:'บันทึกรายงานแล้ว ขอบคุณครับ! ({prov} · {crop} ~{price} {unit})\nหมายเหตุ: ต้นแบบเก็บไว้ชั่วคราวในหน่วยความจำเซิร์ฟเวอร์',
+    reportAsked:'ไม่ได้ราคา ลองพิมพ์: "รายงาน 150 ระยอง ทุเรียน"\n(ราคาที่ส่งจะถูกบันทึกในระบบฐานข้อมูลกลาง เปิดอ่านสาธารณะ ไม่มีการเก็บตำแหน่ง GPS)',
+    reportSaved:'บันทึกรายงานแล้ว ขอบคุณครับ! ({prov} · {crop} ~{price} {unit})\nข้อมูลถูกส่งขึ้นฐานข้อมูลกลางแล้ว (เปิดอ่านสาธารณะ)',
     reportNote:'รายงาน',
     notFound:'ไม่พบจังหวัด/พืชที่พิมพ์ ลองใหม่ เช่น "ราคา ระยอง ทุเรียน"',
     quickPrice:'ราคาอีกครั้ง', quickHelp:'ช่วยเหลือ', quickReport:'รายงานราคา',
@@ -119,11 +136,11 @@ const T = {
     range26:'26-week range', minLbl:'Low', maxLbl:'High', avgLbl:'Avg',
     sig1n:'Price momentum', sig2n:'Seasonal supply', sig3n:'Harvest window', sig4n:'Weather',
     verdict:'Verdict', price:'Price', hint:'Send "price <province> <crop>", e.g. "price Rayong durian" or "ราคา ระยอง ทุเรียน"',
-    helpTitle:'How to use the gracia bot', helpBody:'Send any of these:\n\n• ราคา ระยอง ทุเรียน — price + verdict (add grade: "เกรด B")\n• ราคา จันทบุรี มังคุด เกรด C\n• price chanthaburi mangosteen — English\n• รายงาน 150 ระยอง ทุเรียน — report your sold price\n• ช่วย / help — list commands\n\nCovers 77 provinces and 10 major crops',
+    helpTitle:'How to use the gracia bot', helpBody:'Send any of these:\n\n• ราคา ระยอง ทุเรียน — price + verdict (add grade: "เกรด B")\n• ราคา จันทบุรี มังคุด เกรด C\n• price chanthaburi mangosteen — English\n• รายงาน 150 ระยอง ทุเรียน — report your sold price\n• ช่วย / help — list commands\n\nCovers 77 provinces and 25 major crops',
     unknown:'Command not understood. Send "help" for usage.',
     welcome:'Welcome to the gracia bot 🌾\nSend "price Rayong durian" for a price + sell-timing verdict, or "help" for all commands.',
-    reportAsked:'No price detected. Try: "รายงาน 150 ระยอง ทุเรียน"',
-    reportSaved:'Report saved · thank you! ({prov} · {crop} ~{price} {unit})\nNote: prototype stores temporarily on the server.',
+    reportAsked:'No price detected. Try: "รายงาน 150 ระยอง ทุเรียน"\n(Submitted prices are saved to the shared public database; no GPS is collected)',
+    reportSaved:'Report saved · thank you! ({prov} · {crop} ~{price} {unit})\nSent to the shared public database.',
     reportNote:'Report',
     notFound:'Province/crop not found. Try "price Rayong durian"',
     quickPrice:'Check again', quickHelp:'Help', quickReport:'Report price',
@@ -361,13 +378,15 @@ function buildReportReply(p, lang){
 
 /* Mockup/demo mode: run the exact same command→reply pipeline the LINE bot
    uses, and return the messages in the HTTP response (no LINE credentials).
-   Powers the in-page chat simulator on line.html. */
+   Powers the in-page chat simulator on line.html. Deliberately synchronous
+   and non-persisting: demo reports stay in memory (persist=false) so the
+   public simulator never writes fake rows into the shared database. */
 function processDemo(text, liveMap){
   const cmd = parseCommand(text);
   let messages;
   if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang, liveMap);
   else if (cmd.type === 'help') messages = [buildHelpReply(cmd.lang)];
-  else if (cmd.type === 'report'){ storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
+  else if (cmd.type === 'report'){ void storeReport(cmd, cmd.lang, false); messages = [buildReportReply(cmd, cmd.lang)]; }
   else messages = [buildUnknownReply(cmd.lang)];
   return messages;
 }
@@ -425,22 +444,76 @@ async function sendPush(userId, messages){
   }
 }
 
-/* in-memory farmer reports — ponytail: prototype only; wiped on cold start.
-   Upgrade path: Vercel Blob/KV or a database, then list reports on the site. */
+/* farmer reports — durable via Supabase `price_reports` (service role, same
+   table the web report page writes to), with an in-memory fallback for when
+   SUPABASE_URL/SERVICE_ROLE are missing (previous behavior).
+   persist=false (demo mode) keeps the row in memory only so the public
+   simulator on /line never pollutes the shared dataset. */
 const reports = [];
-function storeReport(p, lang){
+let sbClientPromise = null;
+async function getSupabase(){
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(!url || !key) return null;
+  if(!sbClientPromise){
+    sbClientPromise = (async () => {
+      try{
+        const { createClient } = require('@supabase/supabase-js');
+        return createClient(url, key, { auth: { persistSession: false } });
+      }catch{ return null; }
+    })();
+  }
+  return sbClientPromise;
+}
+async function storeReport(p, lang, persist = true){
   reports.unshift({ p: p.prov, c: p.crop, price: p.price, date: fmtDate(lang, new Date()) });
+  reports.length = Math.min(reports.length, 50);
+  /* persist to the shared network when configured (env-gated, never throws) */
+  try{
+    const sb = await getSupabase();
+    if(persist && sb && p.price > 0){
+      await sb.from('price_reports').insert({
+        crop: p.crop, province: p.prov, price: p.price,
+        unit: null, note: 'LINE OA', lat: null, lng: null
+      });
+    }
+  }catch(e){ /* keep webhook alive; in-memory copy remains */ }
   return reports.slice(0, 50);
 }
 
-/* in-memory LINE followers — ponytail: prototype only; per-instance and
-   wiped on cold start, so this cannot back real push alerts as-is (no
-   shared state across serverless instances). Placeholder until real
-   persistence (Vercel KV/Blob or a DB) lands; LINE_CHANNEL_ACCESS_TOKEN
-   stays unset, so no push actually sends yet regardless. */
-const followers = [];
-function storeFollower(userId){
-  if (userId && !followers.includes(userId)) followers.push(userId);
+/* LINE followers — durable via Vercel Blob (shared across serverless
+   instances/cold starts), with an in-memory cache so repeat reads within
+   the same warm instance skip the network round trip. Falls back to
+   memory-only (previous behavior) when BLOB_READ_WRITE_TOKEN isn't set. */
+const FOLLOWERS_BLOB_PATH = 'line/followers.json';
+let followers = [];
+let followersLoaded = false;
+async function loadFollowers(){
+  if (followersLoaded) return followers;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token){ followersLoaded = true; return followers; }
+  try {
+    const meta = await head(FOLLOWERS_BLOB_PATH, { token });
+    const r = await fetch(meta.url);
+    const data = r.ok ? await r.json() : [];
+    followers = Array.isArray(data) ? data : [];
+  } catch (e) { /* no blob yet (first follower) or transient error — start empty */ }
+  followersLoaded = true;
+  return followers;
+}
+async function storeFollower(userId){
+  await loadFollowers();
+  if (!userId || followers.includes(userId)) return followers;
+  followers.push(userId);
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (token){
+    try {
+      await put(FOLLOWERS_BLOB_PATH, JSON.stringify(followers), {
+        access: 'public', contentType: 'application/json',
+        addRandomSuffix: false, allowOverwrite: true, token
+      });
+    } catch (e) { /* keep webhook alive; follower stays in memory this instance */ }
+  }
   return followers;
 }
 
@@ -495,7 +568,7 @@ module.exports = async function handler(req, res){
         let messages;
         if (cmd.type === 'price') messages = buildPriceReply(cmd, cmd.lang, liveMap);
         else if (cmd.type === 'help') messages = [buildHelpReply(cmd.lang)];
-        else if (cmd.type === 'report'){ storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
+        else if (cmd.type === 'report'){ await storeReport(cmd, cmd.lang); messages = [buildReportReply(cmd, cmd.lang)]; }
         else messages = [buildUnknownReply(cmd.lang)];
         if (ev.replyToken) await sendReply(ev.replyToken, messages);
       } else if (ev.type === 'join' && ev.replyToken){
@@ -503,7 +576,7 @@ module.exports = async function handler(req, res){
         // "Allow bot to join group chats" must be ON or LINE auto-removes it)
         await sendReply(ev.replyToken, [buildJoinReply('th')]);
       } else if (ev.type === 'follow'){
-        storeFollower(ev.source && ev.source.userId);
+        await storeFollower(ev.source && ev.source.userId);
         if (ev.replyToken) await sendReply(ev.replyToken, [buildWelcomeReply('th')]);
       }
     } catch (e) { /* keep webhook alive; LINE retries nothing on 200 */ }

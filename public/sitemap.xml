@@ -1,34 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Harvest Trend (รู้ทันราคา) · static prototype sitemap.
-     Absolute production URLs (deployed at harvest-ecc.vercel.app). -->
+<!-- Harvest Trend (รู้ทันราคา) · React SPA sitemap.
+     Absolute production URLs (deployed at harvest-ecc.vercel.app).
+     Routes mirror src/App.tsx; the vercel.json rewrite serves index.html
+     for every path, so each route is crawlable. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://harvest-ecc.vercel.app/rutun-price.html</loc>
+    <loc>https://harvest-ecc.vercel.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://harvest-ecc.vercel.app/price-chart.html</loc>
+    <loc>https://harvest-ecc.vercel.app/chart</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://harvest-ecc.vercel.app/watch.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <loc>https://harvest-ecc.vercel.app/map</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://harvest-ecc.vercel.app/report.html</loc>
+    <loc>https://harvest-ecc.vercel.app/cost</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://harvest-ecc.vercel.app/line.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://harvest-ecc.vercel.app/watch</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://harvest-ecc.vercel.app/about.html</loc>
+    <loc>https://harvest-ecc.vercel.app/report</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://harvest-ecc.vercel.app/line</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://harvest-ecc.vercel.app/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
