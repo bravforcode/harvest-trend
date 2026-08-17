@@ -175,6 +175,7 @@ async function sendPushes(fetchPrices){
 
   const prices = await fetchPrices(); // [{crop, prov, price, unit, ...}]
   let sent = 0, checked = 0;
+  const errors = [];
   for(const entry of entries){
     const th = entry.threshold;
     checked++;
@@ -185,7 +186,12 @@ async function sendPushes(fetchPrices){
       body: th.c + ' (' + th.p + ') ถึงเป้าหมาย ' + th.price + ' บาท — ตอนนี้ ' + cur + ' บาท'
     });
     try{
-      await webpush.sendNotification(entry.sub, payload);
+      /* web-push expects the browser PushSubscription shape ({ endpoint, keys }) —
+         our store keeps the keys flat (p256dh/auth), so normalize at send time */
+      await webpush.sendNotification({
+        endpoint: entry.sub.endpoint,
+        keys: { p256dh: entry.sub.p256dh, auth: entry.sub.auth }
+      }, payload);
       sent++;
       if(sb){
         await sb.from('push_subs').update({ threshold_price: null }).eq('endpoint', entry.sub.endpoint);
@@ -199,10 +205,13 @@ async function sendPushes(fetchPrices){
         }else{
           memSubs.delete(entry.sub.endpoint);
         }
+      }else{
+        /* surface everything else instead of swallowing it silently */
+        errors.push(String(err && err.message || err));
       }
     }
   }
-  return { sent, checked };
+  return { sent, checked, errors }; // errors: [] on success (push-check passes it through)
 }
 
 module.exports.sendPushes = sendPushes;
