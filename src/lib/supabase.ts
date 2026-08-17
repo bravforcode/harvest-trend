@@ -65,12 +65,10 @@ export const isSupabaseReady: boolean = Boolean(SUPABASE_URL && SUPABASE_ANON_KE
 
 /* --- lazy client loading ------------------------------------------------ */
 
-// Widened to `string` on purpose: TypeScript does not statically resolve
-// dynamic imports whose specifier is not a string literal, so the missing
-// module never produces TS2307. Vite will warn about a non-analyzable
-// dynamic import, but this file is unreachable unless the env vars are set
-// AND the dependency is installed.
-const SUPABASE_MODULE: string = '@supabase/supabase-js';
+// Lazy client loading: import a RELATIVE module that statically re-exports
+// createClient, so Vite bundles it as a real lazy chunk (a bare dynamic
+// import('@supabase/supabase-js') cannot be analyzed and 404s in prod).
+// The specifier MUST be a literal so Rollup can resolve and split it.
 
 let clientPromise: Promise<SupabaseLike | null> | null = null;
 
@@ -85,7 +83,7 @@ export async function ensureClient(): Promise<SupabaseLike | null> {
     clientPromise = (async () => {
       try {
         const mod: { createClient?: (url: string, key: string) => SupabaseLike } =
-          await import(SUPABASE_MODULE);
+          await import('./supabase-client');
         const createClient = mod?.createClient;
         if (!createClient) return null;
         return createClient(SUPABASE_URL as string, SUPABASE_ANON_KEY as string);
