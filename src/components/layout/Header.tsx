@@ -23,9 +23,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-ground/95 backdrop-blur-sm pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2 px-4 py-2.5">
-        <Link to="/" className="flex items-center gap-2.5 no-underline text-ink" aria-label="Harvest Trend">
-          <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-forest shadow-[inset_0_0_0_1px_rgba(255,253,246,.14)]">
-            <BrandMark size={24} />
+        <Link to="/" className="flex items-center gap-0 no-underline text-ink" aria-label="Harvest Trend">
+          <span className="flex h-14 w-auto flex-none items-center overflow-hidden rounded-xl">
+            <BrandMark size={48} />
           </span>
           <span className="leading-tight">
             <span className="block font-display text-[17px] font-extrabold tracking-[.2px]">Harvest Trend</span>
