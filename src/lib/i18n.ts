@@ -227,6 +227,9 @@ export interface Dict {
   repQuick: string;
   repShowAll: string;
   repCollapse: string;
+  /* PDPA consent (report sharing) */
+  repConsentLabel: string;
+  repConsentRequired: string;
   qcProv: string;
   qcCrop: string;
   chartShare: string;
@@ -471,6 +474,8 @@ export const T: Record<Lang, Dict> = {
     repTip: 'เมื่อส่งรายงาน ราคาจะถูกบันทึกในเครื่องของคุณ และถูกส่งขึ้นฐานข้อมูลกลาง (Supabase · เปิดอ่านสาธารณะ เก็บที่สิงคโปร์) เพื่อให้ทุกคนเห็นราคาสด ไม่มีการเก็บตำแหน่ง GPS และไม่ส่งข้อมูลส่วนตัว',
     repSaved: 'บันทึกรายงานแล้ว ขอบคุณครับ!', repBad: 'กรุณากรอกราคาที่ถูกต้อง',
     repQuick: 'ใช้ราคาประมาณ {p}', repShowAll: 'ดูทั้งหมด {n} รายการ', repCollapse: 'ย่อลง',
+    repConsentLabel: 'ข้าพเจ้ายินยอมให้ข้อมูลรายงานนี้ (จังหวัด/พืช/ราคา/หมายเหตุ) ถูกเผยแพร่เป็นข้อมูลสาธารณะและจัดเก็บที่เซิร์ฟเวอร์ในสิงคโปร์ เพื่อให้เกษตรกรทุกคนเห็นราคา — ไม่มีการเก็บตำแหน่ง GPS หรือข้อมูลส่วนตัว',
+    repConsentRequired: 'กรุณากาเครื่องหมายยินยอมก่อนส่งรายงาน (ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562)',
     qcProv: 'จังหวัด', qcCrop: 'พืช', chartShare: 'แชร์ราคานี้',
     chartFollowAdd: 'ติดตาม', chartFollowRemove: 'เลิกติดตาม',
     tblTitle: 'ตารางตัวเลขราคา', tblWeek: 'สัปดาห์ที่', tblMonth: 'เดือน', tblPrice: 'ราคา', tblType: 'ประเภท',
@@ -661,6 +666,8 @@ export const T: Record<Lang, Dict> = {
     repTip: 'When you submit, the price is saved on this device and pushed to a shared database (Supabase · publicly readable · stored in Singapore) so everyone sees fresher prices. No GPS location is collected and no personal data is sent.',
     repSaved: 'Report saved · thank you!', repBad: 'Please enter a valid price',
     repQuick: 'Use estimate ~{p}', repShowAll: 'Show all {n}', repCollapse: 'Collapse',
+    repConsentLabel: 'I consent to this report (province/crop/price/note) being published as public data and stored on a server in Singapore so every farmer can see prices — no GPS location or personal data is collected.',
+    repConsentRequired: 'Please tick the consent box to submit (Thailand PDPA 2019).',
     qcProv: 'Province', qcCrop: 'Crop', chartShare: 'Share price',
     chartFollowAdd: 'Follow', chartFollowRemove: 'Unfollow',
     tblTitle: 'Price table', tblWeek: 'Week', tblMonth: 'Month', tblPrice: 'Price', tblType: 'Type',

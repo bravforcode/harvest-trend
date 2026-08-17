@@ -8,6 +8,7 @@ import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { HomePage } from '@/pages/HomePage';
 import { PriceChartPage } from '@/pages/PriceChartPage';
+import { trackPage } from '@/lib/analytics';
 
 /* code-split every secondary page so the first screen (pick → verdict) stays
    small: map pulls in leaflet+react-leaflet (~47KB gzip), line pulls in
@@ -22,7 +23,11 @@ const LinePage = lazy(() => import('@/pages/LinePage').then((m) => ({ default: m
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    /* lightweight analytics: pageview per route (dedupes itself) */
+    trackPage(pathname);
+  }, [pathname]);
   return null;
 }
 

@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { cropById, provById } from '@/lib/data';
 import { CUR_WEEK, fmtVal, priceAt } from '@/lib/engine';
 import { isSupabaseReady, submitPriceReport } from '@/lib/supabase';
+import { trackEvent } from '@/lib/analytics';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { getReports, setReports, type ReportItem } from '@/lib/storage';
@@ -26,6 +27,9 @@ export function ReportPage() {
   const [note, setNote] = useState('');
   const [reps, setReps] = useState(getReports());
   const [showAll, setShowAll] = useState(false);
+  /* PDPA consent: only required when the report actually leaves this device
+     (Supabase configured). Local-only submissions need no consent. */
+  const [consent, setConsent] = useState(false);
 
   const c = cropById(rCrop);
   const est = c ? priceAt(rCrop, rProv, CUR_WEEK) : 0;
@@ -33,6 +37,7 @@ export function ReportPage() {
   const submit = async () => {
     const v = parseFloat(price);
     if (!(v > 0)) { toast(t.repBad, 'err'); return; }
+    if (isSupabaseReady && !consent) { toast(t.repConsentRequired, 'err'); return; }
     const item: ReportItem = {
       p: rProv, c: rCrop, price: String(v),
       date: new Date().toISOString(), note: note.trim()
@@ -42,6 +47,8 @@ export function ReportPage() {
     setReps(next);
     setPrice('');
     setNote('');
+    /* consent is per-submission — reset so the next share requires a fresh opt-in */
+    setConsent(false);
     /* sync to the shared network when Supabase is configured (env-gated);
        otherwise keep the local-only behavior and say so */
     if (isSupabaseReady) {
@@ -49,6 +56,8 @@ export function ReportPage() {
         crop: rCrop, province: rProv, price: v,
         unit: c ? c.unit.th : undefined, note: note.trim()
       });
+      /* analytics fires only when the report actually reached the network */
+      if (r.ok) trackEvent('/report', 'submit');
       toast(r.ok ? t.repShared : t.repSyncFail, r.ok ? undefined : 'err');
     } else {
       toast(t.repSaved);
@@ -105,7 +114,21 @@ export function ReportPage() {
             <Label className="mb-1.5 block" htmlFor="rep-note">{t.fNote}</Label>
             <Textarea id="rep-note" value={note} onChange={e => setNote(e.target.value)} placeholder={t.fNotePh} />
           </div>
-          <Button variant="gold" onClick={submit}>{t.fSubmit}</Button>
+          {isSupabaseReady && (
+            <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-line bg-ground/60 px-3.5 py-3">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={e => setConsent(e.target.checked)}
+                className="mt-0.5 size-4 flex-none accent-[#B8860B]"
+                aria-describedby="rep-consent-note"
+              />
+              <span id="rep-consent-note" className="text-[12.5px] leading-relaxed text-moss">
+                {t.repConsentLabel}
+              </span>
+            </label>
+          )}
+          <Button variant="gold" onClick={submit} disabled={isSupabaseReady && !consent}>{t.fSubmit}</Button>
         </CardContent>
       </Card>
 
