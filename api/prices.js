@@ -23,12 +23,21 @@
 
   In-memory cache TTL 60s (Vercel instance). GET /api/prices → JSON snapshot.
   Exports fetchPrices() for api/line-webhook.js and _internals for tests.
+
+  Mirror: when CKAN_MIRROR_URL is set (Cloudflare Worker, see
+  workers/ckan-mirror/), datastore reads try the mirror first and only fall
+  back to direct data.go.th if the mirror is unreachable. The mirror stores
+  the same raw CKAN records, so parsing below is shared between paths.
 */
 'use strict';
 
 const CACHE_TTL = 60 * 1000; // refresh upstream at most once a minute
 const FETCH_TIMEOUT = 15 * 1000;
 const DATA_GOV = 'https://data.go.th/api/3/action';
+/* Cloudflare Worker mirror of the CKAN datasets (see workers/ckan-mirror/).
+   If unset, prices.js keeps fetching data.go.th directly. */
+const CKAN_MIRROR_URL = (process.env.CKAN_MIRROR_URL || '').replace(/\/+$/, '');
+const MIRROR_TTL = 10 * 60 * 1000; // re-read the mirror snapshot at most every 10 min
 const BOT_URL = 'https://app.bot.or.th/BTWS_STAT/statistics/BOTWEBSTAT.aspx?reportID=491&language=TH';
 const UA_CUSTOM = 'harvest-ecc/1.0 (+https://harvest-ecc.vercel.app)';
 const UA_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
@@ -78,7 +87,57 @@ async function getText(url){
 }
 
 /* paginate a CKAN datastore (limit is capped at 100 on many installs) */
+/* The mirror returns the same raw records keyed by resource id. We cache
+   the whole snapshot for MIRROR_TTL so per-source datastoreAll() calls share
+   one worker fetch instead of hammering it 26× per refresh.
+
+   Failure handling: when the mirror is down we record mirrorDownAt and do
+   NOT retry it for MIRROR_TTL — otherwise every one of the 26 sequential
+   datastoreAll() calls would re-attempt the fetch (up to 4s timeout each)
+   and blow the whole refresh deadline. The timeout is 4s, not 8s, so a
+   slow-but-healthy mirror can't starve the rest of the refresh either. */
+let mirror = null; // { at, snapshot }
+let mirrorDownAt = 0;
+let mirrorStatus = 'unknown'; // 'up' | 'down' | 'unknown' | 'off'
+async function mirrorRecords(resourceId){
+  if(!CKAN_MIRROR_URL) return null;
+  const due = !mirror || Date.now() - mirror.at > MIRROR_TTL;
+  const coolingDown = Date.now() - mirrorDownAt < MIRROR_TTL;
+  if(due && !coolingDown){
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 4000);
+    try{
+      const r = await fetch(CKAN_MIRROR_URL + '/snapshot', {
+        signal: ctl.signal,
+        headers: { 'User-Agent': UA_CUSTOM, 'Accept': 'application/json' }
+      });
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if(!j || typeof j.resources !== 'object' || !j.resources) throw new Error('bad snapshot');
+      mirror = { at: Date.now(), snapshot: j };
+      mirrorStatus = 'up';
+      mirrorDownAt = 0;
+    }catch(e){
+      /* Mirror down/unreachable — KEEP the last good snapshot and serve it
+         stale during the cooldown (better than the direct fallback, which
+         403s from Vercel IPs). Only resources the stale snapshot lacks go
+         direct. Retries naturally after MIRROR_TTL once mirrorDownAt ages. */
+      mirrorStatus = 'down';
+      mirrorDownAt = Date.now();
+    }finally{
+      clearTimeout(t);
+    }
+  }
+  if(!mirror) return null;
+  const recs = mirror.snapshot.resources[resourceId];
+  return Array.isArray(recs) && recs.length ? recs : null;
+}
+
 async function datastoreAll(resourceId){
+  /* 1) mirror first (worker on Cloudflare's network — not blocked like Vercel IPs) */
+  const mirrored = await mirrorRecords(resourceId);
+  if(mirrored) return mirrored;
+  /* 2) direct fallback (mirror off / resource missing there) */
   const out = [];
   for(let offset = 0; ; offset += 100){
     const url = DATA_GOV + '/datastore_search?resource_id=' + resourceId + '&limit=100&offset=' + offset;
@@ -461,7 +520,7 @@ module.exports = async function handler(req, res){
       const rid = u.searchParams.get('rid') || 'a5b7fe59-1bdd-4e64-bda6-568f3a9866e3';
       const r = await fetch(DATA_GOV + '/datastore_search?resource_id=' + rid + '&limit=2', { headers: { 'User-Agent': UA_BROWSER, 'Accept': 'application/json' } });
       const body = await r.text();
-      return res.status(200).json({ status: r.status, statusText: r.statusText, headers: Object.fromEntries(r.headers.entries()), body: body.slice(0, 1000) });
+      return res.status(200).json({ status: r.status, statusText: r.statusText, headers: Object.fromEntries(r.headers.entries()), body: body.slice(0, 1000), mirror: { configured: !!CKAN_MIRROR_URL, status: mirrorStatus, snapshot_at: mirror ? mirror.at : null } });
     }catch(e){
       return res.status(200).json({ error: e && e.message || String(e), name: e && e.name });
     }
@@ -472,6 +531,8 @@ module.exports = async function handler(req, res){
     return res.status(200).json({
       ok: true,
       source: 'data.go.th (CKAN) + ธนาคารแห่งประเทศไทย',
+      mirror: CKAN_MIRROR_URL ? mirrorStatus : 'off',
+      mirror_updated_at: mirror && mirror.snapshot && mirror.snapshot.updated_at ? mirror.snapshot.updated_at : null,
       updated: new Date().toISOString(),
       count: prices.length,
       errors: (cache && cache.errors) || [],

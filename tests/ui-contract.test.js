@@ -104,7 +104,7 @@ const app = readSrc('App.tsx');
 });
 
 console.log('PWA contract (injectManifest src/sw.ts):');
-const vc = read('vite.config.ts');
+const vc = read('vite.config.mts');
 const sw = readSrc('sw.ts');
 ok('VitePWA plugin configured', vc.includes('VitePWA('));
 ok('injectManifest strategy configured', vc.includes("strategies: 'injectManifest'"));

@@ -1,0 +1,21 @@
+name = "harvest-ckan-mirror"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# KV that holds the CKAN snapshot (raw records per data.go.th resource).
+# Create it once, then paste the id here:
+#   npx wrangler kv namespace create CKAN_KV
+[[kv_namespaces]]
+binding = "CKAN_KV"
+id = "eb3acec6ecc943fda3e64b925e48b28a"
+
+# Refresh the mirror every 6 hours (datasets update monthly; 6h keeps the
+# mirror warm without burning the free KV write quota). You can also trigger
+# an immediate refresh with: POST https://<worker>/refresh
+[triggers]
+crons = ["0 */6 * * *"]
+
+# Optional: if set, POST /refresh requires this token in the
+# X-Refresh-Token header. Leave unset to allow open refresh calls.
+[vars]
+REFRESH_TOKEN = ""
