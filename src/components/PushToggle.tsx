@@ -56,7 +56,7 @@ export function PushToggle() {
           <CardDescription>{t.pushSub}</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-[12.5px] text-moss">{t.pushUnsupported}</p>
+          <p className="text-[0.7813rem] text-moss">{t.pushUnsupported}</p>
         </CardContent>
       </Card>
     );
@@ -100,11 +100,12 @@ export function PushToggle() {
       });
       if (!res.ok) {
         /* the browser-side subscription exists, but the server did not store
-           it (e.g. its VAPID keys are missing in this env) — say so honestly */
+           it (e.g. its VAPID keys are missing in this env) — say so honestly
+           and stay in the off state (re-clicking re-POSTs the existing sub) */
         toast(t.pushFail, 'err');
-      } else {
-        toast(t.pushSaved);
+        return;
       }
+      toast(t.pushSaved);
       setEnabled(true);
     } catch {
       toast(t.pushFail, 'err');
