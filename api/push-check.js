@@ -31,7 +31,7 @@ module.exports = async function handler(req, res){
   }
   try{
     const r = await sendPushes(fetchPrices);
-    return res.status(200).json({ ok: true, sent: r.sent, checked: r.checked, note: r.note || null });
+    return res.status(200).json({ ok: true, sent: r.sent, checked: r.checked, errors: r.errors || [], note: r.note || null });
   }catch(e){
     return res.status(502).json({ ok: false, error: e && e.message || String(e) });
   }
