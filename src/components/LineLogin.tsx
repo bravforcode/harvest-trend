@@ -12,7 +12,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 const CLIENT_ID: string = import.meta.env.VITE_LINE_LOGIN_CLIENT_ID || '';
 const LINE_KEY = 'rtp_line_v1';
 
-interface LineProfile { sub: string; name?: string | null; picture?: string | null }
+interface LineProfile {
+  sub: string;
+  name?: string | null;
+  picture?: string | null;
+  /* auth tokens returned by /api/line-login — used to authenticate
+     /api/watch-sync calls (the server verifies them before read/write).
+     Stored in localStorage like the profile, same trust boundary. */
+  id_token?: string;
+  access_token?: string;
+}
 
 const store = {
   get(): LineProfile | null {
@@ -68,7 +77,17 @@ export function LineLogin() {
     })
       .then(r => r.json())
       .then(d => {
-        if (d.ok && d.profile) { store.set(d.profile); setProfile(d.profile); toast(t.pushSaved); }
+        if (d.ok && d.profile) {
+          store.set({
+            sub: d.profile.sub,
+            name: d.profile.name,
+            picture: d.profile.picture,
+            id_token: d.id_token || undefined,
+            access_token: d.access_token || undefined
+          });
+          setProfile(d.profile);
+          toast(t.pushSaved);
+        }
         else toast(t.llFail, 'err');
       })
       .catch(() => toast(t.llFail, 'err'))

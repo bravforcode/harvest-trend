@@ -2,14 +2,11 @@
    POST { code, redirect_uri, code_verifier } → swaps the auth code for an
    id_token, verifies its HS256 signature with the client secret, and returns
    the LINE profile (sub = stable user id shared with the Messaging API
-   channel when both live under the same provider).
+   channel when both live under the same provider) plus the raw id_token and
+   access_token so the client can present them to /api/watch-sync later.
    Requires env: LINE_LOGIN_CLIENT_ID + LINE_LOGIN_CLIENT_SECRET.
    501 not_configured when missing (feature disabled — app degrades). */
-const crypto = require('crypto');
-
-function b64url(buf) {
-  return Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
+const { verifyIdToken } = require('./line-verify.js');
 
 module.exports = async function handler(req, res) {
   const clientId = process.env.LINE_LOGIN_CLIENT_ID;
@@ -48,16 +45,19 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    /* verify the id_token signature (HS256 with the client secret) */
-    const [h, p, sig] = data.id_token.split('.');
-    if (!h || !p || !sig) throw new Error('bad_id_token');
-    const expected = b64url(crypto.createHmac('sha256', clientSecret).update(h + '.' + p).digest());
-    if (expected !== sig) {
+    /* verify the id_token signature (HS256 with the client secret) + aud + exp */
+    const claims = verifyIdToken(data.id_token);
+    if (!claims) {
       res.status(400).json({ ok: false, reason: 'bad_signature' });
       return;
     }
-    const claims = JSON.parse(Buffer.from(p, 'base64url').toString('utf8'));
-    res.json({ ok: true, profile: { sub: claims.sub, name: claims.name || null, picture: claims.picture || null } });
+    res.json({
+      ok: true,
+      profile: { sub: claims.sub, name: claims.name || null, picture: claims.picture || null },
+      id_token: data.id_token,
+      access_token: data.access_token || null,
+      expires_in: data.expires_in || null
+    });
   } catch (e) {
     res.status(500).json({ ok: false, reason: 'unexpected:' + (e instanceof Error ? e.message : String(e)) });
   }
