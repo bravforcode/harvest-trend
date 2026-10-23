@@ -251,7 +251,12 @@ npm test
 
 ## 📄 License
 
-ยังไม่ได้กำหนดสัญญาอนุญาต (No license yet) — สงวนลิขสิทธิ์ ขออนุญาตใช้เพื่อการศึกษา/สาธิต
+- **โค้ด** (เว็บแอป API และ worker): [Apache License 2.0](LICENSE)
+- **เอกสารและชุดข้อมูลรวม** ที่โครงการเผยแพร่: CC BY 4.0
+- **แบรนด์** (ชื่อ โลโก้ ไอคอน): สงวนลิขสิทธิ์ทั้งหมด
+- **ข้อมูลจากแหล่งภายนอก** (ธปท., data.go.th, สื่อข่าว): อยู่ภายใต้เงื่อนไขการใช้ของแหล่งนั้น โครงการนี้ไม่ได้อนุญาตให้ใช้ซ้ำโดยอัตโนมัติ
+
+Licence for code: Apache-2.0. Docs and aggregated datasets: CC BY 4.0. Brand: all rights reserved. External data (BOT, data.go.th, news) keeps its own terms.
 
 ---
 
