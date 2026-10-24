@@ -8,6 +8,7 @@ import {
   BODY_KEY, CLOSE_KEY, MOM_KEY, REC_KEY, cap, fmtDate, fmtVal, recommend,
   shareText, signalsFor, verdictSpeech, type AppState
 } from '@/lib/engine';
+import { LiveData } from '@/lib/live';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { speakThai, speechSupported, stopSpeaking } from '@/lib/speech';
@@ -46,6 +47,8 @@ export function VerdictCard({ prov, crop, grade, compact }: Props) {
   const r = recommend(sg);
   const last = sg.series.a[sg.series.a.length - 1];
   const watched = inWatch(state.prov, state.crop);
+  const live = LiveData.get(state.crop, state.prov);
+  const priceTag = live && live.price > 0 ? t.lbLiveTitle : t.lbOffTitle;
 
   const onVoice = () => {
     if (!speechSupported()) { app.toast(t.voiceUnsupported, 'err'); return; }
@@ -101,6 +104,7 @@ export function VerdictCard({ prov, crop, grade, compact }: Props) {
             {fmtVal(last, c)}
           </span>
           <span className="pb-0.5 text-sm font-semibold text-moss">{c.unit[lang]}</span>
+          <span className="pb-0.5 text-[11px] font-semibold text-moss">{priceTag}</span>
         </div>
 
         <p className="mt-1.5 text-[13px] text-moss">

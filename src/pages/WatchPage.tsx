@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Trash2 } from 'lucide-react';
 import { cropById, provById } from '@/lib/data';
 import { REC_KEY, fmtVal, recommend, signalsFor } from '@/lib/engine';
+import { LiveData } from '@/lib/live';
 import { useApp } from '@/lib/app-context';
 import { T } from '@/lib/i18n';
 import { getWatch, setWatch } from '@/lib/storage';
@@ -97,6 +98,7 @@ export function WatchPage() {
             const sg = signalsFor(p, c);
             const r = recommend(sg);
             const last = sg.series.a[sg.series.a.length - 1];
+            const live = LiveData.get(p, c);
             const k = p + '|' + c;
             const inCmp = cmp.includes(k);
             return (
@@ -119,6 +121,7 @@ export function WatchPage() {
                     </p>
                     <p className="tabular text-lg font-extrabold text-forest">
                       {fmtVal(last, crop)} <span className="text-[12px] font-semibold text-moss">{crop.unit[lang]}</span>
+                      <span className="ml-2 text-[11px] font-semibold text-moss">{live && live.price > 0 ? t.lbLiveTitle : t.lbOffTitle}</span>
                     </p>
                   </div>
                   <Spark cropId={c} provId={p} />

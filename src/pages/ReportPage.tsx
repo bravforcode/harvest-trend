@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { cropById, provById } from '@/lib/data';
 import { CUR_WEEK, fmtVal, priceAt } from '@/lib/engine';
+import { LiveData } from '@/lib/live';
 import { isSupabaseReady, submitPriceReport } from '@/lib/supabase';
 import { trackEvent } from '@/lib/analytics';
 import { useApp } from '@/lib/app-context';
@@ -33,6 +34,7 @@ export function ReportPage() {
 
   const c = cropById(rCrop);
   const est = c ? priceAt(rCrop, rProv, CUR_WEEK) : 0;
+  const estLive = LiveData.get(rCrop, rProv);
 
   const submit = async () => {
     const v = parseFloat(price);
@@ -104,9 +106,12 @@ export function ReportPage() {
                 className="max-w-52"
               />
               {c && (
-                <Button type="button" variant="outline" size="sm" onClick={() => setPrice(fmtVal(est, c))}>
-                  {t.repQuick.replace('{p}', fmtVal(est, c))}
-                </Button>
+                <>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setPrice(fmtVal(est, c))}>
+                    {t.repQuick.replace('{p}', fmtVal(est, c))}
+                  </Button>
+                  <span className="text-[11px] font-semibold text-moss">{estLive && estLive.price > 0 ? t.lbLiveTitle : t.lbOffTitle}</span>
+                </>
               )}
             </div>
           </div>

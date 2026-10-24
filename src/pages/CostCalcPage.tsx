@@ -133,6 +133,7 @@ export function CostCalcPage() {
               <div className="rounded-xl border border-line bg-paper p-3">
                 <p className="text-[11px] font-bold uppercase tracking-[1px] text-moss">{t.costCurrent}</p>
                 <p className="tabular text-lg font-extrabold text-ink">{fmtVal(current, c)} <span className="text-[12px] font-semibold text-moss">{c.unit[lang]}</span></p>
+                <p className="text-[11px] font-semibold text-moss">{live && live.price > 0 ? t.lbLiveTitle : t.lbOffTitle}</p>
               </div>
               {verdict && (
                 <div className={`rounded-xl border p-3 ${verdict === 'profit' ? 'border-leaf bg-leaf-tint' : verdict === 'loss' ? 'border-clay bg-clay-soft' : 'border-gold bg-gold-soft'}`}>

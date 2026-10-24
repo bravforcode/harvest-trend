@@ -22,6 +22,7 @@ interface Row {
   c: Crop;
   current: number;
   hit: boolean;
+  live: boolean;
 }
 
 export function ThresholdPanel() {
@@ -47,7 +48,7 @@ export function ThresholdPanel() {
       if (!c) continue;
       const live = LiveData.get(x.c, x.p);
       const current = live && live.price > 0 ? live.price : priceAt(x.c, x.p, CUR_WEEK);
-      out.push({ x, c, current, hit: current >= x.price });
+      out.push({ x, c, current, hit: current >= x.price, live: !!live && live.price > 0 });
     }
     return out;
   }, [list, tick]);
@@ -117,6 +118,7 @@ export function ThresholdPanel() {
                   </p>
                   <p className="text-[12.5px] text-moss">
                     {t.thrCurrent.replace('{price}', fmtVal(r.current, r.c) + ' ' + r.c.unit[app.lang])}
+                    {' · '}{r.live ? t.lbLiveTitle : t.lbOffTitle}
                   </p>
                 </div>
                 <Button
