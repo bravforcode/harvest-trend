@@ -176,9 +176,9 @@ Object.keys(used).forEach(k => {
 
 console.log('brand-mark grammar (single source):');
 const bm = readSrc('components/layout/BrandMark.tsx');
-ok('BrandMark.tsx keeps the leaf-circle SVG grammar', bm.includes('cx="12" cy="14.3" r="8.3"'));
-ok('BrandMark.tsx keeps the stem path', bm.includes('M12 11.6V4.5'));
-ok('BrandMark.tsx keeps the leaf fills', bm.includes('fill="#FFFDF6"'));
+ok('BrandMark.tsx renders brand-logo.png', bm.includes('src="/brand-logo.png"'));
+ok('public/brand-logo.png exists', fs.existsSync(path.join(ROOT, 'public', 'brand-logo.png')));
+
 
 console.log('dataset contract:');
 const data = readSrc('lib/data.ts');
