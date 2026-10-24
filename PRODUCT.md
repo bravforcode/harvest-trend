@@ -12,7 +12,7 @@ Primary: Thai farmers in any of 77 provinces, working at the farm (front-of-orch
 
 ## Product Purpose
 
-Harvest Trend (รู้ทันราคา) is a real-use tool — not a pitch — for checking today's farm-gate price signal and getting a harvest/sell timing recommendation with reasons. Success: a farmer picks province → picks crop → reads a clear verdict with why, in 2 taps, offline, in Thai or English.
+Harvest Trend (รู้ทันราคา) is a prototype — not yet tested with farmers in a pilot — for checking today's farm-gate price signal and getting a harvest/sell timing recommendation with reasons. Success: a farmer picks province → picks crop → reads a clear verdict with why, in 2 taps, offline, in Thai or English.
 
 ## Positioning
 

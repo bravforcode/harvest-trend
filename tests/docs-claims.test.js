@@ -15,6 +15,7 @@ const readme = read('README.md');
 const product = read('PRODUCT.md');
 ok('README does not state 421 checks', !readme.includes('421'));
 ok('PRODUCT.md does not state 51 checks', !product.includes('51 checks'));
+ok('PRODUCT.md does not contain real-use tool', !product.includes('real-use tool'));
 
 if (fails) { console.error(fails + ' failure(s)'); process.exit(1); }
 console.log('docs-claims.test.js: all checks OK');
