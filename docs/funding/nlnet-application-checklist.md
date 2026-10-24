@@ -43,7 +43,7 @@ Do **not** enter personal data (phone, address, ID) into any field from chat. Th
 
 | Item | Exists? | Status |
 |---|---|---|
-| Repository URL (public GitHub) | Repo exists; public state not checked here | founder confirms repo is public before submitting |
+| Repository URL (public GitHub) | `https://github.com/bravforcode/harvest-trend` (public, created 2026-10-24). Pushed `master` and `claude/project-funding-plan-249f7d` from a copy with author emails rewritten to noreply. The old `bravforcode/harvest-ecc` is archived and private, so it is not the URL to cite. | founder confirms the URL in the form and checks CI on the new repo |
 | LICENSE (Apache-2.0 for code) | Yes, committed earlier (`2bcf3ba`, `75a27a8`) | agent verified |
 | CI badge | Workflow written (`84df770`), not yet run on GitHub | BLOCKED until G2 (push approved) and a green run. Do not claim CI passes before then. |
 | Coverage table (real-data coverage) | Yes: `docs/funding/coverage-table.md`, commit `99cbf61` | agent verified. Read as: 18 provincial pairs of 1,925; 553 includes national-only data. |
