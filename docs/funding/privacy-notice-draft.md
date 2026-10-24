@@ -65,7 +65,7 @@
 2. **`user_id` อ่านได้สาธารณะ** — นโยบาย `select all` ใน `supabase/schema.sql` ให้ `anon` และ `authenticated` อ่านได้ทุกคอลัมน์ รวม `user_id` ผลคือรหัสผู้ใช้แบบ anonymous ถูกเปิดเผยต่อสาธารณะในกรณี fallback ทางเลือก:
    - ตัด fallback ออก (รายงานทุกรายการเป็นนิรนาม) หรือ
    - จำกัดสิทธิ์อ่านคอลัมน์ `user_id` (ต้องแก้ไข query `select('*')` ใน `src/lib/supabase.ts`)
-   **แก้แล้วใน working tree:** ไคลเอนต์เลือกคอลัมน์ชัดเจนแล้ว (`src/lib/supabase.ts`) และเพิ่ม migration `supabase/migrations/20261024120000_price_reports_hide_user_id.sql` (ยังไม่ได้รันกับโปรเจกต์จริง) รันแล้วกับ harvest-ecc เมื่อ 2026-10-25 หลังเจ้าของโครงการอนุมัติ ยืนยันแล้วว่า anon อ่านคอลัมน์สาธารณะได้ และอ่าน user_id ไม่ได้ · ปิดสิทธิ์ UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER แล้วด้วย migration `20261024182852` (2026-10-25) · INSERT คงไว้เพราะแอปใช้ส่งรายงาน · การ revoke คอลัมน์อย่างเดียวไม่มีผล เพราะสิทธิ์ SELECT ระดับตารางยังครอบคลุมทุกคอลัมน์ migration จึง revoke ทั้งตารางแล้ว grant เฉพาะคอลัมน์สาธารณะ
+   **แก้แล้วใน working tree:** ไคลเอนต์เลือกคอลัมน์ชัดเจนแล้ว (`src/lib/supabase.ts`) และเพิ่ม migration `supabase/migrations/20261024174558_price_reports_hide_user_id.sql` รันแล้วกับ harvest-ecc เมื่อ 2026-10-25 หลังเจ้าของโครงการอนุมัติ ยืนยันแล้วว่า anon อ่านคอลัมน์สาธารณะได้ และอ่าน user_id ไม่ได้ · ปิดสิทธิ์ UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER แล้วด้วย migration `20261024182852` (2026-10-25) · INSERT คงไว้เพราะแอปใช้ส่งรายงาน · การ revoke คอลัมน์อย่างเดียวไม่มีผล เพราะสิทธิ์ SELECT ระดับตารางยังครอบคลุมทุกคอลัมน์ migration จึง revoke ทั้งตารางแล้ว grant เฉพาะคอลัมน์สาธารณะ
 
 3. **ยังไม่มีหน้านโยบายในแอป** — ปุ่มยินยอมไม่มีลิงก์ไปยังเอกสารนี้ ต้องเพิ่มหน้าและลิงก์เมื่อนโยบายพร้อม
 

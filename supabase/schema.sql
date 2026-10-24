@@ -89,7 +89,7 @@ create policy "select all" on public.price_reports
 
 -- Column-level read: user_id stays private. Table-wide SELECT would expose every
 -- column, so revoke it and grant only the public columns. Same as the migration
--- supabase/migrations/20261024120000_price_reports_hide_user_id.sql.
+-- supabase/migrations/20261024174558_price_reports_hide_user_id.sql.
 revoke select on public.price_reports from anon, authenticated;
 grant select (id, crop, province, price, unit, note, lat, lng, photo_url, created_at)
   on public.price_reports to anon, authenticated;
