@@ -199,4 +199,23 @@ ok('recommend thresholds intact', eng.includes('score <= -1.5') && eng.includes(
 console.log('version stamp:');
 ok('Footer carries the v2 build stamp', readSrc('components/layout/Footer.tsx').includes('build v2'));
 
+console.log('privacy controls (PDPA):');
+const sbClient = readSrc('lib/supabase.ts');
+const sqlSchema = read('supabase/schema.sql');
+const migrations = fs.readdirSync(path.join(ROOT, 'supabase', 'migrations'))
+  .map(f => read(path.join('supabase', 'migrations', f))).join('\n');
+const COLUMN_GRANT = 'grant select (id, crop, province, price, unit, note, lat, lng, photo_url, created_at)';
+ok('consent (th) does not claim "no personal data"', !i18n.includes('หรือข้อมูลส่วนตัว'));
+ok('consent (th) states GPS is not collected', i18n.includes('ระบบไม่เก็บตำแหน่ง GPS'));
+ok('consent (en) does not claim "no personal data"', !i18n.includes('or personal data is collected'));
+ok('consent (en) states GPS is not collected', i18n.includes('The app does not collect GPS location'));
+ok('fetchRecentReports selects explicit columns (no user_id)',
+  sbClient.includes("select('id,crop,province,price,unit,note,lat,lng,photo_url,created_at')"));
+ok('fetchRecentReports never selects *', !sbClient.includes("select('*')"));
+ok('PriceReport type omits user_id', !/user_id: string/.test(sbClient));
+ok('migration revokes table-wide select on price_reports from anon, authenticated',
+  migrations.includes('revoke select on public.price_reports from anon, authenticated'));
+ok('migration re-grants column select without user_id', migrations.includes(COLUMN_GRANT));
+ok('schema.sql carries the same column-level grant', sqlSchema.includes(COLUMN_GRANT));
+
 console.log('\nui-contract.test.js: ' + n + ' checks OK');

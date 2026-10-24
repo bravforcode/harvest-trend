@@ -47,7 +47,7 @@ Do **not** enter personal data (phone, address, ID) into any field from chat. Th
 | LICENSE (Apache-2.0 for code) | Yes, committed earlier (`2bcf3ba`, `75a27a8`) | agent verified |
 | CI badge | Workflow written (`84df770`), not yet run on GitHub | BLOCKED until G2 (push approved) and a green run. Do not claim CI passes before then. |
 | Coverage table (real-data coverage) | Yes: `docs/funding/coverage-table.md`, commit `99cbf61` | agent verified. Read as: 18 provincial pairs of 1,925; 553 includes national-only data. |
-| Privacy draft | Not written | BLOCKED until G1 (retention period, proposed 12 months) |
+| Privacy draft | Drafted: `docs/funding/privacy-notice-draft.md` (not published; §7 lists 3 code findings). Consent wording and column-level select are changed in the working tree, not committed. Migration `20261024120000_price_reports_hide_user_id.sql` is written, not applied. | BLOCKED until founder fills controller and contact and counsel reviews. Retention (G1) and consent wording are approved. Migration pending a timing decision. |
 | Label audit (simulated-data labels) | Yes: `docs/funding/label-audit.md`, commit `15ecdf7` | agent verified |
 | Hit-rate metric (backtest groundwork) | Yes, commit `1e6d13e` | agent verified; no backtest results exist yet (Task B5 not done) |
 

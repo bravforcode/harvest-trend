@@ -16,6 +16,7 @@ ok('ci.yml exists', wf.length > 0);
 ok('installs with frozen lockfile', wf.includes('bun install --frozen-lockfile'));
 ok('runs the test script', wf.includes('bun run test'));
 ok('runs the build', wf.includes('bun run build'));
+ok('runs the typecheck', wf.includes('bun run typecheck'));
 ok('pins bun setup action to v2', wf.includes('oven-sh/setup-bun@v2'));
 
 if (fails) { console.error(fails + ' failure(s)'); process.exit(1); }

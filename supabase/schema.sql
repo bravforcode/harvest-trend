@@ -87,6 +87,13 @@ create policy "select all" on public.price_reports
 
 -- Intentionally NO update / delete policies — reports are immutable.
 
+-- Column-level read: user_id stays private. Table-wide SELECT would expose every
+-- column, so revoke it and grant only the public columns. Same as the migration
+-- supabase/migrations/20261024120000_price_reports_hide_user_id.sql.
+revoke select on public.price_reports from anon, authenticated;
+grant select (id, crop, province, price, unit, note, lat, lng, photo_url, created_at)
+  on public.price_reports to anon, authenticated;
+
 -- Typical query: latest reports for a crop × province.
 create index if not exists price_reports_crop_province_created_idx
   on public.price_reports (crop, province, created_at desc);

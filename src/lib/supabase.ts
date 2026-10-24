@@ -30,7 +30,6 @@ interface SupabaseLike {
 /** A submitted farmer price report row (price_reports table). */
 export interface PriceReport {
   id: string;
-  user_id: string | null;
   crop: string;
   province: string;
   price: number;
@@ -155,7 +154,10 @@ export async function fetchRecentReports(
   if (!supabase) return [];
 
   try {
-    let query: any = supabase.from('price_reports').select('*');
+    /* explicit columns: user_id is never read by the client (see migration revoking it) */
+    let query: any = supabase
+      .from('price_reports')
+      .select('id,crop,province,price,unit,note,lat,lng,photo_url,created_at');
     if (crop) query = query.eq('crop', crop);
     if (province) query = query.eq('province', province);
 
