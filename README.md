@@ -13,7 +13,7 @@
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind-4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![LINE OA](https://img.shields.io/badge/LINE%20OA-integrated-06C755?logo=line&logoColor=white)](https://line.me)
 [![Supabase](https://img.shields.io/badge/Supabase-sync-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
-[![Tests](https://img.shields.io/badge/tests-421%20checks-4CAF50)](https://github.com/bravforcode/harvest-ecc/actions)
+[![Tests](https://img.shields.io/badge/tests-449%20checks-4CAF50)](https://github.com/bravforcode/harvest-ecc/actions)
 
 <img src="public/og-image.png" alt="Harvest Trend — รู้ทันราคา" width="640">
 
@@ -103,7 +103,7 @@ harvest-ecc/
 │   └── watch-sync.js       # ซิงก์ watchlist กับ Supabase
 ├── supabase/               # schema + migrations
 ├── scripts/                # gen-vapid · set-rich-menu · fetch-costs
-├── tests/                  # 421 checks (prices · line-bot · ui-contract)
+├── tests/                  # 449 checks (prices · line-bot · ui-contract)
 ├── docs/                   # SUPABASE-SETUP · LINE-LOGIN-SETUP · PUSH-SETUP
 └── public/                 # icons · og-image · sitemap · robots
 ```
@@ -124,7 +124,7 @@ npm run dev
 # build สำหรับ production
 npm run build
 
-# รันเทส (421 checks)
+# รันเทส (449 checks)
 npm test
 ```
 
@@ -218,7 +218,7 @@ npm test
 |---|---|---|
 | `tests/prices.test.js` | 35 checks | API ราคา · schema · ความปลอดภัย |
 | `tests/line-bot.test.js` | 30 tests | LINE webhook · flex reply · signature |
-| `tests/ui-contract.test.js` | 356 checks | 77 จังหวัด · 25 พืช · engine · UI contract |
+| `tests/ui-contract.test.js` | 357 checks | 77 จังหวัด · 25 พืช · engine · UI contract |
 
 ---
 

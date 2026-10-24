@@ -46,7 +46,7 @@ Harvest Trend (รู้ทันราคา) is a real-use tool — not a pitc
 
 - DIRECTION CONTRACT v2 comment block at the top of every page (thesis / own-world / story / form).
 - `about.html`: origin story (durian glut 2026 — output 1,066,980 t, +22.4%, grade C ~170 → ~95 THB/kg) + source list (doae.go.th, thairath.co.th, thaipbs.or.th, prachachat).
-- Live-price integration: `api/prices.js` (BOT tables, data.go.th), `api/line-webhook.js`; `tests/` — 51 checks passing.
+- Live-price integration: `api/prices.js` (BOT tables, data.go.th), `api/line-webhook.js`; `tests/` — 449 checks across the five test files passing.
 - Absences that future work must not fabricate: no real price history beyond the cited sources; no production domain (deployed at harvest-ecc.vercel.app as a Vercel preview/stable URL). LINE OA @441sptre IS real and configured (webhook returns `status: ok`); watchlist sync is keyed on LINE Login `sub` (server does not re-verify the id_token on every write — documented in `api/watch-sync.js`).
 
 ## Product Principles
